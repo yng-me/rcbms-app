@@ -1,0 +1,260 @@
+
+# Section S {.unnumbered}
+
+```{r, include=FALSE, warning=F}
+
+fetch_records <- c('section_s', 'interview_record')
+
+source('../utils/import-data.R')
+
+interview_record <- hpq$interview_record %>% 
+  select(case_id, res_visit) %>% 
+  collect()
+
+section_s <- hpq$section_s %>% 
+  collect() %>% 
+  left_join(dplyr::select(interview_record, case_id, res_visit), by = 'case_id') %>% 
+  filter(res_visit %in% c(2, 4:7))
+
+```
+
+
+### S01 - Result of visit is 2 or 4 or 5 or 6 or 7, and lastname, firstname, middlename is/are blank/not in the value set.
+
+If Result of visit is 2 (Refused) or 4 (VHU/VBLDG) or 5 (NUR) or 6 (Excluded) or 7 (VRH), then lastname, firstname, middlename must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_s01_details <- section_s %>% 
+    filter_at(vars(matches('^s01_[lfm].*'), -matches("fct$")), any_vars(is.na(.) | str_trim(.) == '')) %>% 
+    select_cv(
+      res_visit,
+      matches('^s01_[lfm].*'), 
+      h = c(
+        's01_lstname',
+        's01_firstname',
+        's01_midname'
+      )
+   )
+)[[1]]
+```
+
+### S02 - Answer in S02 is blank/not in the value set.
+
+If Result of visit is 2 (Refused) or 4 (VHU/VBLDG) or 5 (NUR) or 6 (Excluded) or 7 (VRH), then S02 should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_s02a <- section_s %>% 
+    filter(!(s02_relationship %in% c(1:4))) %>%
+    select_cv(res_visit, s02_relationship, h = 's02_relationship')
+)[[1]]
+```
+
+### S03 - Answer in S03 is blank/not in the value set.
+
+If Result of visit is 2 (Refused), then S03 should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_s03a <- section_s %>% 
+    filter(!(s03_ladder %in% c(1:10))) %>%
+    select_cv(res_visit, s03_ladder, h = 's03_ladder')
+)[[1]]
+```
+
+### S04 - Answer in S04 is blank/not in the value set. 
+
+If Result of visit is 2 (Refused), then S04 should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_s04a <- section_s %>% 
+    filter(!(s04_reason %in% c(1:4, 9))) %>%
+    select_cv(res_visit, s04_reason, h = 's04_reason')
+)[[1]]
+``` 
+
+### S04 - Blank specify field of reason of the refusal of the household
+
+If Result of visit is 2 (Refused) and S04 = 9, 'Others, specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_s04a_specify <- section_s %>% 
+    filter(is.na(s04_reasonoth), s04_reason == 9) %>%
+    select_cv(res_visit, s04_reason, s04_reasonoth, h = 's04_reasonoth')
+)[[1]]
+``` 
+
+
+### S05 - Answer in S05 is blank/not in the value set.
+
+If Result of visit is 2 (Refused) or 4 (VHU/VBLDG) or 5 (NUR) or 6 (Excluded) or 7 (VRH), S05 (type of building) should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_s05a <- section_s %>% 
+    filter(!(s05_building %in% c(1:10))) %>%
+    select_cv(res_visit, s05_building, h = 's05_building')
+)[[1]]
+``` 
+
+### S05 - Blank 'Specify' field for the type of building but selected answer in S05 is 09
+
+If Result of visit is 2 (Refused) or any special case and S05 = 9, 'Others, specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_s05a_specify <- section_s %>% 
+    filter(is.na(s05_buildoth), s05_building == 9) %>%
+    select_cv(res_visit, s05_building, s05_buildoth, h = c('s05_building', 's05_buildoth'))
+)[[1]]
+``` 
+
+### S06 - Answer in S06 is blank/not in the value set. 
+
+If Result of visit is 2 (Refused) or 4 (VHU/VBLDG) or 5 (NUR) or 6 (Excluded) or 7 (VRH), S06 (floors in the building) should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_s06a <- section_s %>% 
+    filter(!(s06_floors %in% c(1:99))) %>%
+    select_cv(res_visit, s06_floors, h = 's06_floors')
+)[[1]]
+``` 
+
+### S07 - Answer in S07 is blank/not in the value set.
+
+If Result of visit is 2 (Refused) or 4 (VHU/VBLDG) or 5 (NUR) or 6 (Excluded) or 7 (VRH), S07 (main construction material of the roof) should not be blank and  should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_s07a <- section_s %>% 
+    filter(!(s07_roof %in% c(1:7, 9))) %>%
+    select_cv(res_visit, s07_roof, h = 's07_roof')
+)[[1]]
+``` 
+
+### S07 - Blank 'Specify' field for the main construction material of the roof but selected answer in S07 is 9
+
+If Result of visit is 2 (Refused) or any special case and S07 = 9, 'Others, specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_s07a_specify <- section_s %>% 
+    filter(is.na(s07_others), s07_roof == 9) %>%
+    select_cv(res_visit, s07_roof, s07_others, h = 's07_others')
+)[[1]]
+``` 
+
+### S08 - Answer in S08 is blank/not in the value set.
+
+If Result of visit is 2 (Refused) or 4 (VHU/VBLDG) or 5 (NUR) or 6 (Excluded) or 7 (VRH), S08 (construction material of the outer walls) should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_s08a <- section_s %>% 
+    filter(!(s08_walls  %in% c(1:12, 99))) %>%
+    select_cv(res_visit, s05_building, s08_walls, h = 's08_walls')
+)[[1]]
+``` 
+
+### S08 - Blank 'Specify' field for the construction material of the outer walls but selected answer in S08 is 99
+
+If Result of visit is 2 (Refused) or any special case and S08 = 99, 'Others, specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_s08a_specify <- section_s %>% 
+    filter(is.na(s08_wallsoth), s08_walls == 99) %>%
+    select_cv(res_visit, s08_walls, s08_wallsoth, h = 's08_wallsoth')
+)[[1]]
+``` 
+
+### S09 - Answer in S09 is blank/not in the value set. 
+
+If Result of visit is 2 (Refused) or 4 (VHU/VBLDG) or 5 (NUR) or 6 (Excluded) or 7 (VRH), S09 (finishing material of the floor) should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_s09a <- section_s %>% 
+    filter(!(s09_floor  %in% c(1:7, 9))) %>%
+    select_cv(res_visit, s09_floor, h = 's09_floor')
+)[[1]]
+```
+
+
+### S09 - Blank 'Specify' field for the finishing material of the floor but selected answer in S09 is 9
+
+If Result of visit is 2 (Refused) or any special case and S09 = 9, 'Others, specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_s09a_specify <- section_s %>% 
+    filter(is.na(s09_flooroth), s09_floor == 9) %>%
+    select_cv(res_visit, s09_floor, s09_flooroth, h = 's09_flooroth')
+)[[1]]
+``` 
+
+### S10 - Answer in S10 is blank/not in the value set.
+
+If Result of visit is 2 (Refused) or 4 (VHU/VBLDG) or 5 (NUR) or 6 (Excluded) or 7 (VRH), S10 (main construction material of the floor) should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_s10a <- section_s %>% 
+    filter(!(s10_mfloor  %in% c(1:6, 9))) %>%
+    select_cv(res_visit, s10_mfloor, h = 's10_mfloor')
+)[[1]]
+``` 
+
+### S10 - Blank 'Specify' field for the main construction material of the floor but selected answer in S10 is 9
+
+If Result of visit is 2 (Refused) or any special case and S10 = 9, 'Others, specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_s10a_specify <- section_s %>% 
+    filter(is.na(s10_mflooroth), s10_mfloor == 9) %>%
+    select_cv(res_visit, s10_mfloor, s10_mflooroth, h = 's10_mflooroth')
+)[[1]]
+``` 
+
+### S11 - Answer in S11 is blank/not in the value set.
+
+If Result of visit is 2 (Refused) or 4 (VHU/VBLDG) or 5 (NUR) or 6 (Excluded) or 7 (VRH), S11 (floor area) should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_s11a <- section_s %>% 
+    filter(is.na(s11_farea) | s11_farea == 0) %>%
+    select_cv(res_visit, s11_farea, h = 's11_farea')
+)[[1]]
+``` 
+
+### Fields for items S6 to S11 are not blank but S5 = 8:10
+
+There should be no answer in data items S6 (floors of the building) - S11 (floor area) if the answer in S5 is 8 (None), 9 (Other types of building), or 10 (Temporary Evacuation Center/Relocation Area)
+
+```{r, echo=F, warning=F, error=F}
+
+(
+  cv_s01_1  <- section_s %>%
+    filter(s05_building %in% c(8:10)) %>% 
+    filter_at(vars(matches('^s(0[6-9]|10|11).*'), -matches("fct$")), any_vars(!is.na(.) & str_trim(.) != '')) %>% 
+    select_cv(s05_building, matches('^s(0[6-9]|10|11).*'))
+)[[1]]
+```
+
+
+```{r, include=F, echo=F, warning=F, error=F}
+
+validation_section_s <- as_tibble(ls(pattern = '^cv_s')) %>% 
+  mutate(cases = map(.$value, function(x) { eval(as.name(x))[[2]] })) %>% 
+  unnest(cases) 
+  
+save(validation_section_s, file = '../data/validation/validation_section_s.Rdata')
+
+```
+

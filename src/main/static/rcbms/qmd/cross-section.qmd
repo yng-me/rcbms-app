@@ -1,0 +1,281 @@
+
+```{r, include=FALSE, warning=F}
+
+fetch_records <- c('geo_info', 'summary_of_visit', 'interview_record', 'section_a', 'section_r')
+source('../utils/import-data.R')
+
+geo_info <- hpq$geo_info %>% collect
+
+geo_info_nest_bsn <- geo_info %>% 
+  filter(hsn < 7777) %>% 
+  select(geo_bsn, bsn, region, province, city_mun, brgy, ean, x_long, y_lat) %>% 
+  group_by(geo_bsn) %>% 
+  nest() %>% 
+  mutate(n = map_int(data, nrow))
+
+geo_info_nest_husn <- geo_info %>% 
+  filter(hsn < 7777) %>% 
+  select(geo_husn, bsn, husn, region, province, city_mun, brgy, ean, x_long, y_lat) %>% 
+  group_by(geo_husn) %>% 
+  nest() %>% 
+  mutate(n = map_int(data, nrow)) 
+
+summary_of_visit <- hpq$summary_of_visit %>% collect() 
+interview_record <- hpq$interview_record %>% collect() 
+
+ref_hh_count <- hpq$section_a %>% 
+  collect() %>% 
+  count(case_id)
+
+section_r <- hpq$section_r %>% collect()
+
+```
+
+### Duplicate cases
+
+Case ID must be unique. Delete the duplicate case/s if the contents are identical. otherwise, modify the Case ID of the duplicate case/s following the last serial number used in the EA.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_1_01_duplicates <- summary_of_visit %>% 
+    group_by(case_id, region, province, city_mun, brgy, ean) %>% 
+    count() %>% 
+    ungroup() %>% 
+    filter(n > 1) %>% 
+    rename(duplicates = n) %>% 
+    select_cv(duplicates, h = 'duplicates')
+)[[1]]
+```
+
+### Regular households but missing/invalid responses for 'agree to be interviewed'
+
+Regular households (with HSN < 7777) must have responses for 'agree to be interviewed' and response should be valid, that is, 1 or 2 only.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_1_agree_int <- geo_info %>% 
+    select(-matches('^geo_.*sn$')) %>% 
+    filter(hsn < 7777, !(agree_int %in% c(1, 2))) %>% 
+    select_cv(agree_int, h = 'agree_int')
+)[[1]]
+```
+
+### Missing/invalid response for 'agree to sign the waiver'
+
+If the result of visit is 1 (completed), 'agree to sign the waiver' must not be blank/invalid.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_1_waiver <- geo_info %>% 
+    select(-matches('^geo_.*sn$')) %>% 
+    filter(hsn < 7777) %>% 
+    left_join(
+      dplyr::select(summary_of_visit, case_id, waiver, notsignwaiver, otherreason),
+      by = 'case_id'
+    ) %>% 
+    left_join(
+      dplyr::select(interview_record, case_id, res_visit) %>% 
+        filter(!is.na(res_visit)),
+      by = 'case_id'
+    ) %>% 
+    filter(agree_int == 1, res_visit == 1, is.na(waiver)) %>% 
+    select_cv(agree_int, res_visit, waiver, h = 'waiver')
+)[[1]]
+```
+
+### Invalid BSN, HUSN, or HSN
+
+BSN, HUSN, and HSN cannot be '0000'. They should start with 0001.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_1_02_sn_invalid <- summary_of_visit %>% 
+    filter(bsn == 0 | husn == 0 | hsn == 0) %>% 
+    select_cv(bsn, husn, hsn, h = c('bsn', 'husn', 'hsn'), condition = '0000')
+)[[1]]
+```
+
+### Same BSN but different geopoints
+
+If two or more buildings have the same BSN, their building points must be the same also. 
+
+```{r, echo=F, warning=F, error=F}
+same_husn_n <- geo_info_nest_husn %>% 
+  filter(n > 1) %>% 
+  mutate(u = map_int(data, ~ nrow(distinct(.)))) %>% 
+  filter(n == u) 
+
+if(nrow(same_husn_n) > 0) {
+  (
+    cv_1_04_same_bsn <- same_husn_n %>% 
+      unnest(data) %>% 
+      select_cv(bsn, x_long, y_lat, h = c('x_long', 'y_lat'))
+  )[[1]]
+} else {
+  ( 
+    cv_1_04_same_bsn <- geo_info %>% 
+    filter(case_id == 0) %>% 
+    select_cv()
+  )[[1]]
+}
+```
+
+### Same HUSN but different BSNs
+
+If two or more housing units have the same HUSN, their BSN must be the same.
+
+```{r, echo=F, warning=F, error=F}
+
+ref_03_same_husn <- geo_info %>% 
+  mutate(
+    geo_husn = paste0(
+      sprintf('%02d', as.integer(reg_psgc)),
+      sprintf('%02d', as.integer(prov_psgc)),
+      sprintf('%02d', as.integer(city_mun_psgc)),
+      sprintf('%03d', as.integer(brgy_psgc)),
+      sprintf('%06d', as.integer(ean)),
+      'xxxx',
+      sprintf('%04d', as.integer(husn))
+    )
+  ) %>% 
+  select(geo_husn, region, province, city_mun, brgy, ean, bsn, husn) %>% 
+  group_by(geo_husn) %>% 
+  nest() %>% 
+  mutate(n = map_int(data, ~ nrow(distinct(.)))) %>% 
+  filter(n > 1) 
+
+if(nrow(ref_03_same_husn) > 0) {
+  (
+    cv_1_03_same_husn <- ref_03_same_husn %>% 
+      unnest(data) %>% 
+      select_cv(geo_husn, ean, bsn, husn, h = c('bsn', 'husn'))
+  )[[1]]
+} else {
+  (
+    cv_1_03_same_husn <- geo_info %>% 
+      filter(case_id == 0) %>% 
+      select_cv()
+  )[[1]]
+}
+
+```
+
+
+### Same HUSN but different geopoints
+
+If two or more housing units have the same HUSN, their building points must be the same.
+
+```{r, echo=F, warning=F, error=F}
+if(nrow(same_husn_n) > 0) {
+  (
+    cv_1_06_same_husn <- same_husn_n %>% 
+      unnest(data) %>% 
+      select_cv(bsn, husn, x_long, y_lat, h = c('x_long', 'y_lat'))
+  )[[1]]
+} else {
+  ( 
+    cv_1_06_same_husn <- geo_info %>% 
+    filter(case_id == 0) %>% 
+    select_cv()
+  )[[1]]
+}
+```
+
+### Buildings with missing geopoints
+
+The geopoints (X-Y coordinate) of every building must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_1_05_bsn_no_geo_points <- geo_info_nest_bsn %>% 
+    filter(n == 1) %>% 
+    unnest(data) %>% 
+    filter(is.na(x_long) | is.na(y_lat)) %>% 
+    select(-n) %>% 
+    select_cv(bsn, x_long, y_lat, h = c('x_long', 'y_lat'))
+)[[1]]
+```
+
+### Housing units with missing geopoints 
+
+The geopoints (X-Y coordinate) of every housing unit must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_1_05_husn_no_geo_points <- geo_info_nest_husn %>% 
+    filter(n == 1) %>% 
+    unnest(data) %>% 
+    filter(is.na(x_long) | is.na(y_lat)) %>% 
+    select(-n) %>% 
+    select_cv(bsn, husn, x_long, y_lat, h = c('x_long', 'y_lat'))
+)[[1]]
+```
+
+### Same BSN but different construction materials of roof and outer wall
+
+The construction materials of the roof and outer wall must be the same if the housing unit has the same BSN.
+
+```{r, echo=F, warning=F, error=F}
+discard_n <- geo_info %>% 
+  filter(hsn < 7777) %>% 
+  left_join(dplyr::select(section_r, case_id, matches('^r(0[1-9]|10)_.*')), by = 'case_id') %>% 
+  select(geo_bsn, bsn, husn, region, province, city_mun, brgy, ean, r01_building_fct, r03_roof_fct, r04_walls_fct) %>% 
+  group_by(geo_bsn) %>% 
+  discard_cv() 
+
+if(nrow(discard_n) > 0) {
+  (
+    cv_1_06_bsn_bldg_construction <- discard_n %>% 
+      select_cv(bsn, husn, r01_building_fct, r03_roof_fct, r04_walls_fct, h = c('r03_roof_fct', 'r04_walls_fct'))
+  )[[1]]
+} else {
+  (
+    cv_1_06_bsn_bldg_construction <- geo_info %>% 
+      filter(case_id == 0) %>% 
+      select_cv()
+  )[[1]]
+}
+```
+
+### Same HUSN but different construction materials of the house
+
+The construction materials of the house must be the same if the household has the same HUSN.
+
+```{r, echo=F, warning=F, error=F}
+d_n <- geo_info %>% 
+  filter(hsn < 7777) %>% 
+  left_join(dplyr::select(section_r, case_id, matches('^r(0[1-9]|10)_.*')), by = 'case_id') %>% 
+  select(
+    geo_husn, bsn, husn, region, province, city_mun, brgy, ean, 
+    matches('^r(0[1-8])_.*_fct$'), matches('^r(9|10).*')) %>% 
+  group_by(geo_husn) %>% 
+  discard_cv()
+
+if(nrow(d_n) > 0) {
+  (
+    cv_1_06_husn_bldg_construction <- d_n %>%
+      select_cv(bsn, husn, matches('^r(0[1-8])_.*_fct$'), matches('^r(9|10).*'))
+  )[[1]]
+} else {
+   (
+    cv_1_06_husn_bldg_construction <- geo_info %>% 
+      filter(case_id == 0) %>% 
+      select_cv()
+  )[[1]]
+}
+```
+
+```{r, include=F, echo=F, warning=F, error=F}
+
+validation_cross_section <- as_tibble(ls(pattern = '^cv_1')) %>% 
+  mutate(cases = map(.$value, function(x) { eval(as.name(x))[[2]] })) %>% 
+  unnest(cases) %>% 
+  mutate(
+    case_id = if_else(is.na(case_id) & !is.na(geo_bsn), paste0(geo_bsn, 'xxxxxxxx'), case_id),
+    case_id = if_else(is.na(case_id) & !is.na(geo_husn), paste0(geo_husn, 'xxxx'), case_id)
+  ) %>% 
+  select(-contains('geo_'))
+
+save(validation_cross_section, file = '../data/validation/validation_cross_section.Rdata')
+
+```

@@ -1,0 +1,49 @@
+{
+    "appId": "com.electron.rcbms",
+    "directories": {
+        "output": "dist"
+    },
+    "nsis": {
+        "oneClick": false,
+        "perMachine": true,
+        "installerIcon": "src/main/static/assets/hero.ico",
+        "uninstallerIcon": "src/main/static/assets/hero.ico",
+        "allowToChangeInstallationDirectory": true,
+        "shortcutName": "RCBMS",
+        "runAfterFinish": false,
+        "createDesktopShortcut": true,
+        "createStartMenuShortcut": true
+    },
+    "win": {
+        "target": "nsis",
+        "icon": "src/main/static/assets/hero.ico",
+        "publish": [ "github" ]
+    },
+    
+    "linux":  {
+        "target": ["snap"]
+    },
+    "files": [
+        "build/main/**/*",
+        {
+            "from": "build/renderer",
+            "to": "renderer",
+            "filter": ["**/*"]
+        },
+        {
+            "from": "src/main/static",
+            "to": "static",
+            "filter": ["**/*"]
+        },
+        "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+        "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+        "!**/node_modules/*.d.ts",
+        "!**/node_modules/.bin",
+        "!src",
+        "!config",
+        "!README.md",
+        "!scripts",
+        "!build/renderer",
+        "!dist"
+    ]
+}

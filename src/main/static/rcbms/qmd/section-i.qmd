@@ -1,0 +1,114 @@
+
+# Section I {.unnumbered}
+
+```{r, include=FALSE, warning=F}
+
+fetch_records <- c('section_i', 'section_h')
+
+source('../utils/import-data.R')
+
+ref_i02_freq <- data.frame(
+  i02_freq = c(1:5),
+  i02_freq_m = c(365, 52, 24, 12, 1)
+)
+
+section_h <- hpq$section_h %>% 
+  select(case_id, h6_cfincome) %>% 
+  collect()
+
+section_i <- hpq$section_i %>% 
+  select(-matches('specify')) %>% 
+  collect() %>% 
+  inner_join(section_h, by = 'case_id') %>% 
+  left_join(ref_i02_freq, by = 'i02_freq')
+  
+```
+
+### I01 - Usual or average expenditure is blank or invalid
+
+Usual or average expenditure should not be blank or invalid
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_i01_usualexp_blnk <- section_i %>% 
+    filter(is.na(i01_foodconsump) | i01_foodconsump <= 0) %>% 
+    select_cv(i01_foodconsump, h = 'i01_foodconsump')
+)[[1]]
+```
+
+
+### I02 - Multiplier for frequency is blank or invalid
+
+Multiplier for frequency should not be blank and answer must be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_i02_freq_vlst <- section_i %>% 
+    filter(!(i02_freq %in% c(1:5))) %>% 
+    select_cv(i02_freq, h = 'i02_freq')
+)[[1]]
+```
+
+
+### I03 - Expenditure on food consumed occasionally is blank or invalid
+
+Expenditure on food consumed occasionally should not be blank or invalid.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_i03_occexp_blnk <- section_i %>% 
+    filter(is.na(i03_expenditure) | i03_expenditure < 0) %>% 
+    select_cv(i03_expenditure, h = 'i03_expenditure')
+)[[1]]
+```
+
+
+### I04 - Total food inconsistent with the sum of individual food consumption
+  
+Total annual food consumption should be consistent with the sum of the expenditure on food consumed occassionally and the product of the usual/average expenditure and the multiplier for frequency.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_i04_totalfoodcnsmptn_vlst <- section_i %>% 
+    filter_at(vars(matches('i0[1-4]._*')), all_vars(!is.na(.))) %>%
+    filter((i01_foodconsump * i02_freq_m) + i03_expenditure != i04_totalfood) %>% 
+    select_cv(matches('i0[1-4]._*'))
+)[[1]]
+```
+
+### I04 - Invalid answer in total annual food consumption
+  
+Total annual food consumption should be greater than zero.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_i04_totalfoodcnsmptn_missing_o <- section_i %>% 
+    filter(is.na(i04_totalfood) | i04_totalfood <= 0) %>%
+    select_cv(i04_totalfood, h = 'i04_totalfood')
+)[[1]]
+```
+
+### I04 - Total annual food consumption is greater than family income
+
+Total annual food consumption should be less than family income. 
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_i04_totalfoodcnsmptn_blnk <- section_i %>% 
+    filter(!is.na(i04_totalfood), !is.na(h6_cfincome), i04_totalfood >= h6_cfincome) %>% 
+    select_cv(i04_totalfood, h6_cfincome, h = c('i04_totalfood', 'h6_cfincome'))
+)[[1]]
+```
+
+
+
+```{r, include=F, echo=F, warning=F, error=F}
+
+validation_section_i <- as_tibble(ls(pattern = '^cv_i')) %>% 
+  mutate(cases = map(.$value, function(x) { eval(as.name(x))[[2]] })) %>% 
+  unnest(cases) 
+
+save(validation_section_i, file = '../data/validation/validation_section_i.Rdata')
+
+```
+

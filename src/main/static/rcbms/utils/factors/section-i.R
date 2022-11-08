@@ -1,0 +1,1 @@
+hpq$section_i$i02_freq_fct <- factor(hpq$section_i$i02_freq,levels = c(1,2,3,4,5),labels = c("1 - PER DAY","2 - PER WEEK","3 - EVERY 15 DAYS","4 - PER MONTH","5 - FOR THE ENTIRE YEAR"))

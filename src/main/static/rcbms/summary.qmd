@@ -1,0 +1,39 @@
+# Export Summary {.unnumbered}
+
+```{r Export, echo=F, warning=F, error=F, include=F}
+library(reactable)
+library(yaml)
+config <- read_yaml('config.yml', readLines.warn = F)
+wd_ref_path <- '.'
+source('./utils/exports/export.R')
+```
+
+### Number of Inconsistencies by Section and Priority Level
+
+```{r, echo=F, error=F, warning=F}
+exp_eval_by_case_count %>% 
+  select(-Description) %>% 
+    reactable(
+    resizable = T,
+    bordered = T, 
+    striped = T,
+    pagination = F,
+    wrap = F
+  )
+```
+
+### Number of Consistency Checks Performed by Section and Priority Level
+
+```{r, echo=F, error=F, warning=F}
+exp_eval_by_checks %>% 
+  mutate_at(vars(contains('Percent')), ~ round(., 2)) %>% 
+  select(-Description) %>% 
+  reactable(
+    resizable = T,
+    bordered = T, 
+    striped = T,
+    wrap = F,
+    pagination = F
+  )
+```
+

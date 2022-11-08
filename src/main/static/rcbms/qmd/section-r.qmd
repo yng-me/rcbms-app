@@ -1,0 +1,1028 @@
+
+
+# Section R {.unnumbered}
+
+```{r, include=FALSE, warning=F}
+
+fetch_records <- 'section_r'
+
+source('../utils/import-data.R')
+
+section_r <- hpq$section_r %>% 
+  collect() %>% 
+  filter_at(vars(matches('^r\\d.*')), any_vars(!is.na(.))) 
+
+```
+
+### R01 - Type of building is blank/not in the value set
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+Type of building should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r01 <- section_r %>% 
+    filter(!(r01_building %in% c(1:10))) %>%
+    select_cv(r01_building, h = 'r01_building')
+)[[1]]
+```
+
+#### Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r01_other <- section_r %>% 
+    filter(r01_building == 9, !is.na(r01_buildoth)) %>% 
+    select_cv(r01_building, r01_buildoth)
+)[[1]]
+```
+
+#### Marginal table
+
+Distribution of household by type of building occupied (R01), by barangay
+
+```{r, echo=F, warning=F, error=F}
+section_r %>% 
+  tabyl(brgy, r01_building_fct) %>% 
+  adorn_totals(c('row', 'col')) %>% 
+  reactable_cv()
+```
+
+:::
+
+### R01 - Blank 'Specify' field for the type of building but the selected answer in R01 is 09
+
+If R01 = 09 (Other type of building), 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r01_specify <- section_r %>% 
+    filter(is.na(r01_buildoth), r01_building == 9) %>%
+    select_cv(r01_building, r01_buildoth, h = 'r01_buildoth')
+)[[1]]
+```
+
+### R01 - With answer in the 'Specify' field for the type of building but type of building (R01) is not 09
+
+If R01 is not 09, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r01_specify_na <- section_r %>% 
+    filter(!is.na(r01_buildoth), r01_building != 9) %>%
+    select_cv(r01_building, r01_buildoth, h = 'r01_buildoth')
+)[[1]]
+```
+
+
+### R02 - Number of floors of the building is blank/not in the value set
+
+Number of floors of the building should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r02  <- section_r %>% 
+    filter(is.na(r02_floors) | r02_floors < 0) %>%
+    select_cv(r02_floors, h = 'r02_floors')
+)[[1]]
+```
+
+### R03 - Main construction material of the roof is blank/not in the value set
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+Main construction material of the roof should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r03  <- section_r %>% 
+    filter(!(r03_roof %in% c(1:7, 9))) %>%
+    select_cv(r01_building, r03_roof, h = 'r03_roof')
+)[[1]]
+```
+
+#### Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r03_other <- section_r %>% 
+    filter(r03_roof == 9, !is.na(r03_others)) %>% 
+    select_cv(r03_roof, r03_others)
+)[[1]]
+```
+
+#### Marginal table
+
+Distribution of household by type of construction material of the roof (R03), by barangay
+
+```{r, echo=F, warning=F, error=F}
+section_r %>% 
+  tabyl(brgy, r03_roof_fct) %>% 
+  adorn_totals(c('row', 'col')) %>% 
+  reactable_cv()
+```
+
+:::
+
+### R03 - Blank 'Specify' field for the main construction material of the roof but the selected answer in R03 is 9
+
+If R03 = 9, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r03_specify <- section_r %>% 
+    filter(is.na(r03_others), r03_roof == 9) %>%
+    select_cv(r03_roof, r03_others, h = 'r03_others')
+)[[1]]
+```
+
+### R03 - With answer in the 'Specify' field for the main construction material of the roof but R03 is not 9
+
+If R03 is not 09, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r03_specify_na <- section_r %>% 
+    filter(!is.na(r03_others), r03_roof != 9) %>%
+    select_cv(r03_roof, r03_others, h = 'r03_others')
+)[[1]]
+```
+
+
+### R03.1 - Main construction material for the roof framing is blank/not in the value set
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+Main construction material for the roof framing should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r03_1  <- section_r %>% 
+    filter(!(r03_rooframe %in% c(1:5, 9))) %>%
+    select_cv(r01_building, r03_rooframe, h = 'r03_rooframe')
+)[[1]]
+```
+
+#### R03.1 - Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r01_other1 <- section_r %>% 
+    filter(r03_rooframe == 9, !is.na(r03a_rooframe)) %>% 
+    select_cv(r03_rooframe, r03a_rooframe)
+)[[1]]
+```
+
+#### Marginal table
+
+Distribution of household by type of construction material of the roof frame (R03.1), by barangay
+
+```{r, echo=F, warning=F, error=F}
+section_r %>% 
+  tabyl(brgy, r03_rooframe_fct) %>% 
+  adorn_totals(c('row', 'col')) %>% 
+  reactable_cv()
+```
+
+:::
+
+### R03.1 - Blank 'Specify' field for the main construction material of the roof framing but the selected answer in R031 is 9
+
+If R03.1 = 9, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r03_1_specify <- section_r %>%
+    filter(is.na(r03a_rooframe), r03_rooframe == 9) %>%
+    select_cv(r03_rooframe, r03a_rooframe, h = 'r03a_rooframe')
+)[[1]]
+```
+
+### R031 - With answer in the 'Specify' field for the main construction material of the roof framing but R031 is not 9
+
+If R03.1 is not 9, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r03_1_specify_na <- section_r %>%
+    filter(!is.na(r03a_rooframe), r03_rooframe != 9) %>%
+    select_cv(r03_rooframe, r03a_rooframe, h = 'r03a_rooframe')
+)[[1]]
+```
+
+
+### R04 - Main construction materials of the outer walls is blank/not in the value set
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+Main construction materials of the outer walls should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r04  <- section_r %>% 
+    filter(!(r04_walls %in% c(1:12, 99))) %>%
+    select_cv(r04_walls, h = 'r04_walls')
+)[[1]]
+```
+
+#### Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r04_other <- section_r %>% 
+    filter(r04_walls == 99, !is.na(r04_wallsoth)) %>% 
+    select_cv(r04_walls, r04_wallsoth)
+)[[1]]
+```
+
+#### Marginal table
+
+Distribution of household by type of construction material of the outer wall (R04), by barangay
+
+```{r, echo=F, warning=F, error=F}
+section_r %>% 
+  tabyl(brgy, r04_walls_fct) %>% 
+  adorn_totals(c('row', 'col')) %>% 
+  reactable_cv()
+```
+
+:::
+
+### R04 - Blank 'Specify' field for the main construction material of the outer walls but the selected answer in R04 is 99
+
+If R04 = 99, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r04_specify <- section_r %>%
+    filter(is.na(r04_wallsoth), r04_walls == 99) %>%
+    select_cv(r04_walls, r04_wallsoth, h = 'r04_wallsoth')
+)[[1]]
+```
+
+R04 - With answer in the 'Specify' field for the main construction material of the outer walls but R04 is not 99
+
+If R04 is not 99, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r04_specify_na <- section_r %>%
+    filter(!is.na(r04_wallsoth), r04_walls != 99) %>%
+    select_cv(r04_walls, r04_wallsoth, h = 'r04_wallsoth')
+)[[1]]
+```
+
+
+### R05 - Finishing material of the floor of the housing unit is blank/not in the value set
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+Finishing material of the floor of the housing unit should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r05  <- section_r %>% 
+    filter(!(r05_ffloor %in% c(1:7, 9))) %>%
+    select_cv(r05_ffloor, h = 'r05_ffloor')
+)[[1]]
+```
+
+#### Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r05_other <- section_r %>% 
+    filter(r05_ffloor == 9, !is.na(r05a_ffloor)) %>% 
+    select_cv(r05_ffloor, r05a_ffloor)
+)[[1]]
+```
+
+#### Marginal table
+
+Distribution of household by type of finishing material of the floor (R05), by barangay
+
+```{r, echo=F, warning=F, error=F}
+section_r %>% 
+  tabyl(brgy, r05_ffloor_fct) %>% 
+  adorn_totals(c('row', 'col')) %>% 
+  reactable_cv()
+```
+
+:::
+
+### R05 - Blank 'Specify' field for the finishing material of the floor but the selected answer in R05 is 9
+
+If R05 = 9, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r05_specify <- section_r %>%
+    filter(is.na(r05a_ffloor), r05_ffloor == 9) %>%
+    select_cv(r05_ffloor, r05a_ffloor, h = 'r05a_ffloor')
+)[[1]]
+```
+
+### R05 - With answer in the 'Specify' field for the finishing material of the floor but R05 is not 9
+
+If R05 is not 9, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r05_specify_na <- section_r %>%
+    filter(!is.na(r05a_ffloor), r05_ffloor != 9) %>%
+    select_cv(r05_ffloor, r05a_ffloor, h = 'r05a_ffloor')
+)[[1]]
+```
+
+### R06 - Main construction material of the floor of the housing unit is blank/not in the value set.
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+R06: Main construction material of the floor of the housing unit should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r06  <- section_r %>% 
+    filter(!(r06_mfloor %in% c(1:6, 9))) %>%
+    select_cv(r06_mfloor, h = 'r06_mfloor')
+)[[1]]
+```
+
+#### Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r06_other <- section_r %>% 
+    filter(r06_mfloor == 9, !is.na(r06_mflooroth)) %>% 
+    select_cv(r06_mfloor, r06_mflooroth)
+)[[1]]
+```
+
+#### Marginal table
+
+Distribution of household by type of construction material of the floor (R05), by barangay
+
+```{r, echo=F, warning=F, error=F}
+section_r %>% 
+  tabyl(brgy, r06_mfloor_fct) %>% 
+  adorn_totals(c('row', 'col')) %>% 
+  reactable_cv()
+```
+
+:::
+
+### R06 - Blank 'Specify' field for the main construction material of the floor but the selected answer in R06 is 9
+
+If R06 = 9, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r06_specify <- section_r %>%
+    filter(is.na(r06_mflooroth), r06_mfloor == 9) %>%
+    select_cv(r06_mfloor, r06_mflooroth, h = 'r06_mflooroth')
+)[[1]]
+```
+
+### R06 - With answer in the 'Specify' field for the main construction material of the floor but R06 is not 9
+
+If R06 is not 9, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r06_specify_na <- section_r %>%
+    filter(!is.na(r06_mflooroth), r06_mfloor != 9) %>%
+    select_cv(r06_mfloor, r06_mflooroth, h = 'r06_mflooroth')
+)[[1]]
+```
+
+### R07 - Floor area of the housing unit is blank/not in the value set.
+
+Floor area of the housing unit should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r07  <- section_r %>% 
+    filter(is.na(r07_farea) | r07_farea <= 0 | r07_farea >= 5000) %>%
+    select_cv(r07_farea, h = 'r07_farea')
+)[[1]]
+```
+
+### R08 - Frame material of the housing unit is blank/not in the value set
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+Frame material of the housing unit should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r08  <- section_r %>% 
+    filter(!(r08_frame %in% c(1:13, 99))) %>%
+    select_cv(r08_frame, h = 'r08_frame')
+)[[1]]
+```
+
+#### Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r08_other <- section_r %>% 
+    filter(r08_frame == 99, !is.na(r08_others)) %>% 
+    select_cv(r08_frame, r08_others)
+)[[1]]
+```
+
+:::
+
+### R08 - Blank 'Specify' field for the frame material but the selected answer in R08 is 99
+
+If R08 = 99, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r08_specify <- section_r %>%
+    filter(is.na(r08_others), r08_frame == 99) %>%
+    select_cv(r08_frame, r08_others, h = 'r08_others')
+)[[1]]
+```
+
+### R08 - With answer in the 'Specify' field for the frame material of the housing unit but R08 is not 99
+
+If R08 is not 99, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r08_specify_na <- section_r %>%
+    filter(!is.na(r08_others), r08_frame != 99) %>%
+    select_cv(r08_frame, r08_others, h = 'r08_others')
+)[[1]]
+```
+
+### R09 - Number of bedrooms of the housing unit is blank/not in the value set.
+
+Number of bedrooms of the housing unit should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r09  <- section_r %>% 
+    filter(is.na(r09_broom) | r09_broom < 0 | r09_broom >= r07_farea) %>%
+    select_cv(r07_farea, r09_broom, h = 'r09_broom')
+)[[1]]
+```
+
+### R10 - Tenure status of the housing unit and lot is blank/not in the value set.
+
+Tenure status of the housing unit and lot should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r10  <- section_r %>% 
+    filter(!(r10_tenure %in% c(1:7))) %>%
+    select_cv(r10_tenure, h = 'r10_tenure')
+)[[1]]
+```
+
+### R10.1 - Year the housing unit was constructed is blank/not in the value set.
+
+Year the housing unit was constructed should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r10_1  <- section_r %>% 
+    filter( is.na(r10_year) | r10_year > 2022 | r10_year < 1800) %>%
+    select_cv(r10_year, h = 'r10_year')
+)[[1]]
+```
+
+### R11 - Imputed rent per month for the house and/or lot is blank/not in the value set.
+
+Imputed rent per month for the house and/or lot should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r11  <- section_r %>% 
+    filter( is.na(r11_rent) | r11_rent == 0) %>%
+    select_cv(r10_year, r11_rent, h = 'r11_rent')
+)[[1]]
+```
+
+### R12 - Presence of electricity in the dwelling place is blank/not in the value set
+
+Presence of electricity in the dwelling place should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r12  <- section_r %>% 
+    filter(is.na(r12_elctrcty)) %>%
+    select_cv(r12_elctrcty, h = 'r12_elctrcty')
+)[[1]]
+```
+
+### R13 - Source/s of electricity in the dwelling place is/are blank/not in the value set
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+If there is presence of electricity in the dwelling (R12 = 1), the source/s of electricity should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+#
+(
+  cv_r13a  <- section_r %>% 
+    filter(r12_elctrcty == 1) %>% 
+    filter_at(vars(matches('^r13[a-ez]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      r12_elctrcty,
+      matches('^r13[a-ez]_.*'), 
+      h = c(
+        'r13a_ecmpny',
+        'r13b_gnrator',
+        'r13c_solar',
+        'r13d_btry',
+        'r13e_others'
+      )
+   )
+)[[1]]
+```
+
+#### Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r13_other <- section_r %>% 
+    filter(r13e_others == 1, !is.na(r13ez_others)) %>% 
+    select_cv(r13e_others, r13ez_others)
+)[[1]]
+```
+
+:::
+
+### R13 - Sources of electricity are all 'NO'
+
+If there is presence of electricity in the dwelling (R12 = 1), there should be at least one source of electricity.
+
+```{r, echo=F, warning=F, error=F}
+#
+(
+  cv_r13a  <- section_r %>% 
+    filter(r12_elctrcty == 1) %>% 
+    filter_at(vars(matches('^r13[a-ez]_.*'), -matches("fct$")), all_vars(. == 2)) %>% 
+    select_cv(
+      r12_elctrcty,
+      matches('^r13[a-ez]_.*'), 
+      h = c(
+        'r13a_ecmpny',
+        'r13b_gnrator',
+        'r13c_solar',
+        'r13d_btry',
+        'r13e_others'
+      )
+   )
+)[[1]]
+```
+
+### R13Z - Blank 'Specify' field for the source of electricity but there is other source of electricity (R13Z = 1)
+
+If R13Z = 1, other source of electricity must not be blank. Specify other source of electricity.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r13_specify <- section_r %>%
+    filter(is.na(r13ez_others), r13e_others == 1) %>%
+    select_cv(r13e_others, r13ez_others, h = 'r13ez_others')
+)[[1]]
+```
+
+### R13Z - With answer in the 'Specify' field for the source of electricity but R13Z is not 1
+
+If R13Z is not 1, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r13_specify_na <- section_r %>%
+    filter(!is.na(r13ez_others), r13e_others == 2) %>%
+    select_cv(r13e_others, r13ez_others, h = 'r13ez_others')
+)[[1]]
+```
+
+### R14 - Type of Fuel used for lighting is blank/not in the value set.
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+Type of fuel used for lighting should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r14 <- section_r %>% 
+  filter(!(r14_fuelght %in% c(1:6, 9))) %>%
+  select_cv(r14_fuelght, h = 'r14_fuelght')
+)[[1]]
+```
+
+#### Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r14_other <- section_r %>% 
+    filter(r14_fuelght == 9, !is.na(r14_specify)) %>% 
+    select_cv(r14_fuelght, r14_specify)
+)[[1]]
+```
+
+:::
+
+### R14 - Blank 'Specify' field for the type of fuel used for lighting but the selected answer in R14 is 9
+
+If R14 = 9, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r14_specify <- section_r %>%
+    filter(is.na(r14_specify), r14_fuelght == 9) %>%
+    select_cv(r14_fuelght, r14_specify, h = 'r14_specify')
+)[[1]]
+```
+
+### R14 - With answer in the 'Specify' field for the type of fuel used for lighting but R14 is not 9
+
+If R14 is not 9, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r14_specify_na <- section_r %>%
+    filter(!is.na(r14_specify), r14_fuelght != 9) %>%
+    select_cv(r14_fuelght, r14_specify, h = 'r14_specify')
+)[[1]]
+```
+
+### R15 - Type of Fuel used for cooking is blank/not in the value set.
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+Type of Fuel used for cooking should not be blank and should be in the value set. 
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r15 <- section_r %>% 
+    filter(!(r15_fuelcook %in% c(1:6, 9))) %>%
+    select_cv(r15_fuelcook, h = 'r15_fuelcook')
+)[[1]]
+```
+
+#### Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r15_other <- section_r %>% 
+    filter(r15_fuelcook == 9, !is.na(r15_specify)) %>% 
+    select_cv(r15_fuelcook, r15_specify)
+)[[1]]
+```
+
+:::
+
+### R15 - Blank 'Specify' field for the type of fuel used for cooking but the selected answer in R15 is 9
+
+If R15 = 9, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r15_specify <- section_r %>%
+    filter(is.na(r15_specify), r15_fuelcook == 9) %>%
+    select_cv(r15_fuelcook, r15_specify, h = 'r15_specify')
+)[[1]]
+```
+
+### R15 - With answer in the 'Specify' field for the type of fuel used for cooking but R15 is not 9
+
+If R15 is not 9, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r15_specify_na <- section_r %>%
+    filter(!is.na(r15_specify), r15_fuelcook != 9) %>%
+    select_cv(r15_fuelcook, r15_specify, h = 'r15_specify')
+)[[1]]
+```
+
+### R16 - Ownership of household conveniences/information and communications technology (ICT) devices/vehicles is blank/not in the value set
+
+Ownership of household conveniences/information and communications technology (ICT) devices/vehicles should not be blank and should be in the valueset.
+
+```{r, echo=F, warning=F, error=F}
+#
+(
+  cv_r16_az <- section_r %>% 
+    filter_at(vars(matches('^r16[a-z]_.*'), -matches("fct$")), any_vars(!(. %in% c(0:99)))) %>% 
+    select_cv(
+      matches('^r16[a-z]_.*'), 
+      h = c(
+        'r16a_ref',
+        'r16b_stove',
+        'r16c_inductioncooker',
+        'r16d_airfryer',
+        'r16e_moven',
+        'r16f_wash',
+        'r16g_aircon',
+        'r16h_efan',
+        'r16i_radio',
+        'r16j_tv',
+        'r16k_cd',
+        'r16l_audio',
+        'r16m_landline',
+        'r16n_mobile',
+        'r16o_tablet',
+        'r16p_pc',
+        'r16q_car',
+        'r16r_van',
+        'r16s_jeep',
+        'r16t_truck',
+        'r16u_motor',
+        'r16v_tricycle',
+        'r16w_bike',
+        'r16x_pedicab',
+        'r16y_mboat',
+        'r16z_boat'
+      ) 
+   )
+)[[1]]
+```
+
+### R17 - Television services is blank/not in the value set.
+
+If the household owns at least one television (R16J > 0), television services should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+# Pilot Data Type
+(
+  cv_r17a_na <- section_r %>% 
+    filter(r16j_tv == 1, is.na(r17_tvset) | !(grepl('[A-EZ]+', r17_tvset))) %>%
+    select_cv(r17_tvset)
+)[[1]]
+```
+
+### R17 - With answer in television services but household does not own a television
+
+If the household does not own a television (R16J = 0), television services should be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r17_notna <- section_r %>% 
+    filter(r16j_tv == 0, !is.na(r17_tvset)) %>%
+    select_cv(r16j_tv, r17_tvset, h = 'r17_tvset')
+)[[1]]
+```
+
+### R18 - Ownership of livestock, herds, poultry or other farm animals is blank/not in the value set
+
+Ownership of livestock, herds, poultry or other farm animals should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+#
+(
+  cv_r18_az <- section_r %>% 
+    filter_at(vars(matches('^r18[a-gz]_.*'), -matches("fct$")), any_vars(!(. %in% c(0:99)))) %>% 
+    select_cv(
+      matches('^r18[a-gz]_.*'), 
+      h = c(
+        'r18a_carabao',
+        'r18b_cattle',
+        'r18c_horses',
+        'r18d_swine',
+        'r18e_goats',
+        'r18f_sheep',
+        'r18g_chick',
+        'r18f_others'
+      )
+   )
+)[[1]]
+```
+
+### R18Z - Specify field is blank when there is value in R18Z.
+
+If R18Z has value (owns more than 1 other livestock, herds, poultry or other farm animals), Others Specify field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r18z_specify  <- section_r %>% 
+    filter(is.na(r18fz_others), r18f_others == 1) %>%
+    select_cv(r18f_others, r18fz_others, h = 'r18fz_others')
+)[[1]]
+```
+
+### Fields for items R2 to R11 are not blank but R1 is 9
+
+If R01 = 9 (Other type of building), data items R2-R11 should be blank due to skipping.
+
+```{r, echo=F, warning=F, error=F}
+
+(
+  cv_r01_r12  <- section_r %>%
+    filter(r01_building == 9) %>% 
+    filter_at(vars(matches('^r(0[2-9]|10|11).*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(r01_building, matches('^r(0[2-9]|10|11).*'))
+)[[1]]
+```
+
+### Fields for items R2 to R18 are not blank but R1 is 8 or 10
+
+If R01 = 8 (None) or 10 (Temporary Evacuation Center/Relocation Area), data items R2-R18 should be blank due to skipping.
+
+```{r, echo=F, warning=F, error=F}
+
+(
+  cv_r01_end  <- section_r %>%
+    filter(r01_building %in% c(8,10)) %>% 
+    filter_at(vars(matches('^r(0[2-9]|10|11|[2-8]).*'), -matches("fct$")), any_vars(!is.na(.) | str_trim(.) != '')) %>% 
+    select_cv(r01_building, matches('^r(0[2-9]|10|11|[2-8]).*'))
+)[[1]]
+```
+
+### R06 - Unacceptable answer in R06 since answer in R05 is 1
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+If R05 = 1 (Ceramic tile/marble/granite), the acceptable answer in R06 is 1 (Concrete).
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r05vsr06_1  <- section_r %>% 
+    filter(r05_ffloor == 1, r06_mfloor != 1) %>% 
+    select_cv(r05_ffloor, r06_mfloor, h = 'r06_mfloor')
+)[[1]]
+```
+
+#### Consistency table
+
+Finishing material and floor of the housing unit
+
+```{r, echo=F, warning=F, error=F}
+section_r %>% 
+  tabyl(r05_ffloor_fct, r06_mfloor_fct) %>% 
+  adorn_totals(c('row', 'col')) %>% 
+  reactable_cv()
+```
+
+:::
+
+### R06 - Unacceptable answer in R06 since answer in R05 is 2.
+
+If R05 = 2 (Cement-brick-stone), the acceptable answer in R06 is 1 (Concrete) or 5 (Earth-sand-mud).
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r05vsr06_2  <- section_r %>% 
+  filter(r05_ffloor == 2, !(r06_mfloor %in% c(1, 5))) %>% 
+  select_cv(r05_ffloor, r06_mfloor, h = 'r06_mfloor')
+)[[1]]
+```
+
+### R06 - Unacceptable answer in R06 since answer in R05 is 3.
+
+If R05 = 3 (Wood plank), the acceptable answer in R06 is 1 (Concrete) or 2 (Wood) or 5 (Earth-sand-mud).
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r05vsr06_3  <- section_r %>% 
+    filter(r05_ffloor == 3, !(r06_mfloor %in% c(1, 2, 5))) %>% 
+    select_cv(r05_ffloor, r06_mfloor, h = 'r06_mfloor')
+)[[1]]
+```
+
+### R06 - Unacceptable answer in R06 since answer in R05 is 4.
+
+If R05 = 4 (Wood tile-parquet), the acceptable answer in R06 is 1 (Concrete) or 2 (Wood)
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r05vsr06_4  <- section_r %>% 
+    filter(r05_ffloor == 4, !(r06_mfloor %in% c(1, 2))) %>% 
+    select_cv(r05_ffloor, r06_mfloor, h = 'r06_mfloor')
+)[[1]]
+```
+
+### R06 - Unacceptable answer in R06 since answer in R05 is 5.
+
+If R05 = 5 (Vinyl-carpet tile), the acceptable answer in R06 is 1 (Concrete) or 2 (Wood) 
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r05vsr06_5  <- section_r %>% 
+    filter(r05_ffloor == 5, !(r06_mfloor %in% c(1, 2))) %>% 
+    select_cv(r05_ffloor, r06_mfloor, h = 'r06_mfloor')
+)[[1]]
+```
+
+### R06 - R06 - Unacceptable answer in R06 since answer in R05 is 6.
+
+If R05 = 6 (Linoleum), the acceptable answer in R06 is 1 (Concrete) or 2 (Wood) or 3 (Coconut lumber) or 4 (Bamboo) or 5 (Earth-sand-mud)
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r05vsr06_6  <- section_r %>% 
+    filter(r05_ffloor == 6, !(r06_mfloor %in% c(1:5))) %>% 
+    select_cv(r05_ffloor, r06_mfloor, h = 'r06_mfloor')
+)[[1]]
+```
+
+### R06 - Unacceptable answer in R06 since answer in R05 is 9.
+
+If R05 = 9(Others, specify or None), the acceptable answer in R06 is 1 (Concrete) or 2 (Wood) or 3 (Coconut lumber) or 4 (Bamboo) or 5 (Earth-sand-mud)
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r05vsr06_6  <- section_r %>% 
+    filter(r05_ffloor == 9, !(r06_mfloor %in% c(1:5, 9))) %>% 
+    select_cv(r05_ffloor, r06_mfloor, h = 'r06_mfloor')
+)[[1]]
+```
+
+### Checking of answers in R01 vs R03 vs R04
+
+If answer in R01 = 4(Condominium/condotel) or 5(Other multi-unit residential building) then R03 = 3:9 and R04 2:99.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_r01vsr03vsr04  <- section_r %>% 
+    filter((r01_building %in% c(4:5)), r03_roof %in% c(3:9), r04_walls %in% c(2:99)) %>% 
+    select_cv(r01_building, r03_roof, r04_walls, h = c('r03_roof', 'r04_walls'))
+)[[1]]
+```
+
+### R13 - Sources of electricity are not blank
+
+If the household has no electricity in the dwelling (R12 = 2), sources of electricity should be blank.
+
+```{r, echo=F, warning=F, error=F}
+#
+(
+  cv_r12vs13  <- section_r %>% 
+    filter(r12_elctrcty == 2) %>% 
+    filter_at(vars(matches('^r13[a-ez]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      r12_elctrcty,
+      matches('^r13[a-ez]_.*'), 
+      h = c(
+        'r13a_ecmpny',
+        'r13b_gnrator',
+        'r13c_solar',
+        'r13d_btry',
+        'r13e_others'
+      )
+   )
+)[[1]]
+```
+
+
+
+```{r, include=F, echo=F, warning=F, error=F}
+
+validation_section_r <- as_tibble(ls(pattern = '^cv_r')) %>% 
+  mutate(cases = map(.$value, function(x) { eval(as.name(x))[[2]] })) %>% 
+  unnest(cases) 
+
+save(validation_section_r, file = '../data/validation/validation_section_r.Rdata')
+
+```
+

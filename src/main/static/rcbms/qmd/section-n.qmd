@@ -1,0 +1,446 @@
+
+# Section N {.unnumbered}
+
+```{r, include=FALSE, warning=F, echo=F}
+
+fetch_records <- 'section_n'
+
+source('../utils/import-data.R')
+
+knitr::opts_chunk$set(echo = FALSE)
+section_n <- hpq$section_n %>% select(-matches('specify')) %>% collect()
+
+```
+
+### N01 - Access to internet is blank/not in the value set
+
+Access to internet should not be blank and should be in the value set.
+
+```{r, echo=T, warning=F, error=F}
+(
+  cv_n01_nitvs <- section_n %>% 
+    filter(!(n01_hhinet %in% c(1, 2))) %>% 
+    select_cv(n01_hhinet_fct, h = 'n01_hhinet')
+)[[1]]
+```
+
+### N02 - Household does not have internet access (N01 = 2) but have answers in N02
+
+Places where household members access the internet (N02) should be blank if the household does not have access to internet (N01 = 2).
+
+```{r, echo=T, warning=F, error=F}
+#
+(
+  cv_n02_1_haveentry <- section_n %>%
+    filter(n01_hhinet == 2) %>%
+    filter_at(vars(matches('^n02.*'), -matches('_fct$')), any_vars(!is.na(.))) %>% 
+    select_cv(
+      n01_hhinet_fct, 
+      matches('^n02.*'), 
+      h = c(
+        'n02a_inetaccess', 
+        'n02b_inetaccess', 
+        'n02c_inetaccess', 
+        'n02d_inetaccess',
+        'n02e_inetaccess',
+        'n02f_inetaccess',
+        'n02g_inetaccess',
+        'n02z_inetaccess'
+      )
+   )
+)[[1]]
+```
+
+### N02 - Household has access to internet (N01 = 1) but answers in N02 are all 'No'.
+
+If the household has access to internet, there should be at least one place where the household member/s access the internet.
+
+```{r, echo=T, warning=F, error=F}
+#
+(
+  cv_n02_2_allno <- section_n %>%
+    filter(n01_hhinet == 1) %>%
+    filter_at(vars(matches('^n02[a-gz]_.*'), -matches('_fct$')), all_vars(. == 2 | !(. %in%  c(1, 2)))) %>%
+    select_cv(
+      n01_hhinet,
+      matches('^n02[a-gz]_.*'),
+      h = c(
+        'n02a_inetaccess', 
+        'n02b_inetaccess', 
+        'n02c_inetaccess', 
+        'n02d_inetaccess',
+        'n02e_inetaccess',
+        'n02f_inetaccess',
+        'n02g_inetaccess',
+        'n02z_inetaccess'
+      )
+   )
+)[[1]]
+```
+
+### N02Z - Blank 'Specify' field but answer in N02Z is 'Yes'.
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+If N02Z = 1, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_n02_other_missing <- section_n %>% 
+    filter(n02z_inetaccess == 1, is.na(n02za_inetaccess)) %>% 
+    select_cv(n02z_inetaccess_fct, n02za_inetaccess, h = 'n02za_inetaccess')
+)[[1]]
+```
+
+#### N02Z - Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_n02_other <- section_n %>% 
+    filter(n02z_inetaccess == 1, !is.na(n02za_inetaccess)) %>% 
+    select_cv(n02z_inetaccess_fct, n02za_inetaccess, h = 'n02za_inetaccess')
+)[[1]]
+```
+
+:::
+
+### N02Z - With answer in the 'Specify' field but N02Z is not 1
+
+If N02Z is not 1, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_n02_other_na <- section_n %>% 
+    filter(n02z_inetaccess == 2, !is.na(n02za_inetaccess)) %>% 
+    select_cv(n02z_inetaccess_fct, n02za_inetaccess, h = 'n02za_inetaccess')
+)[[1]]
+```
+
+
+### N03 - Household's ownership of internet at home is blank/not in the value set
+
+If the household has access to internet (N01 = 1), household's ownership of internet at home (N03) should not be blank and should be value set.
+
+```{r, echo=T, warning=F, error=F}
+(
+  cv_n03_nitvs <- section_n %>% 
+    filter(n01_hhinet == 1, !(n03_inetathome %in% c(1, 2))) %>% 
+    select_cv(n01_hhinet_fct, n03_inetathome_fct, h = 'n03_inetathome')
+)[[1]]
+```
+
+### N04 - Household does not have internet at home (N03 = 2) but have answer in N04
+
+If the household does have internet at home (N03 = 2), the type of internet connection at home (N04) should be blank.
+
+```{r, echo=T, warning=F, error=F}
+#
+(
+  cv_n04_haveentry <- section_n %>%
+    filter(n01_hhinet == 1, n03_inetathome == 2) %>%
+    filter_at(vars(matches('^n04[a-d]_.*'), -matches('_fct$')), any_vars(!is.na(.))) %>%
+    select_cv(
+      n01_hhinet_fct, 
+      n03_inetathome_fct, 
+      matches('^n04[a-d]_.*'),
+      h = c(
+        'n04a_inettype',
+        'n04b_inettype',
+        'n04c_inettype',
+        'n04d_inettype'
+      ) 
+   )
+)[[1]]
+```
+
+### N04 - Household has internet at home (N03 = 1) but answers in N04 are all 'No'
+
+If the household has its own internet at home (N03 = 1), there should be at least one 'Yes' in the type of internet connection at home (N04).
+
+```{r, echo=T, warning=F, error=F}
+#
+(
+  cv_n04_2_allno <- section_n %>% 
+    filter(n01_hhinet == 1, n03_inetathome == 1) %>% 
+    filter_at(vars(matches('^n04[a-d]_.*'), -matches('_fct$')), all_vars(. == 2 | !(. %in%  c(1, 2)))) %>%
+    select_cv(
+      n01_hhinet_fct,
+      n03_inetathome_fct, 
+      matches('^n04[a-d]_.*'),
+      h = c(
+        'n04a_inettype',
+        'n04b_inettype',
+        'n04c_inettype',
+        'n04d_inettype'
+      )
+   )
+)[[1]]
+```
+
+### N05 - Answer in N05 is blank/not in the value set
+
+If the household has internet access (N01 = 1), payment for internet access should not be blank and should be in the value set.
+
+```{r, echo=T, warning=F, error=F}
+(
+  cv_n05_ninthvs <- section_n %>% 
+    filter(n01_hhinet == 1, !(n05_inetpay %in% c(1, 2))) %>% 
+    select_cv(n01_hhinet_fct, n05_inetpay_fct, h = 'n05_inetpay')
+)[[1]]
+```
+
+### N06 - Household has access to internet (N01  = 1) but uses of the internet are all 'No'
+
+If the household has internet access (N01 = 1), there should be at least one use of the internet.
+
+```{r, echo=T, warning=F, error=F}
+#
+(
+  cv_n06_1_allno <- section_n %>% 
+    filter(n01_hhinet == 1) %>% 
+    filter_at(vars(matches('^n06[a-g]_.*'), -matches('_fct$')), all_vars(. == 2 | !(. %in%  c(1, 2)))) %>%
+    select_cv(
+      n01_hhinet_fct,
+      matches('^n06[a-g]_.*'),
+      h = c(
+        'n06a_ptminetact',
+        'n06b_ptminetact',
+        'n06c_ptminetact',
+        'n06d_ptminetact',
+        'n06e_ptminetact',
+        'n06f_ptminetact',
+        'n06g_ptminetact'
+      )
+   )
+)[[1]]
+```
+
+### N06 - Use of the internet is blank/not in the value set
+
+If the household has internet access (N01 = 1), uses of the internet should not be blank and should be in the value set.
+```{r, echo=T, warning=F, error=F}
+#
+(
+  cv_n06_2_nitvs <- section_n %>%
+    filter(n01_hhinet == 1) %>% 
+    filter_at(vars(matches('^n06[a-g]_.*'), -matches('_fct$')), all_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      n01_hhinet_fct,
+      matches('^n06[a-g]_.*'), 
+      h = c(
+        'n06a_ptminetact',
+        'n06b_ptminetact',
+        'n06c_ptminetact',
+        'n06d_ptminetact',
+        'n06e_ptminetact',
+        'n06f_ptminetact',
+        'n06g_ptminetact'
+      ) 
+   )
+)[[1]]
+```
+
+### N07 - Engagement in purchasing goods and/or services online is blank/not in the value set
+
+If the household has internet access (N01 = 1), engagement in purchasing goods and/or services online should not be blank and should be in the value set
+
+```{r, echo=T, warning=F, error=F}
+(
+  cv_n07_nitvs <- section_n %>% 
+    filter(n01_hhinet == 1, !(n07_hhpurchase %in% c(1, 2))) %>% 
+    select_cv(n01_hhinet_fct, n07_hhpurchase_fct, h = 'n07_hhpurchase')
+)[[1]]
+```
+
+### N08 - N06A = 1 and N07 = 1 but N08 is blank/not in the value set
+
+If the household has internet access (N01 = 1), used the internet for electronic commerce, trade, and transactions (N06A = 1) and engaged in purchasing goods and/or services online (N07 = 1), N08 should not be blank and should be in the value set.
+
+```{r, echo=T, warning=F, error=F}
+(
+  cv_n08_v_n06_n07 <- section_n %>% 
+    filter(n01_hhinet == 1, n06a_ptminetact == 1, n07_hhpurchase == 1) %>%
+    filter_at(vars(matches('^n08[a-cz]_.*'), -matches('fct$')), all_vars(. == 2 | !(. %in%  c(1, 2)))) %>%
+    select_cv(
+      n01_hhinet_fct,
+      n06a_ptminetact_fct, 
+      n07_hhpurchase_fct,
+      matches('^n08[a-cz]_.*'), 
+      h = c(
+        'n08a_ptmecomuse',
+        'n08b_ptmecomuse',
+        'n08c_ptmecomuse',
+        'n08z_ptmecomuse'
+      )
+   ) 
+)[[1]]
+```
+
+
+### N08 - At least one 'No' answer in N06A and N07 but have answer in N08
+
+If the household did not use the internet for electronic commerce, trade and transactions (N06A = 2) or did not engaage in purchasing goods and/or services online (N07 = 2), N08 should be blank.
+
+```{r, echo=T, warning=F, error=F}
+#
+(
+  cv_n08_1_haveentry <- section_n %>%
+    filter(n01_hhinet == 1, n07_hhpurchase == 2) %>%
+    filter_at(vars(matches('^n08[a-cz]_.*'), -matches('fct$')), any_vars(!is.na(.)))%>%
+    select_cv(
+      n01_hhinet_fct,
+      n07_hhpurchase_fct, 
+      matches('^n08[a-cz]_.*'), 
+      h = c(
+        'n08a_ptmecomuse',
+        'n08b_ptmecomuse',
+        'n08c_ptmecomuse',
+        'n08z_ptmecomuse'
+      )
+   )
+)[[1]]
+```
+
+### N08 -  N06A = 1 and N07 = 1 but answers in N08 are all 'No'
+
+If the household has internet access (N01 = 1), used the internet for electronic commerce, trade, and transactions (N06A = 1) and engaged in purchasing goods and/or services online (N07 = 1), there should be at least one 'Yes' answer in N08.
+
+```{r, echo=T, warning=F, error=F}
+#
+(
+  cv_n08_2_allno <- section_n %>%
+    filter(n01_hhinet == 1, n07_hhpurchase == 1) %>%
+    filter_at(vars(matches('^n08[a-cz]_.*'), -matches('fct$')), all_vars(. == 2 | !(. %in%  c(1, 2)))) %>%
+    select_cv(
+      n01_hhinet_fct,
+      n07_hhpurchase_fct, 
+      matches('^n08[a-cz]_.*'), 
+      h = c(
+        'n08a_ptmecomuse',
+        'n08b_ptmecomuse',
+        'n08c_ptmecomuse',
+        'n08z_ptmecomuse'
+      )
+   )
+)[[1]]
+```
+
+### N08Z - Blank 'Specify' field but answer in N08Z is 'Yes'.
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+If N08Z = 1, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_n08_other_missing <- section_n %>% 
+    filter(n08z_ptmecomuse == 1, is.na(n08za_ptmecomuse)) %>% 
+    select_cv(n08z_ptmecomuse_fct, n08za_ptmecomuse, h = 'n08za_ptmecomuse')
+)[[1]]
+```
+
+#### N08Z - Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_n08_other <- section_n %>% 
+    filter(n08z_ptmecomuse == 1, !is.na(n08za_ptmecomuse)) %>% 
+    select_cv(n08z_ptmecomuse_fct, n08za_ptmecomuse, h = 'n08za_ptmecomuse')
+)[[1]]
+```
+
+:::
+
+### N08Z - With answer in the 'Specify' field but N08Z is not 1
+
+If N08Z is not 1, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_n08_other_na <- section_n %>% 
+    filter(n08z_ptmecomuse == 2, !is.na(n08za_ptmecomuse)) %>% 
+    select_cv(n08z_ptmecomuse_fct, n08za_ptmecomuse, h = 'n08za_ptmecomuse')
+)[[1]]
+```
+
+
+
+### N09 - Engagement in online work through an online platform is blank/not in the value set
+
+If the household has internet access (N01 = 1), engagement in online work (N09) should not be blank and should be in the value set.
+
+```{r, echo=T, warning=F, error=F}
+(
+  cv_n09_nitvs <- section_n %>% 
+    filter(n01_hhinet == 1, !(n09_olplatform %in% c(1, 2))) %>% 
+    select_cv(n01_hhinet_fct, n09_olplatform_fct, h = 'n09_olplatform')
+ )[[1]]
+```
+
+### N10 - Household engaged in online work (N09 = 1) but income received from online work is blank/invalid
+
+If any member of the household engaged in online work (N09 = 1), income received from online work should not be blank and should be greater than 0
+
+```{r, echo=T, warning=F, error=F}
+#
+(
+  cv_n10_1_zerovalue <- section_n %>% 
+    filter(n01_hhinet == 1, n09_olplatform == 1) %>%
+    filter_at(vars(matches('^n10[a-cz]_.*'), -matches('_fct$')), all_vars(. == 0 | is.na(.))) %>%
+    select_cv(
+      n01_hhinet_fct,
+      n09_olplatform_fct, 
+      matches('^n10[a-cz]_.*'), 
+      h = c(
+        'n10a_deskjob',
+        'n10b_tnvs',
+        'n10c_onlineselling',
+        'n10z_oth'
+      )
+   )
+)[[1]]
+```
+
+### N10 - Household did not engage in online work (N09 = 2) but have answer in N10
+
+If the household did not engage in online work (N09 = 2), income received from online work should be blank.
+
+```{r, echo=T, warning=F, error=F}
+#
+(
+  cv_n10_2_haveentry <- section_n %>% 
+    filter(n01_hhinet == 1, n09_olplatform == 2) %>%
+    filter_at(vars(matches('^n10[a-cz]_.*'), -matches('_fct$')), any_vars(!is.na(.))) %>%
+    select_cv(
+      n01_hhinet_fct,
+      n09_olplatform_fct, 
+      matches('^n10[a-cz]_.*'), 
+      h = c(
+        'n10a_deskjob',
+        'n10b_tnvs',
+        'n10c_onlineselling',
+        'n10z_oth'
+      )
+   )
+)[[1]]
+```
+
+
+```{r, include=F, echo=F, warning=F, error=F}
+
+validation_section_n <- as_tibble(ls(pattern = '^cv_n')) %>% 
+  mutate(cases = map(.$value, function(x) { eval(as.name(x))[[2]] })) %>% 
+  unnest(cases) 
+
+save(validation_section_n, file = '../data/validation/validation_section_n.Rdata')
+
+```
+

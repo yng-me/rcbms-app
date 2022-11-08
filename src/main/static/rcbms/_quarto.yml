@@ -1,0 +1,33 @@
+project:
+  type: book
+
+book:
+  title: "List of HPQ Cases with Inconsistencies"
+  chapters:
+    - index.qmd
+    - qmd/section-a.qmd
+    - qmd/section-b.qmd
+    - qmd/section-c.qmd
+    - qmd/section-d.qmd
+    - qmd/section-e.qmd
+    - qmd/section-f.qmd
+    - qmd/section-g.qmd
+    - qmd/section-h.qmd
+    - qmd/section-i.qmd
+    - qmd/section-j.qmd
+    - qmd/section-k.qmd
+    - qmd/section-l.qmd
+    - qmd/section-m.qmd
+    - qmd/section-n.qmd
+    - qmd/section-o.qmd
+    - qmd/section-p.qmd
+    - qmd/section-q.qmd
+    - qmd/section-r.qmd
+    - qmd/section-s.qmd
+    - summary.qmd
+
+format:
+  html:
+    theme: cosmo
+    css: "./qmd/assets/style.css"
+

@@ -1,0 +1,52 @@
+{
+  "name": "rcbms",
+  "version": "1.0.1",
+  "description": "Validation Generator for the Community-Based Monitoring System using R",
+  "main": "build/main/main.js",
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "build": "node scripts/build.js && electron-builder -c config/electron-builder.json",
+    "build:win": "node scripts/build.js && electron-builder -c config/electron-builder.json --win --x64",
+    "package": "node scripts/build.js && electron-builder -c config/electron-builder.json --win --x64 -p always",
+    "build:mac": "node scripts/build.js && electron-builder -c config/electron-builder.json --mac",
+    "build:linux": "node scripts/build.js && electron-builder -c config/electron-builder.json --linux"
+  },
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "yng-me",
+      "repo": "rcbms"
+    }
+  ],
+  "author": {
+    "name": "PSA-CBMS",
+    "url": "https://cbms.psa.gov.ph"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.3",
+    "@vitejs/plugin-vue": "^3.0.3",
+    "@vue/cli": "^5.0.1",
+    "autoprefixer": "^10.4.12",
+    "chalk": "^4.1.2",
+    "chokidar": "^3.5.3",
+    "electron": "^20.1.0",
+    "electron-builder": "^23.3.3",
+    "parcel-plugin-electron-dotenv": "^0.1.0",
+    "postcss": "^8.4.16",
+    "tailwindcss": "^3.1.8",
+    "typescript": "^4.8.2",
+    "vite": "^3.0.9"
+  },
+  "dependencies": {
+    "chart.js": "^3.9.1",
+    "cryptr": "^6.0.3",
+    "electron-log": "^4.4.8",
+    "electron-updater": "^5.3.0",
+    "fs-extra": "^10.1.0",
+    "js-yaml": "^4.1.0",
+    "temp": "^0.9.4",
+    "vue": "^3.2.36",
+    "vue-chartjs": "^4.1.2",
+    "xlsx": "^0.18.5"
+  }
+}

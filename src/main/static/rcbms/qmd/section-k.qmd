@@ -1,0 +1,943 @@
+
+# Section K {.unnumbered}
+
+```{r, include=FALSE, warning=F}
+
+fetch_records <- 'section_k'
+
+source('../utils/import-data.R')
+
+section_k <- hpq$section_k %>% select(-matches('specify')) %>% collect()
+
+```
+
+### K01 - Blank/invalid answer/s in ownership of formal financial account
+
+Ownership of formal financial account should not be blank and should be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k01_finacc_vlst <- section_k %>% 
+    filter_at(vars(matches('^k01[a-z]_.*'), -matches('_fct$')), any_vars(!(. %in% c(1, 2, 9)))) %>% 
+    select_cv(
+      matches('^k01[a-z]_.*'), 
+      h = c(
+        'k01a_bank',
+        'k01b_digitalbank',
+        'k01c_emoney',
+        'k01d_nsslanonstock',
+        'k01e_coop',
+        'k01f_microfin',
+        'k01z_oth'
+      )
+    )
+)[[1]]
+```
+
+### K01Z - Blank 'Specify' field for ownership of formal financial account but answer in K01Z is 1
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+If K01Z = 1, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k01_other_missing <- section_k %>% 
+    filter(k01z_oth == 1, is.na(k01za_oth)) %>% 
+    select_cv(k01z_oth, k01za_oth, h = 'k01za_oth')
+)[[1]]
+```
+
+#### Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k01_other <- section_k %>% 
+    filter(k01z_oth == 1, !is.na(k01za_oth)) %>% 
+    select_cv(k01z_oth, k01za_oth, h = 'k01za_oth')
+)[[1]]
+```
+
+:::
+
+### K01Z - With answer in the 'Specify' field for the ownership of formal financial account but K01Z is not 1
+
+If K01Z is not 1, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k01_other_na <- section_k %>% 
+    filter(k01z_oth == 2, !is.na(k01za_oth)) %>% 
+    select_cv(k01z_oth, k01za_oth, h = 'k01za_oth')
+)[[1]]
+```
+
+### K02 - Reason/s for not having formal financial account is/are blank or not in the value set
+
+If the household has no formal financial account, reason/s for not having a formal financial account should not be blank and should be in the value set. 
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k02_rsnfrnthvngfinacc_blnk <- section_k %>% 
+    filter_at(vars(matches('^k01[a-z]_.*'), -matches('_fct$')), all_vars(. == 2 | is.na(.))) %>% 
+    filter_at(vars(matches('^k02[a-z]_rsnnofinacct$'), -matches('_fct$')), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      matches('^k01[a-z]_.*'), 
+      matches('^k02[a-z]_rsnnofinacct$'), 
+      h = c(
+        'k02a_rsnnofinacct',
+        'k02b_rsnnofinacct',
+        'k02c_rsnnofinacct',
+        'k02d_rsnnofinacct',
+        'k02e_rsnnofinacct',
+        'k02f_rsnnofinacct',
+        'k02g_rsnnofinacct',
+        'k02h_rsnnofinacct',
+        'k02i_rsnnofinacct',
+        'k02j_rsnnofinacct',
+        'k02z_rsnnofinacct'
+      ), 
+    )
+)[[1]]
+```
+
+### K02Z - Blank 'Specify' field but answer in K02Z is 1
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+If K02Z = 1, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k02_other_missing <- section_k %>% 
+    filter(k02z_rsnnofinacct == 1, is.na(k02za_rsnnofinacct)) %>% 
+    select_cv(k02z_rsnnofinacct, k02za_rsnnofinacct, h = 'k02za_rsnnofinacct')
+)[[1]]
+```
+
+#### Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k02_other <- section_k %>% 
+    filter(k02z_rsnnofinacct == 1, !is.na(k02za_rsnnofinacct)) %>% 
+    select_cv(k02z_rsnnofinacct, k02za_rsnnofinacct, h = 'k02za_rsnnofinacct')
+)[[1]]
+```
+
+:::
+
+### K02Z - With answer in the 'Specify' but answer in K02Z is not 1
+
+If K02Z is not 1, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k02_other_na <- section_k %>% 
+    filter(k02z_rsnnofinacct == 2, !is.na(k02za_rsnnofinacct)) %>% 
+    select_cv(k02z_rsnnofinacct, k02za_rsnnofinacct, h = 'k02za_rsnnofinacct')
+)[[1]]
+```
+
+### K02 - Reason/s for not having formal financial account is/are not blank
+
+If the household has formal financial account, reason/s for not having formal financial account should be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k02_rsnfrnthvngfinacc_notblnk <- section_k %>% 
+    filter_at(vars(matches('^k01[a-z]_.*'), -matches('_fct$')), any_vars(. == 1)) %>% 
+    filter_at(vars(matches('^k02[a-z]_rsnnofinacct$'), -matches('_fct$')), any_vars(!is.na(.))) %>% 
+    select_cv(
+      matches('^k01[a-z]_.*'), 
+      matches('^k02[a-z]_rsnnofinacct$'), 
+      h = c(
+        'k02a_rsnnofinacct',
+        'k02b_rsnnofinacct',
+        'k02c_rsnnofinacct',
+        'k02d_rsnnofinacct',
+        'k02e_rsnnofinacct',
+        'k02f_rsnnofinacct',
+        'k02g_rsnnofinacct',
+        'k02h_rsnnofinacct',
+        'k02i_rsnnofinacct',
+        'k02j_rsnnofinacct',
+        'k02z_rsnnofinacct'
+      )
+    )
+)[[1]]
+```
+
+
+### K03 - Use/s of financial account is/are blank or not in the value set
+
+If the household has formal financial account/s, use/s of the financial account should not be blank and should be in the value set.
+  
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k03_useoffinacc_blnk <- section_k %>% 
+    select(-matches('other')) %>% 
+    filter_at(vars(matches('^k01[a-z]_.*'), -matches('_fct$')), any_vars(. == 1)) %>% 
+    filter_at(vars(matches('^k03_.*'), -matches('_fct$')), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      matches('^k01[a-z]_.*'), matches('^k03_.*'),
+      h = c(
+        'k03_educ',
+        'k03_travel',
+        'k03_emergency',
+        'k03_savbusiness',
+        'k03_event',
+        'k03_invest',
+        'k03_savoth',
+        'k03_ebanking',
+        'k03_debit',
+        'k03_check',
+        'k03_pos',
+        'k03_bills',
+        'k03_onlineshop',
+        'k03_loanpayment',
+        'k03_benefits',
+        'k03_salary',
+        'k03_pension',
+        'k03_loanreceipt',
+        'k03_allowance',
+        'k03_businessop',
+        'k03_remittance'
+      )
+    )
+)[[1]]
+```
+  
+### K03Z - Blank 'Specify' field for use/s of financial account but answer in K03Z is 1
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+If K03Z = 1, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k03_other_missing <- section_k %>% 
+    filter(k03_others == 1, is.na(k03a_others)) %>% 
+    select_cv(k03_others, k03a_others, h = 'k03a_others')
+)[[1]]
+```
+
+#### Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k03_other <- section_k %>% 
+    filter(k03_others == 1, !is.na(k03a_others)) %>% 
+    select_cv(k03_others, k03a_others, h = 'k03a_others')
+)[[1]]
+```
+
+:::
+
+### K03Z - With answer in the 'Specify' field but answer in K03Z is not 1
+
+If K03Z is not 1, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k03_other <- section_k %>% 
+    filter(k03_others == 2, !is.na(k03a_others)) %>% 
+    select_cv(k03_others, k03a_others, h = 'k03a_others')
+)[[1]]
+```
+
+
+### K03 - Possible uses of financial account are all 'No'
+
+If the household has formal financial account/s, there should be at least one use of the financial account.  
+  
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k03_useoffinacc_allno <- section_k %>% 
+    filter_at(vars(matches('^k01[a-z]_.*'), -matches('_fct$')), any_vars(. == 1)) %>% 
+    filter_at(vars(matches('^k03_.*'), -matches('_fct$')), all_vars(. == 2)) %>% 
+    select_cv(
+      matches('^k01[a-z]_.*'), matches('^k03_.*'), 
+      h = c(
+        'k03_educ',
+        'k03_travel',
+        'k03_emergency',
+        'k03_savbusiness',
+        'k03_event',
+        'k03_invest',
+        'k03_savoth',
+        'k03_ebanking',
+        'k03_debit',
+        'k03_check',
+        'k03_pos',
+        'k03_bills',
+        'k03_onlineshop',
+        'k03_loanpayment',
+        'k03_benefits',
+        'k03_salary',
+        'k03_pension',
+        'k03_loanreceipt',
+        'k03_allowance',
+        'k03_businessop',
+        'k03_remittance',
+        'k03_others'
+      )
+    )
+)[[1]]
+```
+
+
+### K03 - Use/s of financial account is/are not blank
+
+If the household has no formal financial account, then use/s of financial account should be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k03_useoffinacc_notblnk <- section_k %>% 
+    filter_at(vars(matches('^k01[a-z]_.*'), -matches('_fct$')), all_vars(. == 2)) %>% 
+    filter_at(vars(matches('^k03_.*'), -matches('_fct$')), any_vars(!is.na(.))) %>% 
+    select_cv(
+      matches('^k01[a-z]_.*'), matches('^k03_.*'), 
+      h = c(
+        'k03_educ',
+        'k03_travel',
+        'k03_emergency',
+        'k03_savbusiness',
+        'k03_event',
+        'k03_invest',
+        'k03_savoth',
+        'k03_ebanking',
+        'k03_debit',
+        'k03_check',
+        'k03_pos',
+        'k03_bills',
+        'k03_onlineshop',
+        'k03_loanpayment',
+        'k03_benefits',
+        'k03_salary',
+        'k03_pension',
+        'k03_loanreceipt',
+        'k03_allowance',
+        'k03_businessop',
+        'k03_remittance',
+        'k03_others'
+      )
+    )
+)[[1]]
+```  
+  
+### K04 - Presence of savings is blank or not in the value set
+
+Presence of savings should not be blank or should be in the value set. 
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k04_savings_blnk <- section_k %>% 
+    filter(!(k04_otherform %in% c(1, 2))) %>% 
+    select_cv(k04_otherform, h = 'k04_otherform')
+)[[1]]
+```
+
+### K05 - Place/s where savings are kept is/are blank or not in the value set
+
+If the household has savings, place/s where savings are kept should not be blank and should be in the value set.
+  
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k05_savingsloc_blnk <- section_k %>% 
+  filter(k04_otherform == 1) %>% 
+  filter_at(vars(matches('^k05[a-z]_.*'), -matches('_fct$')), any_vars(!(. %in% c(1, 2, 9)))) %>% 
+  select_cv(
+    k04_otherform, 
+    matches('^k05[a-z]_.*'), 
+    h = c(
+      'k05a_where',
+      'k05b_where',
+      'k05c_where',
+      'k05d_where',
+      'k05e_where',
+      'k05z_where'
+    )
+  )
+)[[1]]
+```
+  
+### K05Z - Blank 'Specify' field for place/s where savings are kept but answer in K05Z is 1
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+If K05Z = 1, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k05_other_missing <- section_k %>% 
+    filter(k05z_where == 1, is.na(k05za_where)) %>% 
+    select_cv(k05z_where, k05za_where, h = 'k05za_where')
+)[[1]]
+```
+
+#### Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k05_other <- section_k %>% 
+    filter(k05z_where == 1, !is.na(k05za_where)) %>% 
+    select_cv(k05z_where, k05za_where, h = 'k05za_where')
+)[[1]]
+```
+
+:::
+
+### K05Z - With answer in the 'Specify' field but answer in K05Z is not 1
+
+If K05Z is not 1, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k05_other_na <- section_k %>% 
+    filter(k05z_where == 2, !is.na(k05za_where)) %>% 
+    select_cv(k05z_where, k05za_where, h = 'k05za_where')
+)[[1]]
+```
+
+### K05 - Possible places where savings are kept are all 'No'
+
+If the household has savings, there should be at least one place where the savings is being kept.  
+  
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k05_savingsloc_allno <- section_k %>% 
+    filter(k04_otherform == 1) %>% 
+    filter_at(vars(matches('^k05[a-z]_.*'), -matches('_fct$')), all_vars(. == 2)) %>% 
+    select_cv(
+      k04_otherform, 
+      matches('^k05[a-z]_.*'), 
+      h = c(
+        'k05a_where',
+        'k05b_where',
+        'k05c_where',
+        'k05d_where',
+        'k05e_where',
+        'k05z_where'
+      )
+    )
+)[[1]]
+```
+  
+### K05 - Place/s where savings are kept is/are not blank
+
+If the household has no savings, then place/s where savings are kept should be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k05_savingsloc_notblnk <- section_k %>% 
+    filter(k04_otherform == 2) %>% 
+    filter_at(vars(matches('^k05[a-z]_.*'), -matches('_fct$')), any_vars(!is.na(.))) %>% 
+    select_cv(
+      k04_otherform, 
+      matches('^k05[a-z]_.*'), 
+      h = c(
+        'k05a_where',
+        'k05b_where',
+        'k05c_where',
+        'k05d_where',
+        'k05e_where',
+        'k05z_where'
+      ) 
+    )
+)[[1]]
+```
+
+
+### K06 - Reason/s for not having savings is/are blank or not in the value set
+
+If the household has no savings, reason/s for not having savings should not be blank and must be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k06_rsnfrnthvngsvngs_blnk <- section_k %>% 
+    filter(k04_otherform == 2) %>% 
+    filter_at(vars(matches('^k06[a-z]_.*'), -matches('_fct$')), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      k04_otherform, 
+      matches('^k06[a-z]_.*'), 
+      h = c(
+        'k06a_rsnnosavings',
+        'k06b_rsnnosavings',
+        'k06c_rsnnosavings',
+        'k06d_rsnnosavings',
+        'k06z_rsnnosavings'
+      )
+   )
+)[[1]]
+```
+
+### K06Z - Blank 'Specify' field for reason/s for not having savings but answer in K06Z is 1
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+If K06Z = 1, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k06_other_missing <- section_k %>% 
+    filter(k06z_rsnnosavings == 1, is.na(k06az_rsnnosavings)) %>% 
+    select_cv(k06z_rsnnosavings, k06az_rsnnosavings, h = 'k06az_rsnnosavings')
+)[[1]]
+```
+
+#### Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k06_other <- section_k %>% 
+    filter(k06z_rsnnosavings == 1, !is.na(k06az_rsnnosavings)) %>% 
+    select_cv(k06z_rsnnosavings, k06az_rsnnosavings, h = 'k06az_rsnnosavings')
+)[[1]]
+```
+
+:::
+
+### K06Z - With answer in the 'Specify' field but answer in K06Z is not 1
+
+If K06Z is not 1, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k06_other_na <- section_k %>% 
+    filter(k06z_rsnnosavings == 2, !is.na(k06az_rsnnosavings)) %>% 
+    select_cv(k06z_rsnnosavings, k06az_rsnnosavings)
+)[[1]]
+```
+
+### K06 - Possible reasons for not having savings are all 'No'
+
+If the household has no savings, there should be at least one reason for not having savings.
+  
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k06_rsnfrnthvngsvngs_allno <- section_k %>% 
+    filter(k04_otherform == 2) %>% 
+    filter_at(vars(matches('^k06[a-z]_.*'), -matches('_fct$')), all_vars(. == 2)) %>% 
+    select_cv(
+      k04_otherform,
+      matches('^k06[a-z]_.*'), 
+      h = c(
+        'k06a_rsnnosavings',
+        'k06b_rsnnosavings',
+        'k06c_rsnnosavings',
+        'k06d_rsnnosavings',
+        'k06z_rsnnosavings'
+      )
+    )
+)[[1]]
+```
+
+
+### K06 - Reason/s for not having savings is/are not blank
+
+If the household has savings, reason/s for not having savings should be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k06_rsnfrnthvngsvngs_notblnk <- section_k %>% 
+    filter(k04_otherform == 1) %>%  
+    filter_at(vars(matches('^k06[a-z]_.*'), -matches('_fct$')), any_vars(!is.na(.))) %>% 
+    select_cv(
+      k04_otherform,
+      matches('^k06[a-z]_.*'), 
+      h = c(
+        'k06a_rsnnosavings',
+        'k06b_rsnnosavings',
+        'k06c_rsnnosavings',
+        'k06d_rsnnosavings',
+        'k06z_rsnnosavings'
+      )
+   )
+)[[1]]
+```
+
+
+### K07 - Presence of loan/s is blank or not in the value set
+  
+Presence of loan/s should not be blank and must be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k07_loans_vlst <- section_k %>% 
+    filter(!(k07_loan %in% c(1, 2, 8, 9))) %>% 
+    select_cv(k07_loan, h = 'k07_loan')
+)[[1]]
+```
+
+### K08 - Loan provider/s is/are blank or not in the values set
+
+If the household has loan/s, loan provider/s should not be blank and should be in the value set.
+  
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k08_loanprov_blnk <- section_k %>% 
+    filter(k07_loan == 1) %>% 
+    filter_at(vars(matches('^k08[a-z]_.*'), -matches('_fct$')), any_vars(!(. %in% c(1, 2, 9)))) %>% 
+    select_cv(
+      k07_loan, 
+      matches('^k08[a-z]_.*'), 
+      h = c(
+        'k08a_bank',
+        'k08b_nssla',
+        'k08c_coop',
+        'k08d_microfin',
+        'k08e_traditional',
+        'k08f_online',
+        'k08g_pawnshop',
+        'k08h_govtinstitution',
+        'k08i_famrelfrnds',
+        'k08j_informal',
+        'k08k_advance',
+        'k08l_inhousefin',
+        'k08z_others'
+      )
+    )
+)[[1]]
+```
+
+### K08Z - Blank 'Specify' field for loan provider/s but answer in K08Z is 1
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+If K08Z = 1, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k08_other_missing <- section_k %>% 
+    filter(k08z_others == 1, is.na(k08za_others)) %>% 
+    select_cv(k08z_others, k08za_others, h = 'k08za_others')
+)[[1]]
+```
+
+#### Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k08_other <- section_k %>% 
+    filter(k08z_others == 1, !is.na(k08za_others)) %>% 
+    select_cv(k08z_others, k08za_others, h = 'k08za_others')
+)[[1]]
+```
+
+:::
+
+### K08Z - With answer in the 'Specify' field but answer in K08Z is not 1
+
+If K08Z is not 1, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k08_other_na <- section_k %>% 
+    filter(k08z_others == 2, !is.na(k08za_others)) %>% 
+    select_cv(k08z_others, k08za_others, h = 'k08za_others')
+)[[1]]
+```
+
+### K08 - Possible loan providers are all 'No'
+
+If the household has loan/s, there should be at least one provider of loan.  
+  
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k08_loanprov_allno <- section_k %>% 
+    filter(k07_loan == 1) %>% 
+    filter_at(vars(matches('^k08[a-z]_.*')), all_vars(. == 2)) %>% 
+    select_cv(
+      k07_loan,
+      matches('^k08[a-z]_.*'), 
+      h = c(
+        'k08a_bank',
+        'k08b_nssla',
+        'k08c_coop',
+        'k08d_microfin',
+        'k08e_traditional',
+        'k08f_online',
+        'k08g_pawnshop',
+        'k08h_govtinstitution',
+        'k08i_famrelfrnds',
+        'k08j_informal',
+        'k08k_advance',
+        'k08l_inhousefin',
+        'k08z_others'
+      )
+   )
+)[[1]]
+```
+
+
+### K08 - Loan provider/s is/are not blank
+
+If the household has no loan/s, then loan provider/s should be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k08_loanprov_notblnk <- section_k %>%
+    filter(k07_loan == 2) %>%
+    filter_at(vars(matches('^k08[a-z]_.*'), -matches('_fct$')), any_vars(!is.na(.))) %>% 
+    select_cv(
+      k07_loan, 
+      matches('^k08[a-z]_.*'), 
+      h = c(
+        'k08a_bank',
+        'k08b_nssla',
+        'k08c_coop',
+        'k08d_microfin',
+        'k08e_traditional',
+        'k08f_online',
+        'k08g_pawnshop',
+        'k08h_govtinstitution',
+        'k08i_famrelfrnds',
+        'k08j_informal',
+        'k08k_advance',
+        'k08l_inhousefin',
+        'k08z_others'
+      )
+   )
+)[[1]]
+```
+
+
+### K09 - Purpose/s of loan/s is/are blank or not in the value set
+
+If the household has loan/s, purpose/s of loan/s should not be blank and must be in the value set.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k09_loanpurpose_blnk <- section_k %>% 
+    filter(k07_loan == 1) %>% 
+    filter_at(vars(matches('^k09[a-z]_.*'), -matches('_fct$')), any_vars(!(. %in% c(1, 2, 9)))) %>% 
+    select_cv(
+      k07_loan,
+      matches('^k09[a-z]_.*'), 
+      h = c(
+        'k09a_business',
+        'k09b_educ',
+        'k09c_travel',
+        'k09d_medical',
+        'k09e_dailyneeds',
+        'k09f_vehicle',
+        'k09g_realestate',
+        'k09h_loan',
+        'k09i_appliance',
+        'k09j_insurance',
+        'k09k_events',
+        'k09z_others'
+      )
+   )
+)[[1]]
+```
+
+### K09Z - Blank 'Specify' field for purpose/s of loan/s but answer in K09Z is 1
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+If K09Z = 1, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k09_other_missing <- section_k %>% 
+    filter(k09z_others == 1, is.na(k09za_others)) %>% 
+    select_cv(k09z_others, k09za_others, h = 'k09za_others')
+)[[1]]
+```
+
+#### Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k09_other <- section_k %>% 
+    filter(k09z_others == 1, !is.na(k09za_others)) %>% 
+    select_cv(k09z_others, k09za_others, h = 'k09za_others')
+)[[1]]
+```
+
+:::
+
+### K09Z - With answer in the 'Specify' field but answer in K09Z is not 1
+
+If K09Z is not 1, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k09_other_na <- section_k %>% 
+    filter(k09z_others == 2, !is.na(k09za_others)) %>% 
+    select_cv(k09z_others, k09za_others, h = 'k09za_others')
+)[[1]]
+```
+
+
+### K09 - Possible purposes of loan/s are all 'No'
+
+If the household has loan/s, there should be at least one purpose of loan/s.  
+  
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k09_loanpurpose_allno <- section_k %>% 
+    filter(k07_loan == 1) %>% 
+    filter_at(vars(matches('^k09[a-z]_.*'), -matches('_fct$')), all_vars(. == 2)) %>% 
+    select_cv(
+      k07_loan,
+      matches('^k09[a-z]_.*'), 
+      h = c(
+        'k09a_business',
+        'k09b_educ',
+        'k09c_travel',
+        'k09d_medical',
+        'k09e_dailyneeds',
+        'k09f_vehicle',
+        'k09g_realestate',
+        'k09h_loan',
+        'k09i_appliance',
+        'k09j_insurance',
+        'k09k_events',
+        'k09z_others'
+      )
+   )
+)[[1]]
+```
+
+### K09 - Purpose/s of loan/s is/are not blank
+
+If the household has no loan/s, then purposes of loan/s should be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k09_loanpurpose_notblnk <- section_k %>%
+    filter(k07_loan == 2) %>%
+    filter_at(vars(matches('^k09[a-z]_.*'), -matches('_fct$')), any_vars(!is.na(.))) %>% 
+    select_cv(
+      k07_loan,
+      matches('^k09[a-z]_.*'), 
+      h = c(
+        'k09a_business',
+        'k09b_educ',
+        'k09c_travel',
+        'k09d_medical',
+        'k09e_dailyneeds',
+        'k09f_vehicle',
+        'k09g_realestate',
+        'k09h_loan',
+        'k09i_appliance',
+        'k09j_insurance',
+        'k09k_events',
+        'k09z_others'
+      )
+   )
+)[[1]]
+```
+
+
+### K10 - Insurance availment is blank or not in the value set
+
+Insurance availment should not be blank and must be in the value set. 
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k10_insurance_blnk <- section_k %>% 
+    filter_at(vars(matches('^k10[a-z]_.*'), -matches('_fct$')), any_vars(!(. %in% c(1, 2, 9)))) %>% 
+    select_cv(
+      matches('^k10[a-z]_.*'), 
+      h = c(
+        'k10a_life',
+        'k10b_accident',
+        'k10c_health',
+        'k10d_combination',
+        'k10e_fire',
+        'k10f_vehicle',
+        'k10g_micro',
+        'k10h_crop',
+        'k10i_livepoul',
+        'k10j_fisheries',
+        'k10z_oth'
+      )
+   )
+)[[1]]
+```
+
+### K10Z - Blank 'Specify' field for insurance availment but answer in K10Z is 1
+
+::: {.panel-tabset}
+
+#### Cases with inconsistency
+
+If K10Z = 1, 'Specify' field must not be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k10_other_missing <- section_k %>% 
+    filter(k10z_oth == 1, is.na(k10za_oth)) %>% 
+    select_cv(k10z_oth, k10za_oth, h = 'k10za_oth')
+)[[1]]
+```
+
+#### Other responses
+
+Recode answer for 'Others, specify' if necessary.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k10_other <- section_k %>% 
+    filter(k10z_oth == 1, !is.na(k10za_oth)) %>% 
+    select_cv(k10z_oth, k10za_oth, h = 'k10za_oth')
+)[[1]]
+```
+
+:::
+
+### K10Z - With answer in the 'Specify' field but answer in K10Z  is not 1
+
+If K10Z is not 1, 'Others, specify' field must be blank.
+
+```{r, echo=F, warning=F, error=F}
+(
+  cv_k10_other_na <- section_k %>% 
+    filter(k10z_oth == 2, !is.na(k10za_oth)) %>% 
+    select_cv(k10z_oth, k10za_oth, h = 'k10za_oth')
+)[[1]]
+```
+
+
+```{r, include=F, echo=F, warning=F, error=F}
+
+validation_section_k <- as_tibble(ls(pattern = '^cv_k')) %>% 
+  mutate(cases = map(.$value, function(x) { eval(as.name(x))[[2]] })) %>% 
+  unnest(cases) 
+
+save(validation_section_k, file = '../data/validation/validation_section_k.Rdata')
+
+```
+

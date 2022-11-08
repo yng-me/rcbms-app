@@ -1,0 +1,11 @@
+
+```{r Setup, include=FALSE, warning=F, echo=F, render=F}
+knitr::opts_chunk$set(echo = FALSE)
+source('./utils/import.R')
+```
+
+# Cross-section {.unnumbered}
+
+```{r, child="qmd/cross-section.qmd"}
+```
+
