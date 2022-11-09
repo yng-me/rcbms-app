@@ -37,6 +37,6 @@ export const updateRCBMS = () => {
             fs.copySync(from, to, { recursive: true });
         })
 
-        fs.writeJSONSync(path, { version })
+        fs.writeJSONSync(path, { version: v })
     }
 }

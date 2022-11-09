@@ -270,7 +270,7 @@ If the answer in G05 = 2 (No) then G07 should not be blank or invalid
 
 If the answer in G01 = 01 (agricultural land) then g08 should not be blank or invalid.
 
-```{r, warning=F}
+```{r, warning=F, echo=F, error=F}
 (
   cv_g8_prclarea_blank <- section_g01_10 %>% 
     filter(
@@ -286,7 +286,7 @@ If the answer in G01 = 01 (agricultural land) then g08 should not be blank or in
 
 If the answer in G01 = 1 (agricultural land) then there should be HH members selected in G09.
 
-```{r, warning=F}
+```{r, warning=F, echo=F, error=F}
 (
   cv_g9_comanaged_blank <- section_g01_10 %>%
     left_join(ref_hh_count, by = 'case_id') %>% 
@@ -362,7 +362,7 @@ If the household did not engage in household sustenance (F02D = 2 and F02E = 2) 
 
 If the household only has household sustenance activity (F02D = 1 and F02E = 1) and/or is engaged in agricultural and fishery activity (G11.1 = 1) then G11.2 should not be blank/invalid.
 
-```{r, warning=F}
+```{r, warning=F, echo=F, error=F}
 (
   cv_g11_2_agrimem_blank_hhsustenance <- section_g11_19 %>% 
     filter(g11_1_hhengage == 1, age >= 10, as.integer(line_number_id) < 0 | as.integer(line_number_id) > n) %>% 
