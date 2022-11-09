@@ -1,7 +1,7 @@
 import { join } from 'path'
 import fs from 'fs-extra'
 import { rConfig } from '../modules/checker/with-rconfig'
-import { app } from 'electron'
+import { base } from './constants'
 
 export const foryourconsideration = '100ad4ecac23db231981211bb1cc142e3453d96'
 
@@ -47,13 +47,13 @@ export const withQuartoInstalled = () => {
 
 // RCBMS folder
 export const withRCBMSFolder = () => {
-    const path = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms' : 'C:\\rcbms' 
+    const path = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms' : base 
     return { isAvailable: fs.existsSync(path), path }  
 }
 
 // text data
 export const withTextData = () => {
-    const path = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/text' : 'C:\\rcbms\\data\\text'
+    const path = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/text' : join(base, 'data', 'text')
     return { isAvailable: fs.pathExistsSync(path), path } 
 }
 
@@ -87,7 +87,7 @@ export const withOutputFolder = () => {
 
 // Data dictionary
 export const withDataDict = () => {
-    const path = 'C:\\rcbms\\references\\HPQF2_DICT.dcf'
+    const path = join(base, 'references\\HPQF2_DICT.dcf')
     return { isAvailable: fs.pathExistsSync(path), path } 
 }
 
@@ -116,8 +116,8 @@ export const withReferenceDictionary = () => {
 // Reference
 export const withParquetData = () => {
 
-    const path = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/geo.parquet' : 'C:\\rcbms\\data\\parquet\\geo.parquet'
-    const directory = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet' : 'C:\\rcbms\\data\\parquet'
+    const path = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/geo.parquet' : join(base, 'data\\parquet\\geo.parquet')
+    const directory = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet' : join(base, 'data\\parquet')
     const filePath = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/geo.parquet' : './data/parquet/geo.parquet'
     const fileDirectory = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet' : './data/parquet'
 

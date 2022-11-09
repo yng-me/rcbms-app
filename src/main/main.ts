@@ -1,4 +1,4 @@
-import { app, BrowserView, BrowserWindow, dialog, ipcMain } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { join } from 'path';
 import { exec, spawn } from 'child_process'
 import fs from 'fs-extra'
@@ -40,6 +40,7 @@ import {
 import { executer } from './modules/executer'
 import { dataLoader } from './modules/loader'
 import { updateRCBMS } from './modules/updater';
+import { base } from './utils/constants';
 
 const os = process.platform === 'darwin'
 const dev = process.env.NODE_ENV === 'development'
@@ -77,7 +78,7 @@ function createWindow () {
       ? 'index.html'
       : `qmd\\section-${section.slice(-1).toLowerCase()}.html`
 
-    const htmlPath = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/_book/' + htmlFile : 'C:\\rcbms\\_book\\' + htmlFile
+    const htmlPath = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/_book/' + htmlFile : join(base, '_book', htmlFile)
 
     childWindow.loadFile(htmlPath)
     childWindow.show()

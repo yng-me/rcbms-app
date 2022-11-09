@@ -1,6 +1,9 @@
 import fs from 'fs-extra'
 import { join } from 'path'
-  
+
+
+export const base = 'C:\\rcbms'
+
 export interface Paths {
     r_path: string
     rstudio_path: string
@@ -76,12 +79,12 @@ export const config : RConfig = {
       r_path,
       rstudio_path: 'C:\\Program Files\\RStudio\\bin\\rstudio.exe',
       quarto_path: 'C:\\Program Files\\RStudio\\bin\\quarto\\bin\\quarto.exe',
-      rdata_path: os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/hpq.Rdata' : 'C:\\rcbms\\data\\hpq.Rdata',
+      rdata_path: os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/hpq.Rdata' : join(base, 'data\\hpq.Rdata'),
       before_edit_path: 'C:\\PSA SYSTEMS FOLDER\\CBMS-ROLLOUT\\HPQ\\DOWNLOADED',
       after_edit_path: 'C:\\PSA SYSTEMS FOLDER\\CBMS-ROLLOUT\\HPQ\\EDITED',
-      justification_path: os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/references/justification.xlsx' : 'C:\\rcbms\\references\\justification.xlsx',
-      output_path: os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/output' : 'C:\\rcbms\\output',
-      reference_path: os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/references/dictionary.xlsx' : 'C:\\rcbms\\references\\dictionary.xlsx',
+      justification_path: os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/references/justification.xlsx' : join(base, 'references\\justification.xlsx'),
+      output_path: os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/output' : join(base, 'output'),
+      reference_path: os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/references/dictionary.xlsx' : join(base, 'references\\dictionary.xlsx'),
       cspro_path,
       csconcat_path,
       csexport_path
