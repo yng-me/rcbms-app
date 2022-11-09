@@ -2,13 +2,13 @@ import fs from 'fs-extra'
 import { join } from 'path'
 import yaml from 'js-yaml'
 
-import { config, RConfig } from '../../utils/constants';
+import { base, config, RConfig } from '../../utils/constants';
 
 const os = process.platform == 'darwin'
 
 // YAML config
 export const withYamlConfig = () => {
-    const path = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/config.yml' : 'C:\\rcbms\\config.yml'
+    const path = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/config.yml' : join(base, 'config.yml')
     return { isAvailable: fs.pathExistsSync(path), path } 
 }
 

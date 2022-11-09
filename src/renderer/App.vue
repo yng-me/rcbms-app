@@ -65,40 +65,40 @@ ipcRenderer.on('percent', (event, data) => {
 
 
 <style scoped>
-.v-enter-active,
-.v-leave-active {
-  transition: opacity 0.5s ease;
-}
+  .v-enter-active,
+  .v-leave-active {
+    transition: opacity 0.5s ease;
+  }
 
-.v-enter-from,
-.v-leave-to {
-  opacity: 0;
-}
+  .v-enter-from,
+  .v-leave-to {
+    opacity: 0;
+  }
 
-.v-enter-active {
-  transition: all 0.5s ease-out;
-}
+  .v-enter-active {
+    transition: all 0.5s ease-out;
+  }
 
-.v-leave-active {
-  transition: all 0.3s ease-in;
-}
+  .v-leave-active {
+    transition: all 0.3s ease-in;
+  }
 
-.v-enter-from,
-.v-leave-to {
-  transform: translateX(-100px);
-  opacity: 0;
-}
-.y-scroll-bar::-webkit-scrollbar-track {
-    background-color: #A8A29E;
-}
+  .v-enter-from,
+  .v-leave-to {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+  .y-scroll-bar::-webkit-scrollbar-track {
+      background-color: #A8A29E;
+  }
 
-.y-scroll-bar::-webkit-scrollbar {
-    width: 8px;
-    background-color: #E7E5E4;
-}
+  .y-scroll-bar::-webkit-scrollbar {
+      width: 8px;
+      background-color: #E7E5E4;
+  }
 
-.y-scroll-bar::-webkit-scrollbar-thumb {
-    background-color: #44403C;
-}
+  .y-scroll-bar::-webkit-scrollbar-thumb {
+      background-color: #44403C;
+  }
 
 </style>

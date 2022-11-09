@@ -12,7 +12,7 @@ addStyle(wb, 'Summary', title_style, rows = 1, cols = 1, T, T)
 # Summary of cases -------------------------------------------------------------
 
 ## Row 5
-geo_id <- get(load('./data/records/geo_id.Rdata'))
+geo_id <- arrow::open_dataset('./data/parquet/geo_id.parquet') %>% collect()
 exp_cases_count <- geo_id %>% nrow()
 exp_unique_cases <- exp_case_wise %>% 
   filter(!grepl('x$', `Case ID`)) %>% 

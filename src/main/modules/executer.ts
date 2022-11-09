@@ -2,11 +2,13 @@ import { ipcMain } from "electron";
 import { spawn } from 'child_process' 
 import { clearData } from "../utils/helpers";
 import { rConfig } from "./checker/with-rconfig";
+import { join } from 'path'
 
 import { withRInstalled, withQuartoInstalled } from "../utils/helpers";
+import { base } from "../utils/constants";
 
 const os = process.platform == 'darwin'
-const cwd = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms' : 'C:\\rcbms'
+const cwd = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms' : base
 
 const replacer = (str : string) => {
   return str != undefined ? str.replace(/(\r\n|\n|\r|\r\n)*/gm, '') : ''
@@ -157,8 +159,8 @@ export const executer = () => {
                 event.reply('done-processing')
 
                 if(rConfig().clear) {
-                  clearData('C:\\rcbms\\data\\csdb')
-                  clearData('C:\\rcbms\\data\\text')
+                  clearData(join(base, 'data\\csdb'))
+                  clearData(join(base, 'data\\text'))
                 }
               // }
             })

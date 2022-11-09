@@ -3,6 +3,7 @@ import { join } from 'path'
 import fs from 'fs-extra'
 import { getVersion, withRCBMSFolder } from '../utils/helpers'
 import { rConfig } from './checker/with-rconfig'
+import { base } from '../utils/constants'
 // import { NsisUpdater } from "electron-updater"
 
 
@@ -16,7 +17,7 @@ export const updateRCBMS = () => {
 
     if(v !== version) {
 
-        const p  = 'C:\\rcbms\\config.yml'
+        const p  = join(base, 'config.yml')
 
         if(fs.pathExistsSync(p)) {
             fs.rmSync(p, { recursive: true, force: true })
@@ -27,7 +28,8 @@ export const updateRCBMS = () => {
         const qmdFilesToUpdate = [
             join('qmd', 'section-g.qmd'),
             join('qmd', 'section-l.qmd'),
-            join('qmd', 'cross-section.qmd')
+            join('qmd', 'cross-section.qmd'),
+            join('utils', 'exports', 'export-config.R')
         ]
 
         qmdFilesToUpdate.forEach(el => {
