@@ -82,7 +82,7 @@ export const config : RConfig = {
       rdata_path: os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/hpq.Rdata' : join(base, 'data\\hpq.Rdata'),
       before_edit_path: 'C:\\PSA SYSTEMS FOLDER\\CBMS-ROLLOUT\\HPQ\\DOWNLOADED',
       after_edit_path: 'C:\\PSA SYSTEMS FOLDER\\CBMS-ROLLOUT\\HPQ\\EDITED',
-      justification_path: os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/references/justification.xlsx' : join(base, 'references\\justification.xlsx'),
+      justification_path: os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/references/justifications.xlsx' : join(base, 'references\\justifications.xlsx'),
       output_path: os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/output' : join(base, 'output'),
       reference_path: os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/references/dictionary.xlsx' : join(base, 'references\\dictionary.xlsx'),
       cspro_path,
