@@ -128,6 +128,8 @@ ipcMain.on('before-mount', (event, data) => {
 
 const mountedPayload = () => {
 
+  const p = rConfig().run_after_edit ? withEditedData().path : withDownloadedData().path
+
   return {
     rConfig: rConfig(), 
     exportLog: exportLogCheck().data,
@@ -141,7 +143,8 @@ const mountedPayload = () => {
     withRStudioInstalled: os ? { isAvailable : true, path: 'Not applicable' } : withRStudioInstalled(), 
     withQuartoInstalled: os ? { isAvailable : true, path: 'Not applicable' } : withQuartoInstalled(), 
     withCSProInstalled: os ? { isAvailable : true, path: 'Not applicable' } : withCSProInstalled(),
-    withParquetData: withParquetData().isAvailable
+    withParquetData: withParquetData().isAvailable,
+    csdbeList:  csdbeCheck(p)
   }
 }
 
