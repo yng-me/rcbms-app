@@ -7,6 +7,7 @@ interface CSDBE {
     loading?: boolean
     isAvailable?: boolean
     count?: number
+    files: string[]
     path: string
 }
 
@@ -18,7 +19,8 @@ export const csdbeCheck = (path : string) :CSDBE => {
         status: 'No available data',
         loading: false,
         count: 0,
-        path
+        files: [],
+        path,
     }
  
     if(fs.existsSync(path)) {
@@ -43,6 +45,7 @@ export const csdbeCheck = (path : string) :CSDBE => {
                         isAvailable: true,
                         status: 'Data ready to be loaded',
                         count: csdbeConcat.length,
+                        files: csdbeConcat,
                         path
                     }
 

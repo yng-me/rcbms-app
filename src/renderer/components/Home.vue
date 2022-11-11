@@ -25,12 +25,16 @@ defineEmits(['tabulate'])
 // BEFORE MOUNT
 const doneCopyingResources = ref(false)
 
-const data : {
+interface IData  { 
   errors: any
-  exportLog: any
-} = reactive({
+  exportLog: any,
+  csdbeList: string[]
+}
+
+const data = reactive<IData>({
   errors : [],
-  exportLog: []
+  exportLog: [],
+  csdbeList: []
 })
 
 onBeforeMount(() => {
@@ -52,7 +56,6 @@ const rConfig : any = reactive({
   use_raw_data_from_tablet: false
 
 })
-
 
 const checks = reactive({
   withData: { isAvailable: false },
@@ -81,6 +84,7 @@ ipcRenderer.on('mounted', (event, payload) => {
   rConfig.convert_to_rdata = payload.rConfig.convert_to_rdata  
   rConfig.use_raw_data_from_tablet = payload.rConfig.use_raw_data_from_tablet
 
+  data.csdbeList = payload.csdbeList.files
 
   data.errors = []
 
