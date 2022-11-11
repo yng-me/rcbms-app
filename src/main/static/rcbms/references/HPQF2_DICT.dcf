@@ -8548,13 +8548,6 @@ Value=1;1 - YES
 Value=2;2 - NO
 
 [Item]
-Label=H01 LNO counter
-Name=H01_LNOCTR
-Start=569
-Len=2
-DataType=Numeric
-
-[Item]
 Label=H_AUX01
 Name=H_AUX01
 Start=571
@@ -21041,38 +21034,6 @@ Len=30
 DataType=Alpha
 
 [Item]
-Label=G11 Counter
-Name=G11_LNOCTR
-Start=321
-Len=2
-DataType=Numeric
-ZeroFill=Yes
-
-[Item]
-Label=G11.2 Counter
-Name=G11_2_LNOCTR
-Start=323
-Len=2
-DataType=Numeric
-ZeroFill=Yes
-
-[Item]
-Label=G47 Counter
-Name=G47_LNOCTR
-Start=325
-Len=2
-DataType=Numeric
-ZeroFill=Yes
-
-[Item]
-Label=G27 Counter
-Name=G27_LNOCTR
-Start=327
-Len=2
-DataType=Numeric
-ZeroFill=Yes
-
-[Item]
 Label=G_AUX01
 Name=G_AUX011
 Start=329
@@ -22604,25 +22565,3 @@ Name=G_AUX02
 Start=1671
 Len=100
 DataType=Alpha
-
-[Record]
-Label=LNO Counter
-Name=LNO_COUNTER
-RecordTypeValue='9'
-RecordLen=32
-
-[Item]
-Label=D01 LNO Counter
-Name=D01_LNOCTR
-Start=29
-Len=2
-DataType=Numeric
-ZeroFill=Yes
-
-[Item]
-Label=E01 LNO Counter
-Name=E01_LNOCTR
-Start=31
-Len=2
-DataType=Numeric
-ZeroFill=Yes

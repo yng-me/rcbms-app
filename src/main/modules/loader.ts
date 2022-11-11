@@ -3,8 +3,11 @@ import fs from 'fs-extra'
 import { join, basename } from 'path'
 import { exec, execSync } from 'child_process'
 import Cryptr from 'cryptr'
+
 const temp = require('temp')
 temp.track()
+
+const dev = process.env.NODE_ENV === 'development'
 
 import { vb } from './checker/somewhere'
 import { lv, all_that_can_be_expressed } from './checker/junk'
@@ -44,8 +47,9 @@ export const dataLoader = () : void => {
         const fpvpf = rConfig().use_raw_data_from_tablet ? all_that_can_be_expressed + 'uo' : cryptr.decrypt(vvv)
         const inputDict = withDataDict().path
         const outputCsdbe = `C:\\rcbms\\data\\csdb\\concatenated.csdbe|password=${fpvpf}`
-        
-        console.log(fpvpf);
+
+        if(dev) console.log(fpvpf)
+
         if(!withDataDict().isAvailable) {
           
 

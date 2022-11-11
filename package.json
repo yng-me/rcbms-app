@@ -1,5 +1,6 @@
 {
   "name": "rcbms",
+  "productName": "RCBMS",
   "version": "1.0.1",
   "description": "Validation Generator for the Community-Based Monitoring System using R",
   "main": "build/main/main.js",
@@ -7,7 +8,7 @@
     "dev": "node scripts/dev-server.js",
     "build": "node scripts/build.js && electron-builder -c config/electron-builder.json",
     "build:win": "node scripts/build.js && electron-builder -c config/electron-builder.json --win --x64",
-    "package": "node scripts/build.js && electron-builder -c config/electron-builder.json --win --x64 -p always",
+    "publish": "node scripts/build.js && electron-builder -c config/electron-builder.json --win --x64 -p always",
     "build:mac": "node scripts/build.js && electron-builder -c config/electron-builder.json --mac",
     "build:linux": "node scripts/build.js && electron-builder -c config/electron-builder.json --linux"
   },

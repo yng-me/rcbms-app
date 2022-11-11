@@ -29,6 +29,7 @@ export const updateRCBMS = () => {
             join('qmd', 'section-g.qmd'),
             join('qmd', 'section-l.qmd'),
             join('qmd', 'cross-section.qmd'),
+            join('utils', 'exports', 'export-summary.R'),
             join('utils', 'exports', 'export-config.R')
         ]
 
