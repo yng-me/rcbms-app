@@ -449,7 +449,7 @@ If household has household sustenance activity in raising livestock and poultry 
 )[[1]]
 ```
 
-### G12 - Answer in G12C is NO but HH is engated in fishing fishery related activity
+### G12 - Answer in G12C is NO but HH is engaged in fishing fishery related activity
 
 If HH has sustenance activity in fishing, gathering shells, snails, seaweeds, corals, etc (F02A = 1) and/or engaged in entrepreneurial activity in fishing (F03C = 2), then G12D, G12D, or G12E should be YES (= 1).
 
