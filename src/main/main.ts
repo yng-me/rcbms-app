@@ -352,7 +352,7 @@ autoUpdater.on('checking-for-update', () => {
 })
 
 autoUpdater.on('update-downloaded', (a) => {
-  sendStatusToWindow('Update downloaded successfully!')
+  sendStatusToWindow('Update downloaded successfully! Please restart RCBMS to apply the changes.')
 })
 
 autoUpdater.on('error', (err) => {

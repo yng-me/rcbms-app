@@ -20,7 +20,17 @@ const d = reactive({
   bytesPerSecond: 0,
 })
 
-ipcRenderer.on('on-update', (event, payload) => progress.value = payload)
+const newUpdateAvailable = ref(false)
+
+ipcRenderer.on('on-update', (event, payload) => {
+  progress.value = payload
+
+  if(payload === 'Update downloaded successfully! Please restart RCBMS to apply the changes.') {
+    setTimeout(() => {
+      newUpdateAvailable.value = true
+    }, 1500);
+  }
+})
 ipcRenderer.on('percent', (event, data) => {
   d.percent = parseFloat(data.percent)
 })
@@ -32,7 +42,7 @@ ipcRenderer.on('percent', (event, data) => {
   <transition>
     <div v-if="progress && show" class="absolute left-3 top-3 xl:w-1/3 sm:w-2/5 w-2/3 z-50">
       <div class="px-4 py-2.5 shadow-xl rounded-xl bg-gradient-to-bl from-teal-600 to-cyan-700 text-white border-gray-50 border-2 opacity-80">
-        <div class="items-start flex justify-between">
+        <div class="items-start flex space-x-2 justify-between">
           <p class="tracking-wider text-sm">{{ progress }}</p>
           <button 
               @click.prevent="show = false"
@@ -60,7 +70,7 @@ ipcRenderer.on('percent', (event, data) => {
         <Arrow @back="tabulate = false" />
     </div>
   </transition>
-  <Footer></Footer>
+  <Footer :newUpdateAvailable="newUpdateAvailable"></Footer>
 </template>
 
 
