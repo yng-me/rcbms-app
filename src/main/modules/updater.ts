@@ -66,5 +66,27 @@ export const updateRCBMS = () => {
         
     }
 
+    if(version == '1.0.2') {
+
+        if(fs.pathExistsSync(p)) {
+            fs.rmSync(p, { recursive: true, force: true })
+        }
+    
+        rConfig()
+
+        const qmdFilesToUpdate = [
+            join('utils', 'exports', 'export-config.R'),
+        ]
+
+        qmdFilesToUpdate.forEach(el => {
+            const from = join(app.getAppPath(), 'static', 'rcbms', el)
+            const to = join(withRCBMSFolder().path, el)
+
+            fs.copySync(from, to, { recursive: true });
+        })
+
+        
+    }
+
     fs.writeJSONSync(path, { version: v })
 }
