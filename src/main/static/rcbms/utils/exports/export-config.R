@@ -95,7 +95,7 @@ exp_case_wise <- do.call('rbind', validation_data) %>%
       paste0('Section ', section)
     ), 
   ) %>% 
-  mutate(lno = ifelse(grepl('\\d{2}', lno), '', lno)) %>% 
+  # mutate(lno = if_else(grepl('\\d{2}', lno), '', lno)) %>% 
   na_if('') %>% 
   select(
     'Case ID' = case_id,
@@ -132,7 +132,7 @@ if(config$include_justifiction & file.exists(justification_path)) {
   exp_case_wise <- exp_case_wise %>% 
     left_join(
       justification, 
-      by = c('Case ID', 'Region', 'Province', 'City/Mun', 'Barangay', 'EA', 'Line Number', 'Priority', 'Section', 'Title', 'Description')
+      by = c('Case ID', 'Region', 'Province', 'City/Mun', 'Barangay', 'EA', 'Priority', 'Section', 'Title', 'Description')
     )
   
 } else {
