@@ -1,6 +1,39 @@
 <script lang="ts" setup>
 
-const changeLogs = [
+import { reactive } from '@vue/reactivity';
+
+// @ts-ignore
+import ChangeLogItem from './ChangeLogItem.vue';
+
+const changeLogs = reactive([
+    {
+        version: 'RCBMS v1.0.2',
+        releaseDate: '12 November 2022',
+        logs: [ 
+            {
+                feature: 'Select csdbe files to extract',
+                type: 'feature',
+                info: [
+                    'Before extracting the csdbe files, you can now pick specific file/s you want to include in the generation of list of cases with inconsistencies.',
+                    'If these files were downloaded directly from the tablet, however, a minimum of 10 csdbe files is still required.'
+                ]
+            },
+            // {
+            //     feature: 'Dependency version requirements',
+            //     type: 'enhancement',
+            //     info: [
+            //         'To prevent unexpected errors, you are no longer allowed to proceed if you have not installed the minimun versions of R and RStudio required by RCBMS.',
+            //     ]
+            // },
+            {
+                feature: 'Null data dictionary records',
+                type: 'bug fix',
+                info: [
+                    'Excluded record types and items in the data dictionary file which caused error in extracting csdbe files and consequently produced null values when concatenating.'
+                ]
+            }
+        ]  
+    },
     {
         version: 'RCBMS v1.0.1',
         releaseDate: '09 November 2022',
@@ -31,12 +64,7 @@ const changeLogs = [
             }
         ]
     }
-]
-
-const bg : any = {
-    feature: 'bg-teal-600',
-    'bug fix': 'bg-red-600'
-}
+])
 
 </script>
 
@@ -54,24 +82,7 @@ const bg : any = {
             </div>
             <div class="gap-6 overflow-auto " style="max-height: 600px !important">
                 <div v-for="(i, index) in changeLogs" :key="index" class="px-5 py-3 border-t">
-                    <h2 class="inline-flex space-x-1 items-baseline tracking-wider">
-                        <span class="text-lg font-semibold text-teal-600">{{ i.version }}</span>
-                        <span class="text-gray-400">&bull;</span>
-                        <span class="text-sm">{{ i.releaseDate }}</span>
-                    </h2>
-                    <ul class="pt-4 tracking-wide">
-                        <li v-for="j in i.logs" :key="j.feature" class="pb-6 pt-1">
-                            <span class="inline-flex space-x-2 items-center font-semibold">
-                                <span :class="bg[j.type]" class="uppercase tracking-wide font-mono text-xs px-2 py-px rounded-xl text-white">
-                                    {{ j.type }}
-                                </span>
-                                <span class="">{{ j.feature }}</span>
-                            </span>
-                            <ul v-for="k in j.info" :key="k" class="space-y-1 list-disc px-6 ">
-                                <li v-html="k" class="py-1 text-sm"></li>
-                            </ul>
-                        </li>
-                    </ul>
+                    <ChangeLogItem :item="i" :order="index" />
                 </div>
             </div>
         </div>

@@ -119,7 +119,7 @@ ipcRenderer.on('mounted', (event, payload) => {
   if(!payload.withRInstalled.isAvailable) {
     data.errors.push({
       message: 'Unable to locate installation of R.',
-      url: 'https://cran.r-project.org/bin/windows/base/R-4.2.1-win.exe'
+      url: 'https://cran.r-project.org/bin/windows/base/R-4.2.2-win.exe'
     })
   }
 

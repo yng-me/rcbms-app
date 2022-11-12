@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 // @ts-ignore
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 // @ts-ignore
 import { version } from '../../../package.json'
 // @ts-ignore
@@ -14,7 +14,11 @@ import ChangeLog from './ChangeLog.vue';
 
 const showAbout = ref(false)
 const showChangelog = ref(false)
+const props = defineProps(['newUpdateAvailable'])
 
+watch(() => props.newUpdateAvailable, () => {
+  showChangelog.value = true
+})
 
 </script>
 
