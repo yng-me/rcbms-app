@@ -158,11 +158,7 @@ const myhalf = g + '800393e28d621d9471609fd2'
 
 // Load data ============================================================
 
-const loadData = (load : boolean = false) => {
-  if(checks.textDataCheck.isAvailable && load === false && !data.errors.length) {
-    show.loadDataConfirm = true
-  } else {
-    show.loadDataConfirm = false
+const loadData = () => {
     show.loadData = false
     loading.value = true
     
@@ -170,11 +166,9 @@ const loadData = (load : boolean = false) => {
       ipcRenderer.send('load-data', {
         myhalf,
         check: rConfig.run_after_edit,
-        files: selectedCSDBE
+        files: [...selectedCSDBE.value]
       })
     }, 1000);
-
-  }
 }
 
 ipcRenderer.on('data-loaded', (event, payload) => { 
@@ -298,6 +292,15 @@ const refreshApp = () => {
   }, 1500);
 }
 
+
+const loadDataDialog = () => {
+  if(checks.textDataCheck.isAvailable && !data.errors.length) {
+    show.loadDataConfirm = true
+  } else {
+    show.loadData = true
+  }
+}
+
 const selectedCSDBE = ref([])
 const selectAllCSDBE = ref(true)
 
@@ -351,7 +354,7 @@ watch(selectedCSDBE, (newValue) => {
         <template v-else>
           <div class="mx-auto max-w-4xl px-10 sm:flex items-center sm:space-y-0 space-y-3 gap-3 justify-center mt-3">
               <button 
-                @click.prevent="loadData()"
+                @click.prevent="loadDataDialog"
                 :disabled="loading || cannotLoadData"
                 :class="cannotLoadData? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'"
                 class="sm:w-auto w-full flex items-center justify-center text-xs space-x-2 rounded-xl px-4 py-2 bg-gradient-to-tr tracking-wider"
@@ -454,8 +457,9 @@ watch(selectedCSDBE, (newValue) => {
                 </button>
                 <button 
                   :disabled="selectedCSDBE.length === 0"
-                  @click.prevent="loadData(true)" 
-                  class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl text-white bg-teal-600 hover:bg-teal-700">
+                  @click.prevent="loadData" 
+                  :class="selectedCSDBE.length === 0 ? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'"
+                  class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl bg-gradient-to-tr">
                     Load Data
                 </button>
             </div>
