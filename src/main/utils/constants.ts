@@ -1,8 +1,9 @@
 import fs from 'fs-extra'
 import { join } from 'path'
+import os from 'os'
 
-
-export const base = 'C:\\rcbms'
+const isMac = process.platform === 'darwin'
+export const base = isMac ? join(os.homedir(), 'Desktop', 'R Codes', '2022-cbms') : 'C:\\rcbms'
 
 export interface Paths {
     r_path: string
@@ -30,8 +31,6 @@ export interface RConfig {
     use_raw_data_from_tablet: boolean
     paths: Paths
 }
-
-const os = process.platform == 'darwin'
 
 const r64Path = join('C:', 'Program Files', 'R')
 const r86Path = join('C:', 'Program Files (x86)', 'R')
@@ -79,12 +78,12 @@ export const config : RConfig = {
       r_path,
       rstudio_path: 'C:\\Program Files\\RStudio\\bin\\rstudio.exe',
       quarto_path: 'C:\\Program Files\\RStudio\\bin\\quarto\\bin\\quarto.exe',
-      rdata_path: os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/hpq.Rdata' : join(base, 'data\\hpq.Rdata'),
+      rdata_path: isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/hpq.Rdata' : join(base, 'data', 'hpq.Rdata'),
       before_edit_path: 'C:\\PSA SYSTEMS FOLDER\\CBMS-ROLLOUT\\HPQ\\DOWNLOADED',
       after_edit_path: 'C:\\PSA SYSTEMS FOLDER\\CBMS-ROLLOUT\\HPQ\\EDITED',
-      justification_path: os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/references/justifications.xlsx' : join(base, 'references\\justifications.xlsx'),
-      output_path: os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/output' : join(base, 'output'),
-      reference_path: os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/references/dictionary.xlsx' : join(base, 'references\\dictionary.xlsx'),
+      justification_path: isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/references/justifications.xlsx' : join(base, 'references\\justifications.xlsx'),
+      output_path: isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/output' : join(base, 'output'),
+      reference_path: isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/references/dictionary.xlsx' : join(base, 'references\\dictionary.xlsx'),
       cspro_path,
       csconcat_path,
       csexport_path

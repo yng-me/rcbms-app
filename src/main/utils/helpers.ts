@@ -2,6 +2,7 @@ import { join } from 'path'
 import fs from 'fs-extra'
 import { rConfig } from '../modules/checker/with-rconfig'
 import { base } from './constants'
+import XLSX from 'xlsx'
 
 export const foryourconsideration = '100ad4ecac23db231981211bb1cc142e3453d96'
 
@@ -206,5 +207,39 @@ export const getVersion = () => {
     }
 
     return v
+
+}
+
+
+export const getFileLabel = (files : string[]) => {
+    try {         
+
+        const psgc = join(base, 'references', 'psgc.xlsx')
+        const workbook = XLSX.readFile(psgc);
+        const sheet_name_list = workbook.SheetNames;
+        const xlData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]])
+            .map((item : any) => {
+                return {
+                    code: item['Correspondence Code'],
+                    cityMun: item['City/Municipality'],
+                    brgy: item['Name']
+                }
+            })
+            
+        return files.map((file : string) => {
+            return {
+                file,
+                ean: file.substring(10, 16),
+                ...xlData.find(el => el.code == file.substring(1, 10))
+            }
+        })
+
+    } catch {
+        console.log('Error');
+        return [
+            { file: '', ean: '', code: '', cityMun: '', brgy: '' }
+
+        ]
+    }
 
 }

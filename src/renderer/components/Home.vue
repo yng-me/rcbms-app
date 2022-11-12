@@ -28,7 +28,7 @@ const doneCopyingResources = ref(false)
 interface IData  { 
   errors: any
   exportLog: any,
-  csdbeList: string[]
+  csdbeList: any
 }
 
 const data = reactive<IData>({
@@ -84,7 +84,9 @@ ipcRenderer.on('mounted', (event, payload) => {
   rConfig.convert_to_rdata = payload.rConfig.convert_to_rdata  
   rConfig.use_raw_data_from_tablet = payload.rConfig.use_raw_data_from_tablet
 
-  data.csdbeList = payload.csdbeList.files
+  data.csdbeList = payload.csdbeList
+
+  selectedCSDBE.value = payload.csdbeList.map((el : any) => el.file)
 
   data.errors = []
 
@@ -148,7 +150,8 @@ const updateConfig = (event : any) => rConfig[event.key] = event.val
 
 const show = reactive({
   runScript: false,
-  loadData: false
+  loadDataConfirm: false,
+  loadData: false,
 })
 
 const myhalf = g + '800393e28d621d9471609fd2'
@@ -157,15 +160,17 @@ const myhalf = g + '800393e28d621d9471609fd2'
 
 const loadData = (load : boolean = false) => {
   if(checks.textDataCheck.isAvailable && load === false && !data.errors.length) {
-    show.loadData = true
+    show.loadDataConfirm = true
   } else {
+    show.loadDataConfirm = false
     show.loadData = false
     loading.value = true
     
     setTimeout(() => {      
       ipcRenderer.send('load-data', {
         myhalf,
-        check: rConfig.run_after_edit
+        check: rConfig.run_after_edit,
+        files: selectedCSDBE
       })
     }, 1000);
 
@@ -293,6 +298,30 @@ const refreshApp = () => {
   }, 1500);
 }
 
+const selectedCSDBE = ref([])
+const selectAllCSDBE = ref(true)
+
+const showLoadData = () => {
+  show.loadDataConfirm = false
+  setTimeout(() => {
+    show.loadData = true
+  }, 1000);
+}
+
+watch(selectAllCSDBE, (newValue) => {
+  if(newValue === true) {
+    selectedCSDBE.value = data.csdbeList.map((el : any) => el.file)
+  }
+  
+  if(newValue === false && selectedCSDBE.value.length === data.csdbeList.length) { 
+    selectedCSDBE.value = []
+  }
+})
+
+watch(selectedCSDBE, (newValue) => {
+  if(selectedCSDBE.value.length < data.csdbeList.length) selectAllCSDBE.value = false
+})
+
 </script>
 
 
@@ -376,32 +405,76 @@ const refreshApp = () => {
         </template>
 
         <!-- Dialog windows -->
-        <BaseModal @close="show.loadData = false" :show="show.loadData" usage="dialog" max-width="md">
-        <DialogBox 
-            @close="show.loadData = false"
-            title="Extraction Option" 
-            message="You already loaded the data files and it's now ready for use. <span class='font-medium'>Do you want to perform it again</span>?"
-        >
-        <div class="border-t px-4 py-2.5 flex justify-end space-x-2 bg-gray-50">
-            <button @click.prevent="show.loadData = false" class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl bg-gray-500 text-white hover:bg-gray-600">Exit</button>
-            <button @click.prevent="loadData(true)" class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl text-white bg-teal-600 hover:bg-teal-700">Proceed</button>
-        </div>
-        </DialogBox>
+        <BaseModal @close="show.loadDataConfirm = false" :show="show.loadDataConfirm" usage="dialog" max-width="md">
+          <DialogBox 
+              @close="show.loadDataConfirm = false"
+              title="Extraction Option" 
+              message="You already loaded the data files and it's now ready for use. <span class='font-medium'>Do you want to perform it again</span>?"
+          >
+          <div class="border-t px-4 py-2.5 flex justify-end space-x-2 bg-gray-100">
+              <button @click.prevent="show.loadDataConfirm = false" class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl bg-gray-500 text-white hover:bg-gray-600">Exit</button>
+              <button @click.prevent="showLoadData" class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl text-white bg-teal-600 hover:bg-teal-700">Proceed</button>
+          </div>
+          </DialogBox>
+        </BaseModal>
+
+        <BaseModal @close="show.loadData = false" :show="show.loadData" usage="dialog" max-width="2xl">
+          <DialogBox title="Select CSDBE Files to Extract">
+            <div class="pt-4 flex flex-col space-y-4 overflow-auto max-h-96">
+               <table class="w-full ">
+                <thead>
+                  <th class="py-1.5 pl-6 text-left font-medium">
+                    <input v-model="selectAllCSDBE" type="checkbox" id="selectAll" class="text-teal-600 rounded flex items-center">
+                  </th>
+                  <th class="py-1.5 px-3 text-left font-medium"><label for="selectAll">File</label></th>
+                  <th class="py-1.5 px-3 text-left font-medium">City/Municipality</th>
+                  <th class="py-1.5 px-3 text-left font-medium">Barangay</th>
+                  <th class="py-1.5 pl-3 pr-6 text-left font-medium">EA</th>
+                </thead>
+                <tbody>
+                  <tr v-for="(i, index) in data.csdbeList" :key="index" class="border-t hover:bg-gray-100">
+                    <td class="py-1.5 pl-6">
+                      <input 
+                        type="checkbox" 
+                        v-model="selectedCSDBE" 
+                        :value="i.file" :name="i.file" :id="i.file" 
+                        class="text-teal-600 rounded flex items-center">
+                    </td>
+                    <td class="py-1.5 px-3"><label :for="i.file" class=" whitespace-nowrap">{{ i.file }}</label></td>
+                    <td class="py-1.5 px-3"><label :for="i.file" class=" whitespace-nowrap">{{ i.cityMun }}</label></td>
+                    <td class="py-1.5 px-3"><label :for="i.file" class=" whitespace-nowrap">{{ i.brgy }}</label></td>
+                    <td class="py-1.5 pl-3 pr-6 text-center"><label :for="i.file" class=" whitespace-nowrap">{{ i.ean }}</label></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="border-t px-4 py-2.5 flex justify-end space-x-2 bg-gray-100">
+                <button @click.prevent="show.loadData = false" class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl bg-gray-500 text-white hover:bg-gray-600">
+                  Cancel
+                </button>
+                <button 
+                  :disabled="selectedCSDBE.length === 0"
+                  @click.prevent="loadData(true)" 
+                  class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl text-white bg-teal-600 hover:bg-teal-700">
+                    Load Data
+                </button>
+            </div>
+          </DialogBox>
         </BaseModal>
 
         <BaseModal @close="stopProcessing" :closeable="false" :show="show.runScript" usage="dialog" max-width="xl">
-        <Generate 
-            @close="stopProcessing" 
-            :loading="loading" 
-            @done-processing="doneProcessing"
-            @stop-processing="stopProcessing"
-            :time-elapsed="`${hr}:${min}:${sec}`"
-        >
-            <span v-if="loading" class="flex items-center space-x-1">
-            <span class="text-xs text-gray-400 font-mono">{{ hr }}:{{ min }}:{{ sec }}</span>
-            <span class="flex shrink-0 h-1.5 w-1.5 animate-pulse rounded-full bg-red-600"></span>
-            </span>
-        </Generate>
+          <Generate 
+              @close="stopProcessing" 
+              :loading="loading" 
+              @done-processing="doneProcessing"
+              @stop-processing="stopProcessing"
+              :time-elapsed="`${hr}:${min}:${sec}`"
+          >
+              <span v-if="loading" class="flex items-center space-x-1">
+              <span class="text-xs text-gray-400 font-mono">{{ hr }}:{{ min }}:{{ sec }}</span>
+              <span class="flex shrink-0 h-1.5 w-1.5 animate-pulse rounded-full bg-red-600"></span>
+              </span>
+          </Generate>
         </BaseModal>
   </div>
 </template>
