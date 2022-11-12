@@ -34,7 +34,7 @@ export const rConfig = () : RConfig => {
 
     if(fs.existsSync('C:\\Program Files (x86)')) {
         const csproDir = fs.readdirSync('C:\\Program Files (x86)')
-        const csproMatch = csproDir.find((el : string) => /^CSPro \d\.\d/.test(el))
+        const csproMatch = csproDir.find((el : string) => /^CSPro 7\.7/.test(el))
         if(csproMatch !== undefined) {
         
             cspro_path = join('C:\\Program Files (x86)', csproMatch, 'CSPro.exe')

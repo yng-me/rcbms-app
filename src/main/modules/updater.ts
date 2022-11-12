@@ -26,16 +26,18 @@ export const updateRCBMS = () => {
     
         rConfig()
 
-        const qmdFilesToUpdate = [
+        const filesToUpdate = [
             join('qmd', 'section-g.qmd'),
+            join('qmd', 'section-m.qmd'),
             join('qmd', 'section-l.qmd'),
             join('qmd', 'cross-section.qmd'),
             join('utils', 'exports', 'export-summary.R'),
+            join('references', 'export_settings.xlsx'),
             join('utils', 'exports', 'export-config.R'),
             join('references', 'HPQF2_DICT.dcf')
         ]
 
-        qmdFilesToUpdate.forEach(el => {
+        filesToUpdate.forEach(el => {
             const from = join(app.getAppPath(), 'static', 'rcbms', el)
             const to = join(withRCBMSFolder().path, el)
 
@@ -52,11 +54,14 @@ export const updateRCBMS = () => {
     
         rConfig()
 
-        const qmdFilesToUpdate = [
+        const filesToUpdate = [
+            join('qmd', 'section-m.qmd'),
+            join('qmd', 'section-g.qmd'),
+            join('references', 'export_settings.xlsx'),
             join('references', 'HPQF2_DICT.dcf')
         ]
 
-        qmdFilesToUpdate.forEach(el => {
+        filesToUpdate.forEach(el => {
             const from = join(app.getAppPath(), 'static', 'rcbms', el)
             const to = join(withRCBMSFolder().path, el)
 
@@ -74,18 +79,19 @@ export const updateRCBMS = () => {
     
         rConfig()
 
-        const qmdFilesToUpdate = [
+        const filesToUpdate = [
+            join('references', 'export_settings.xlsx'),
+            join('qmd', 'section-g.qmd'),
+            join('qmd', 'section-m.qmd'),
             join('utils', 'exports', 'export-config.R'),
         ]
 
-        qmdFilesToUpdate.forEach(el => {
+        filesToUpdate.forEach(el => {
             const from = join(app.getAppPath(), 'static', 'rcbms', el)
             const to = join(withRCBMSFolder().path, el)
 
             fs.copySync(from, to, { recursive: true });
         })
-
-        
     }
 
     fs.writeJSONSync(path, { version: v })
