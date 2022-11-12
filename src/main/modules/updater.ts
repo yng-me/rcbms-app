@@ -15,22 +15,24 @@ export const updateRCBMS = () => {
         ? require('../../../package.json').version
         : app.getVersion()
 
-    if(v !== version) {
+    const p  = join(base, 'config.yml')
 
-        const p  = join(base, 'config.yml')
+
+    if(version == '1.0.0') {
 
         if(fs.pathExistsSync(p)) {
             fs.rmSync(p, { recursive: true, force: true })
         }
-
+    
         rConfig()
-        
+
         const qmdFilesToUpdate = [
             join('qmd', 'section-g.qmd'),
             join('qmd', 'section-l.qmd'),
             join('qmd', 'cross-section.qmd'),
             join('utils', 'exports', 'export-summary.R'),
-            join('utils', 'exports', 'export-config.R')
+            join('utils', 'exports', 'export-config.R'),
+            join('references', 'HPQF2_DICT.dcf')
         ]
 
         qmdFilesToUpdate.forEach(el => {
@@ -40,6 +42,29 @@ export const updateRCBMS = () => {
             fs.copySync(from, to, { recursive: true });
         })
 
-        fs.writeJSONSync(path, { version: v })
     }
+
+    if(version == '1.0.1') {
+
+        if(fs.pathExistsSync(p)) {
+            fs.rmSync(p, { recursive: true, force: true })
+        }
+    
+        rConfig()
+
+        const qmdFilesToUpdate = [
+            join('references', 'HPQF2_DICT.dcf')
+        ]
+
+        qmdFilesToUpdate.forEach(el => {
+            const from = join(app.getAppPath(), 'static', 'rcbms', el)
+            const to = join(withRCBMSFolder().path, el)
+
+            fs.copySync(from, to, { recursive: true });
+        })
+
+        
+    }
+
+    fs.writeJSONSync(path, { version: v })
 }
