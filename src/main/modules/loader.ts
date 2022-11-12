@@ -81,7 +81,9 @@ export const dataLoader = () : void => {
               res.forEach(item => {
                 if(item.isFile()) csdbe.push(item.name);
               })
-              const csdbeConcat = csdbe.filter(el => /\.csdbe$/g.test(el)).map(item => join(dataPath, item));
+              const csdbeConcat = csdbe.filter(el => /\.csdbe$/g.test(el))
+                .filter(file => data.files.includes(file))
+                .map(item => join(dataPath, item));
 
               const csdbeConcatLength = rConfig().use_raw_data_from_tablet ? csdbeConcat.length - 9 : csdbeConcat.length
           

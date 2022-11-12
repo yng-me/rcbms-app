@@ -1,13 +1,15 @@
 import fs from 'fs-extra'
 import { dialog } from 'electron'
 
+const isMac = process.platform === 'darwin'
+
 interface CSDBE {
     error: boolean
     status: string
     loading?: boolean
     isAvailable?: boolean
     count?: number
-    files: string[]
+    files: any
     path: string
 }
 
@@ -23,6 +25,17 @@ export const csdbeCheck = (path : string) :CSDBE => {
         path,
     }
  
+    if(isMac) { 
+
+        const files = [
+            'H141114003001000.csdbe',
+            'H141114007002000.csdbe',
+            'H141114008001000.csdbe'
+        ]
+
+        return { ...payload, files }
+    }
+
     if(fs.existsSync(path)) {
 
         try {
@@ -36,8 +49,8 @@ export const csdbeCheck = (path : string) :CSDBE => {
                     if(item.isFile()) csdbe.push(item.name);
                 })
 
-                const csdbeConcat = csdbe.filter(el => /\.csdbe$/g.test(el))     
-                
+                const csdbeConcat = csdbe.filter(el => /\.csdbe$/g.test(el))
+
                 if(csdbeConcat.length) {
 
                     return payload = { 

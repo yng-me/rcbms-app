@@ -33,7 +33,8 @@ import {
   withDownloadedData,
   withParquetData,
   toParquet,
-  withRCBMSFolder
+  withRCBMSFolder,
+  getFileLabel
 } from './utils/helpers'
 
 // execution
@@ -50,7 +51,7 @@ let mainWindow : BrowserWindow
 function createWindow () {
 
   mainWindow = new BrowserWindow({
-    width: 985,
+    width: dev ? 1200: 985,
     height: 775,
     autoHideMenuBar: true,  
     minWidth: 550,
@@ -129,6 +130,7 @@ ipcMain.on('before-mount', (event, data) => {
 const mountedPayload = () => {
 
   const p = rConfig().run_after_edit ? withEditedData().path : withDownloadedData().path
+  const csdbeList = getFileLabel(csdbeCheck(p).files)
 
   return {
     rConfig: rConfig(), 
@@ -144,7 +146,7 @@ const mountedPayload = () => {
     withQuartoInstalled: os ? { isAvailable : true, path: 'Not applicable' } : withQuartoInstalled(), 
     withCSProInstalled: os ? { isAvailable : true, path: 'Not applicable' } : withCSProInstalled(),
     withParquetData: withParquetData().isAvailable,
-    csdbeList:  csdbeCheck(p)
+    csdbeList
   }
 }
 

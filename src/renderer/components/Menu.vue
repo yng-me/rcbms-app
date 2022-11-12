@@ -119,7 +119,7 @@ const checksConfig = computed(() => {
     </nav>
     <transition name="slide-fade">
       <div v-if="showMenu" class="absolute right-4 top-10 z-50">
-        <div class="rounded-lg border bg-white w-96 flex flex-col items-start text-xs tracking-wide shadow-2xl">
+        <div class="rounded-lg border bg-white w-96 flex flex-col items-start text-xs tracking-wide shadow-2xl overflow-hidden">
             <div class="uppercase tracking-widest font-medium pl-4 pr-3 py-1.5 text-gray-500 justify-between w-full flex items-center" style="font-size: 10px">
               <div class="flex items-center space-x-4">
                 <!-- @click.prevent="viewStatus = false" -->
@@ -172,7 +172,7 @@ const checksConfig = computed(() => {
                   <span class="slider round"></span>
                 </span>
               </label>
-              <label class="px-4 py-2.5 border-t w-full flex items-center justify-between">
+              <label :class="rConfig.use_rdata ? 'text-gray-300' : 'hover:bg-gray-50'" class="px-4 py-2.5 border-t w-full flex items-center justify-between">
                 <span class="flex items-center space-x-2">
                   <svg class="w-4 h-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                   <span >Use raw data from tablet</span>
@@ -181,13 +181,14 @@ const checksConfig = computed(() => {
                   <input 
                     @change="updateConfigR('withDownloadedData', 'before_edit_path')" 
                     v-model="rConfig.use_raw_data_from_tablet" 
+                    :disabled="rConfig.use_rdata"
                     name="run-after-edit" 
                     type="checkbox" 
                   />
                   <span class="slider round"></span>
                 </span>
               </label>
-              <label class="px-4 py-2.5 border-t w-full flex items-center justify-between">
+              <label class="px-4 py-2.5 border-t w-full flex items-center justify-between hover:bg-gray-50">
                 <span class="flex items-center space-x-2">
                   <svg class="w-4 h-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                   <span >Run after-edit checks</span>
@@ -218,7 +219,7 @@ const checksConfig = computed(() => {
                   <span class="slider round"></span>
                 </span>
               </label>
-              <label :class="rConfig.use_rdata ? 'text-gray-300' : 'hover:bg-gray-50'" class="px-4 py-2.5 border-t w-full flex items-center justify-between hover:bg-gray-50">
+              <label :class="rConfig.use_rdata ? 'text-gray-300' : 'hover:bg-gray-50'" class="px-4 py-2.5 border-t w-full flex items-center justify-between">
                 <span class="flex items-center space-x-2">
                   <svg class="w-4 h-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
                   <span>Convert to Rdata</span>
@@ -234,7 +235,7 @@ const checksConfig = computed(() => {
                   <span class="slider round"></span>
                 </span>
               </label>
-              <label :class="rConfig.use_rdata ? 'text-gray-300' : 'hover:bg-gray-50'" class="px-4 py-2.5 border-t w-full flex items-center justify-between hover:bg-gray-50">
+              <label :class="rConfig.use_rdata ? 'text-gray-300' : 'hover:bg-gray-50'" class="px-4 py-2.5 border-t w-full flex items-center justify-between">
                 <span class="flex items-center space-x-2">
                   <svg class="w-4 h-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path></svg>
                   <span>Clear data files after execution</span>

@@ -20,7 +20,7 @@ const props = defineProps(['title', 'message', 'loading', 'height'])
             </button>
           </div>
           <slot name="progress"></slot>
-          <div class="px-4 py-5" :class="height">
+          <div v-if="message" class="px-4 py-5" :class="height">
             <p v-html="message"></p>
           </div>
           <slot></slot>
