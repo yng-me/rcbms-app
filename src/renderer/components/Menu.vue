@@ -85,6 +85,12 @@ const checksConfig = computed(() => {
     })
 })
 
+const loadingConfig = ref(false)
+ipcRenderer.on('saved-path-config', (event, name) => {
+    setTimeout(() => {
+      loadingConfig.value = false
+    }, 1000);
+})
 
 </script>
 
@@ -147,6 +153,8 @@ const checksConfig = computed(() => {
               <ul class="w-full">
                 <template v-for="(i, index) in checksConfig" :key="index">
                   <Configuration 
+                    @saving-config="loadingConfig = true"
+                    :loading-config="loadingConfig"
                     :is-available="i.isAvailable" 
                     :title="i.label"
                     :description="i.path"

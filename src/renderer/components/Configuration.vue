@@ -1,29 +1,41 @@
 <script lang="ts" setup>
 
-import { ref } from 'vue';
+import { watch, ref } from 'vue';
 import { ipcRenderer } from '../electron'
 
-const props = defineProps(['isAvailable', 'title', 'description', 'config', 'property'])
+const props = defineProps(['isAvailable', 'title', 'description', 'config', 'property', 'loadingConfig'])
+const emit = defineEmits(['saving-config'])
 
 const loading = ref(false)
+const doneLoading = ref(false)
+
 const configurePath = () => {
     loading.value = true
     ipcRenderer.send('configure-path', {
         property: props.property,
         config: props.config
     })
+    emit('saving-config')
 }
 
-ipcRenderer.on('saved-path-config', (event, name) => {
-    setTimeout(() => {
-        loading.value = false
-    }, 1000);
+watch(() => props.loadingConfig, (newValue) => {
+    if(!newValue) {
+        doneLoading.value = true
+        setTimeout(() => {
+            doneLoading.value = false
+        }, 2000);
+    }
 })
 
 </script>
 
 <template>
-    <li :class="loading? 'animate-pulse bg-gray-200' : ''" class="flex items-center px-4 py-1.5 space-x-1.5 border-t w-full justify-between">
+    <li 
+        :class="{ 
+            'animate-pulse bg-gray-200' : loading && loadingConfig,
+            'animate-pulse bg-teal-600 bg-opacity-30' : loading && doneLoading
+        }" 
+        class="flex items-center px-4 py-1.5 space-x-1.5 border-t w-full justify-between">
         <span class="flex items-start space-x-1">
             <span>
                 <svg v-if="isAvailable" class="w-4 h-4 text-teal-600 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>

@@ -32,60 +32,70 @@ export interface RConfig {
     paths: Paths
 }
 
-const r64Path = join('C:', 'Program Files', 'R')
-const r86Path = join('C:', 'Program Files (x86)', 'R')
+export const dependenciesPath = () => {
 
-let r_path = ''
-
-if(fs.existsSync(r64Path)) {
-    const r = fs.readdirSync(r64Path)
-    r_path = join(r64Path, r[0], '\\bin\\x64\\Rscript.exe')
-
-} else if (fs.existsSync(r86Path)) {
-    const r = fs.readdirSync(r86Path)
-    r_path = join(r86Path, r[0], '\\bin\\Rscript.exe')
-} 
-
-
-let cspro_path = ''
-let csconcat_path = ''
-let csexport_path = ''
-
-if(fs.existsSync('C:\\Program Files (x86)')) {
-    const csproDir = fs.readdirSync('C:\\Program Files (x86)')
-    const csproMatch = csproDir.find((el : string) => /^CSPro \d\.\d/.test(el))
-    if(csproMatch !== undefined) {
+    const r64Path = join('C:', 'Program Files', 'R')
+    const r86Path = join('C:', 'Program Files (x86)', 'R')
     
-        cspro_path = join('C:\\Program Files (x86)', csproMatch, 'CSPro.exe')
-        if(fs.existsSync(cspro_path)) {
-            csconcat_path = join('C:', 'Program Files (x86)', csproMatch, 'CSConcat.exe')
-            csexport_path = join('C:', 'Program Files (x86)', csproMatch, 'CSExport.exe')
+    let r_path = ''
+    
+    if(fs.existsSync(r64Path)) {
+        const r = fs.readdirSync(r64Path)
+        r_path = join(r64Path, r[0], '\\bin\\x64\\Rscript.exe')
+    
+    } else if (fs.existsSync(r86Path)) {
+        const r = fs.readdirSync(r86Path)
+        r_path = join(r86Path, r[0], '\\bin\\Rscript.exe')
+    } 
+    
+    
+    let cspro_path = ''
+    let csconcat_path = ''
+    let csexport_path = ''
+    
+    if(fs.existsSync('C:\\Program Files (x86)')) {
+        const csproDir = fs.readdirSync('C:\\Program Files (x86)')
+        const csproMatch = csproDir.find((el : string) => /^CSPro 7\.7/.test(el))
+        if(csproMatch !== undefined) {
+        
+            cspro_path = join('C:\\Program Files (x86)', csproMatch, 'CSPro.exe')
+            if(fs.existsSync(cspro_path)) {
+                csconcat_path = join('C:', 'Program Files (x86)', csproMatch, 'CSConcat.exe')
+                csexport_path = join('C:', 'Program Files (x86)', csproMatch, 'CSExport.exe')
+            }
         }
+    }
+
+    return {
+        r_path,
+        cspro_path,
+        csconcat_path,
+        csexport_path,
     }
 }
 
 
 export const config : RConfig = {
-  run_after_edit: false,
-  use_rdata: false,
-  include_justifiction: false,
-  clear: false,
-  save_by_area: false,
-  convert_to_rdata: false,
-  append_new_record : false,
-  use_raw_data_from_tablet: false,
-  paths: {
-      r_path,
-      rstudio_path: 'C:\\Program Files\\RStudio\\bin\\rstudio.exe',
-      quarto_path: 'C:\\Program Files\\RStudio\\bin\\quarto\\bin\\quarto.exe',
-      rdata_path: isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/hpq.Rdata' : join(base, 'data', 'hpq.Rdata'),
-      before_edit_path: 'C:\\PSA SYSTEMS FOLDER\\CBMS-ROLLOUT\\HPQ\\DOWNLOADED',
-      after_edit_path: 'C:\\PSA SYSTEMS FOLDER\\CBMS-ROLLOUT\\HPQ\\EDITED',
-      justification_path: isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/references/justifications.xlsx' : join(base, 'references\\justifications.xlsx'),
-      output_path: isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/output' : join(base, 'output'),
-      reference_path: isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/references/dictionary.xlsx' : join(base, 'references\\dictionary.xlsx'),
-      cspro_path,
-      csconcat_path,
-      csexport_path
+    run_after_edit: false,
+    use_rdata: false,
+    include_justifiction: false,
+    clear: false,
+    save_by_area: false,
+    convert_to_rdata: false,
+    append_new_record : false,
+    use_raw_data_from_tablet: false,
+    paths: {
+        r_path: dependenciesPath().r_path,
+        rstudio_path: 'C:\\Program Files\\RStudio\\bin\\rstudio.exe',
+        quarto_path: 'C:\\Program Files\\RStudio\\bin\\quarto\\bin\\quarto.exe',
+        rdata_path: isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/hpq.Rdata' : join(base, 'data', 'hpq.Rdata'),
+        before_edit_path: 'C:\\PSA SYSTEMS FOLDER\\CBMS-ROLLOUT\\HPQ\\DOWNLOADED',
+        after_edit_path: 'C:\\PSA SYSTEMS FOLDER\\CBMS-ROLLOUT\\HPQ\\EDITED',
+        justification_path: isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/references/justifications.xlsx' : join(base, 'references\\justifications.xlsx'),
+        output_path: isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/output' : join(base, 'output'),
+        reference_path: isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/references/dictionary.xlsx' : join(base, 'references\\dictionary.xlsx'),
+        cspro_path: dependenciesPath().cspro_path,
+        csconcat_path: dependenciesPath().csconcat_path,
+        csexport_path: dependenciesPath().csexport_path
   }
 }
