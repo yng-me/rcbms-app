@@ -7,6 +7,29 @@ import ChangeLogItem from './ChangeLogItem.vue';
 
 const changeLogs = reactive([
     {
+        version: 'RCBMS v1.0.3',
+        releaseDate: '12 November 2022',
+        logs: [ 
+            {
+                feature: 'Detect the latest CSPro installation',
+                type: 'enhancement',
+                info: [
+                    'CSPro 7.7 will be selected as default.',
+                    'If you have more than one installation of CSPro, it will no longer cause a problem.'
+                ]
+            },
+            {
+                feature: 'R Script and Excel output file',
+                type: 'bug fix',
+                info: [
+                    'Re-instated missing values in the <span class="font-medium">Line Number</span> column of the Excel output file.',
+                    'Section M, item 16 to allow zero (0) answer.',
+                    'Fixed title and despcription for Section L, item 33.'
+                ]
+            }
+        ]  
+    },
+    {
         version: 'RCBMS v1.0.2',
         releaseDate: '12 November 2022',
         logs: [ 
@@ -71,7 +94,7 @@ const changeLogs = reactive([
 <template>
     <div class="px-4">
         <div class="bg-white rounded-xl overflow-hidden">
-            <div class="pl-5 py-3 pr-4 flex justify-between w-full bg-gray-50">
+            <div class="pl-5 py-3 pr-4 flex justify-between w-full bg-gray-50 border-b">
                 <div class="uppercase tracking-wider text-sm font-semibold">ChangeLog</div>
                 <button 
                     @click.prevent="$emit('close')" 
