@@ -15,5 +15,5 @@ const tableItemValue = computed(() => {
 
 </script>
 <template>
-    <span v-html="tableItemValue"></span>
+    <span v-html="tableItemValue" class=" whitespace-nowrap"></span>
 </template>

@@ -9,7 +9,7 @@ const props = defineProps(['title', 'message', 'loading', 'height'])
     <div class="px-4">
         <div class="bg-white rounded-xl overflow-hidden">
           <div class="px-4 py-3 flex items-center justify-between border-b">
-            <span class="text-teal-600 font-medium transition-opacity ease-in-out delay-700">{{ title }}</span>
+            <span class="text-teal-600 font-medium tracking-wide transition-opacity ease-in-out delay-700">{{ title }}</span>
             <button 
                 :disabled="loading"
                 @click.prevent="$emit('close')" 
