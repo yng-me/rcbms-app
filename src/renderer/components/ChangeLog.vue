@@ -7,6 +7,26 @@ import ChangeLogItem from './ChangeLogItem.vue';
 
 const changeLogs = reactive([
     {
+        version: 'RCBMS v1.0.4',
+        releaseDate: '18 November 2022',
+        logs: [ 
+            {
+                feature: 'Rdata configuration',
+                type: 'enhancement',
+                info: [
+                    'The Rdata file path configuration now only accepts valid Rdata format/extension to avoid unexpected errors.'
+                ]
+            },
+            {
+                feature: 'Execution progress',
+                type: 'bug fix',
+                info: [
+                    'If installation of R packages fails, the execution process will now be terminated.',
+                ]
+            },
+        ]  
+    },
+    {
         version: 'RCBMS v1.0.3',
         releaseDate: '12 November 2022',
         logs: [ 

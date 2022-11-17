@@ -14,11 +14,11 @@ import ChangeLog from './ChangeLog.vue';
 
 const showAbout = ref(false)
 const showChangelog = ref(false)
-const props = defineProps(['newUpdateAvailable'])
+// const props = defineProps(['newUpdateAvailable'])
 
-watch(() => props.newUpdateAvailable, () => {
-  showChangelog.value = true
-})
+// watch(() => props.newUpdateAvailable, () => {
+//   showChangelog.value = true
+// })
 
 </script>
 

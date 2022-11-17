@@ -36,6 +36,7 @@ export const updateRCBMS = () => {
             join('utils', 'exports', 'export-config.R'),
             join('references', 'HPQF2_DICT.dcf')
         ]
+        
 
         filesToUpdate.forEach(el => {
             const from = join(app.getAppPath(), 'static', 'rcbms', el)
@@ -66,9 +67,7 @@ export const updateRCBMS = () => {
             const to = join(withRCBMSFolder().path, el)
 
             fs.copySync(from, to, { recursive: true });
-        })
-
-        
+        })   
     }
 
     if(version == '1.0.2') {
@@ -84,6 +83,26 @@ export const updateRCBMS = () => {
             join('qmd', 'section-g.qmd'),
             join('qmd', 'section-m.qmd'),
             join('utils', 'exports', 'export-config.R'),
+        ]
+
+        filesToUpdate.forEach(el => {
+            const from = join(app.getAppPath(), 'static', 'rcbms', el)
+            const to = join(withRCBMSFolder().path, el)
+
+            fs.copySync(from, to, { recursive: true });
+        })
+    }
+
+    if(version == '1.0.3') {
+
+        if(fs.pathExistsSync(p)) {
+            fs.rmSync(p, { recursive: true, force: true })
+        }
+    
+        rConfig()
+
+        const filesToUpdate = [
+            join('utils', 'exports', 'export.R'),
         ]
 
         filesToUpdate.forEach(el => {
