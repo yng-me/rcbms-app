@@ -26,8 +26,7 @@ nrow_cases <- nrow(exp_case_wise) + 5
 
 exp_case_wise_write <- exp_case_wise %>% 
   filter(!is.na(`Case ID`)) %>% 
-  arrange(`Case ID`) %>% 
-  select(-tab)
+  arrange(`Case ID`) 
 
 writeData(wb, sheet_2, 'List of Cases with Inconsistencies', startRow = 1)
 writeData(wb, sheet_2, eval_date, startRow = 2)
@@ -36,8 +35,10 @@ writeDataTable(wb, sheet_2, exp_case_wise_write, startRow = 5)
 
 addStyle(wb, sheet_2, title_style, 1, 1, T, T)
 addStyle(wb, sheet_2, text_center, 6:nrow_cases, 5:7, T, T)
-setColWidths(wb, sheet_2, 1:12, c(30, 25, 20, 20, 10, 10, 10, 15, 50, 80, 10, 35))
+setColWidths(wb, sheet_2, 1:14, c(30, 25, 20, 20, 10, 10, 10, 10, 15, 50, 80, 0, 10, 35))
+setColWidths(wb, sheet_2, 12, 0, hidden = T)
 mergeCells(wb, sheet_2, cols = 1:7, rows = 1)
+
 # 
 # writeData(wb, sheet_2, 'Corrected', startCol = 27, startRow = 1)
 # writeData(wb, sheet_2, 'Justified', startCol = 27, startRow = 2)

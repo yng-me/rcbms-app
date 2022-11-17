@@ -322,6 +322,7 @@ watch(selectAllCSDBE, (newValue) => {
 })
 
 watch(selectedCSDBE, (newValue) => {
+  if(selectedCSDBE.value.length === data.csdbeList.length) selectAllCSDBE.value = true
   if(selectedCSDBE.value.length < data.csdbeList.length) selectAllCSDBE.value = false
 })
 
