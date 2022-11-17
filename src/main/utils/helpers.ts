@@ -1,4 +1,4 @@
-import { join } from 'path'
+import { join, extname } from 'path'
 import fs from 'fs-extra'
 import { rConfig } from '../modules/checker/with-rconfig'
 import { base } from './constants'
@@ -61,8 +61,10 @@ export const withTextData = () => {
 // RData
 export const withRData = () => {
     const { paths } = rConfig()
+    const ext = extname(paths.rdata_path)
+    const validExt = ext === '.Rdata' || ext === '.rdata' || ext === '.RData'
 
-    return { isAvailable: fs.pathExistsSync(paths.rdata_path), path: paths.rdata_path, key: 'rdata_path' } 
+    return { isAvailable: fs.pathExistsSync(paths.rdata_path) && validExt, path: paths.rdata_path, key: 'rdata_path' } 
 }
 
 // Downloaded folder

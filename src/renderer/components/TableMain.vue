@@ -20,6 +20,7 @@ const state = reactive({
     geo: [] as Geo[],
     dictionary: [] as DataDictionary[],
     data: [] as any,
+    script: ''
 })
 
 const show = reactive({
@@ -86,7 +87,8 @@ const applyFilter = (evt : any, type : 'groupBy' | 'geoFilter') => {
 
 ipcRenderer.on('return-arrow', (event, payload) => {
     loading.value = false
-    state.data = payload
+    state.script = payload.script
+    state.data = payload.data
 })
 
 watch(() => tableOptions.row && tableOptions.col, () => {
@@ -104,7 +106,7 @@ const rowName = computed(() => {
 })
 
 const matchedVariables = computed(() => {
-    const geo = ['region', 'province', 'city_mun', 'brgy', 'ean', 'bsn', 'husn', 'hsn', 'age', 'b06_ofi']
+    const geo = ['region', 'province', 'city_mun', 'brgy', 'ean', 'bsn', 'husn', 'hsn', 'age']
     const g = [...Object.entries({...tableOptions.groupBy}).filter(item => item[1] === true).map(el => el[0]), ...geo]
     const row = state.dictionary.filter(el => el.record === tableOptions.rowRecord && el.variable !== tableOptions.col && !g.includes(el.variable))
     const col = state.dictionary
@@ -190,9 +192,6 @@ watch(() => tableOptions.rowRecord, (newValue, oldValue) => {
             </transition>
         </div>
     </div>
-    <pre>
-        <!-- {{ tableOptions }} -->
-    </pre>
      <div class="grid md:grid-cols-4 grid-cols-1 items-end gap-4 px-6 pt-4 pb-6 border-t border-b bg-gray-50">
         <div class="flex flex-col space-y-1.5">
             <label for="" class="text-xs tracking-widest text-gray-500 uppercase font-semibold">Row Record</label>
@@ -251,6 +250,11 @@ watch(() => tableOptions.rowRecord, (newValue, oldValue) => {
             :rowName="rowName"
             :data-table="state.data"
         />
+        <pre>
+            <code>
+                {{ state.script }}
+            </code>
+        </pre>
     </template>
     <BaseModal :closeable="false" :show="show.joinBy" usage="dialog" max-width="2xl">
         <DialogBox @close="show.joinBy = false" title="Joining Records">

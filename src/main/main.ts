@@ -337,6 +337,9 @@ ipcMain.on('arrow', (event, request) => {
 
       print(jsonlite::toJSON(df))
   `
+
+  console.log(script);
+  
   
    const sp = spawn(rPath, ['-e', script], { cwd: rcmbsPath }) 
 
@@ -347,7 +350,10 @@ ipcMain.on('arrow', (event, request) => {
    sp.on('close', (code) => {
     if(code == 0) {
       const payload = JSON.parse(df)
-      event.reply('return-arrow', payload)
+      event.reply('return-arrow', {
+        data: payload,
+        script
+      })
     }
    })
 })
