@@ -88,20 +88,45 @@ export const pilotDataLoader = () : void => {
                 fs.closeSync(concatPffTemp.fd);
                     
                 exec(`"${csconcat_path}" "${concatPffTemp.path}"`, (con) => {
+
                     temp.cleanupSync()
+                    if(!fs.existsSync(join('C:', dataDir, 'text'))) fs.mkdirSync(join('C:', dataDir, 'text'))
 
                     const { csexport_path } = withCSProInstalled();
                     const pffPath = join(app.getAppPath(), 'static', 'pff', 'pilot');
 
-                    if(!fs.existsSync(join('C:', dataDir, 'text'))) fs.mkdirSync(join('C:', dataDir, 'text'))
+                    ['all', 'exported'].forEach(el => {
 
-                    execSync(`"${csexport_path}" "${join(pffPath, 'exported.exf.pff')}"`)
-                    execSync(`"${csexport_path}" "${join(pffPath, 'all.exf.pff')}"`)
+                        // EXF
+                        const exf = fs.readFileSync(join(pffPath, `${el}_exf.txt`));
+                        const exfPathTemp = temp.openSync({ suffix: '.exf' });
+                        
+                        fs.writeSync(exfPathTemp.fd, exf.toString());
+                        fs.closeSync(exfPathTemp.fd);
+                        
+                        
+                        // PFF
+                        const exfPffPathTemp = temp.openSync({ suffix: '.exf.pff' });
+                        const exfBasePath = basename(exfPathTemp.path);
+                        const exfApplication = `Application=.\\${exfBasePath}`
+
+
+                        const pff = fs.readFileSync(join(pffPath, `${el}_pff.txt`));
+                        const pffFIle = `[Run Information]\nVersion=CSPro 7.7\nAppType=Export\n\n[Files]\n${exfApplication}\n${pff.toString()}`
+
+                        fs.writeSync(exfPffPathTemp.fd, pffFIle);
+                        fs.close(exfPffPathTemp.fd);
+                        
+                        execSync(`"${csexport_path}" "${exfPffPathTemp.path}"`);
+
+                        temp.cleanupSync()
+                    })
 
                     event.reply('data-loaded', {
                         error: false,
                         message: 'Data loaded successfully'
                     })
+
                 })
 
             })

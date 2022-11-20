@@ -13,17 +13,25 @@ select_cv <- function(data, ..., h = NULL, condition = NULL) {
       ...
     ) %>% 
     mutate_at(vars(matches('^ean$')), ~ paste0(sprintf('%06d', as.integer(.)))) %>% 
+    mutate_at(vars(matches('^lno$')), ~ paste0(sprintf('%02d', as.integer(.)))) %>% 
     mutate_at(
       vars(starts_with(c('BSN', 'HUSN', 'HSN'), ignore.case = T)), 
       ~ paste0(sprintf('%04d', as.integer(.)))
     ) %>% 
     convert_fct_cv()
   
+  with_lno <- names(df)
+  with_ean <- names(df)
+  
+  if(!('lno' %in% with_lno)) {
+    df <- df %>% mutate(lno = '')
+  }
+  
+  if(!('ean' %in% with_ean)) {
+    df <- df %>% mutate(ean = '')
+  }
+  
   df_x <- df %>% 
-    mutate(
-      lno = ifelse('lno' %in% colnames(.), sprintf('%02d', lno), ''),
-      ean = ifelse('ean' %in% colnames(.), ean, '')
-    ) %>% 
     select(
       matches('^(case_id|geo_bsn|geo_husn)$'), 
       region, 

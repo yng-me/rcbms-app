@@ -20,7 +20,7 @@ let payload : TXT = {
     count: 0
 }
 
-export const textDataCheck = (source : string) : TXT => {
+export const textDataCheck = (source = '2022-cbms') : TXT => {
 
 
     let path = withTextData().path
@@ -33,7 +33,7 @@ export const textDataCheck = (source : string) : TXT => {
 
     const sourceDir = {
         '2021-pilot-cbms': fs.existsSync(path),
-        '2022-cbms': withTextData().path
+        '2022-cbms': withTextData().isAvailable
     }[source] 
 
     if(sourceDir) {
