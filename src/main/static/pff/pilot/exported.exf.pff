@@ -10,6 +10,6 @@ Listing=C:\rcbms\scripts\2021-pilot-cbms\references\log.lst
 
 [Parameters]
 Language=EN
-ViewListing=Always
-ViewResults=Yes
+ViewListing=Never
+ViewResults=No
 InputOrder=Sequential

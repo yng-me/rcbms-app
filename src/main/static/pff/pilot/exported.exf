@@ -2,7 +2,7 @@
 Version=CSPro 7.7
 
 [Dictionaries]
-File=C:\rcmbs\scripts\2021-pilot-cbms\references\HPQF2_PILOT_DICT.dcf
+File=C:\rcbms\scripts\2021-pilot-cbms\references\HPQF2_PILOT_DICT.dcf
 
 [ExportType]
 FilesCreated=Single
