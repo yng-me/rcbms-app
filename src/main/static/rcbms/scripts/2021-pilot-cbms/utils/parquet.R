@@ -31,22 +31,17 @@ selected_files <- read.csv('./references/files.csv') %>%
   mutate(file = str_remove(file, '\\.(txt|TXT)$')) %>% 
   pull(file)
 
-files <- as_tibble(list.files(paste0('./data/', source_folder, '/'), recursive = T)) %>%
-  separate(col = value, into = c('name', 'record_type'), sep = '/') %>% 
-  mutate(
-    geo = str_sub(name, 1, 6),
-    record_type = str_remove(record_type, '\\.(txt|TXT)$')
-  ) %>% 
+files <- as_tibble(list.files(paste0('./data/', source_folder, '/'), recursive = T)) %>% 
+  mutate(record_type = str_remove(value, '\\.(txt|TXT)')) %>% 
   filter(record_type %in% selected_files)
 
-areas <- files %>% distinct(geo, .keep_all = T) %>% select(geo, name)
 paths <- files %>% distinct(record_type) %>% pull(record_type)
-#paths <- c(paths, files_alt)
+
 sections <- LETTERS[6:18]
 
 hpq <- list()
 
-for(i in 1:nrow(areas)) {
+#for(i in 1:nrow(areas)) {
   
   for(j in 1:length(paths)) {
 
@@ -54,7 +49,7 @@ for(i in 1:nrow(areas)) {
       paste0(
         './data/', 
         source_folder, '/', 
-        areas$name[i], '/', 
+        # areas$name[i], '/', 
         paths[j], '.txt'
       )
     )
@@ -73,11 +68,11 @@ for(i in 1:nrow(areas)) {
           mutate(birthday = ymd(A06DATEBORN))
       )
       
-      hpq[[paste0(areas$geo[i], '_SECTION_A_E')]] <- hpq_individual
+      hpq[['SECTION_A_E')]] <- hpq_individual
       
     } else if (paths[j] == 'SECTION_P1_P4') {
       
-      hpq[[paste0(areas$geo[i], '_', paths[j])]] <- hpq_data %>% 
+      hpq[[paths[j]]] <- hpq_data %>% 
         rename(P3TLNO = ncol(.))
       
     } else if (paths[j] == 'Exported') {
@@ -85,7 +80,7 @@ for(i in 1:nrow(areas)) {
       hpq_data <- hpq_data %>% 
         rename_at(vars(matches('^P[34]TLNO_')), ~ str_replace(., 'P4', 'P3'))
       
-      hpq[[paste0(areas$geo[i], '_SUMMARY')]] <- hpq_data %>% 
+      hpq[['SUMMARY']] <- hpq_data %>% 
         select(
           1:12, 
           RESULT_OF_VISIT, 
@@ -102,7 +97,7 @@ for(i in 1:nrow(areas)) {
         )
       
       for(k in 1:length(sections)) {
-        hpq[[paste0(areas$geo[i], '_SECTION_', sections[k])]] <- hpq_data %>% 
+        hpq[[paste0('SECTION_', sections[k])]] <- hpq_data %>% 
           select(1:12, 63:71, 75:81, 107:ncol(.)) %>% 
           rename(G_TOTALFOOD = TOTALFOOD) %>% 
           select(1:12, starts_with(sections[k])) 
@@ -111,11 +106,11 @@ for(i in 1:nrow(areas)) {
       
     } else {
       
-      hpq[[paste0(areas$geo[i], '_', paths[j])]] <- hpq_data
+      hpq[[paths[j]]] <- hpq_data
       
     }
   }
-}
+#}
 
 distinct_files <- files %>% 
   distinct(record_type) %>% 

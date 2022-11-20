@@ -5,10 +5,10 @@ list_of_packages <- c(
   'readxl',
   'openxlsx',
   'lubridate',
-  'parallel',
-  'yaml',
+  # 'parallel',
+  'yaml'
   #'glue',
-  'RM.weights'
+  # 'RM.weights'
 )
 
 new_packages <- list_of_packages[
@@ -25,8 +25,8 @@ library(yaml)
 library(openxlsx)
 library(lubridate)
 #library(glue)
-library(parallel)
-library(RM.weights)
+# library(parallel)
+# library(RM.weights)
 
 config <- read_yaml('config.yml')
 #d <- config$disaggregation
