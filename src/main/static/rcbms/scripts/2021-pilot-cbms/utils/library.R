@@ -1,3 +1,5 @@
+print('Loading packages...')
+
 list_of_packages <- c(
   'arrow',
   'tidyverse',

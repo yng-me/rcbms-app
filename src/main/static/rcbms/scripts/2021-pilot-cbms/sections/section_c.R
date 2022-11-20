@@ -1,4 +1,6 @@
 # ====================================================================
+print('Processing Section C...')
+
 section_c <- hpq_individual %>%
   filter(HSN < 7777, RESULT_OF_VISIT == 1) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, A07AGE, starts_with('C'), -case_id_m)
@@ -317,6 +319,3 @@ cv_c06_reason_not_in_school_male_pregnant <- hpq_individual %>%
 cv_c06_reason_5_years_old_employed <- hpq_individual %>%
   filter(age_computed <= 5, C03ATTEND == 2, C06NOTATTEND == 6) %>%
   select(case_id, LINENO, age_computed, C03ATTEND, C06NOTATTEND, E01WORK)
-
-
-print('Section C complete!')

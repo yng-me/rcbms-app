@@ -99,7 +99,7 @@ export const config : RConfig = {
         after_edit_path: 'C:\\PSA SYSTEMS FOLDER\\CBMS-ROLLOUT\\HPQ\\EDITED',
         justification_path: join(base, 'references', 'justifications.xlsx'),
         output_path: join(base, 'output'),
-        pilot_output_path: pilotDirectory,
+        pilot_output_path: join(pilotDirectory, 'output', 'Inconsistencies'),
         reference_path: join(base, 'references', 'dictionary.xlsx'),
         cspro_path: dependenciesPath().cspro_path,
         csconcat_path: dependenciesPath().csconcat_path,

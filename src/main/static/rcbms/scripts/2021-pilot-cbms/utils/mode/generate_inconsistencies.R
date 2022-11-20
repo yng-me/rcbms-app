@@ -17,7 +17,9 @@ ref_sections_reviewed <- as_tibble(list.files('./references/sections')) %>%
   pull(value) %>% 
   str_sub(1, -6)
 
-ref_sections <- paste0('./scripts/inconsistencies/', list.files('./scripts/inconsistencies'))
+inc <- './sections/'
+
+ref_sections <- paste0(inc, list.files(inc))
 
 ref_export_settings <- paste0('./references/sections/', list.files('./references/sections')) %>% 
   tibble() %>% 
@@ -57,6 +59,8 @@ for(i in 1:nrow(ref_areas_available)) {
   if(config$mode == 'generate_inconsistencies_with_output') {
     lapply(ref_sections, FUN = source)
     hh_count <- nrow(rov)
+
+    print('Preparing output file...')
     
     # ============================================================ #
     
@@ -104,6 +108,8 @@ for(i in 1:nrow(ref_areas_available)) {
 
   # ============================================================ #
   # Export
+  
+    print('Saving Excel file...')
     source('./utils/inconsistencies/config.R')
     source('./utils/inconsistencies/summary.R')
     source('./utils/inconsistencies/export.R')

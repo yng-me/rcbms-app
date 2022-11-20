@@ -1,4 +1,6 @@
 
+print('Processing Section P...')
+
 section_p <- suppressWarnings(
   hpq_data$SECTION_P %>% 
   left_join(rov, by = 'case_id') %>% 
@@ -242,4 +244,3 @@ for (i in 1:13) {
 list2env(p_list, section_p, envir = .GlobalEnv)
 rm(p_list)
 
-print('Section P complete!')

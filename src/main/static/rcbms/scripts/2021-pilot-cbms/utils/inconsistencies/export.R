@@ -134,10 +134,3 @@ mergeCells(wb, 'Cases with Inconsistencies', cols = 1:7, rows = 1)
 # }
 
 saveWorkbook(wb, file = export_path, overwrite = TRUE)
-
-
-print(paste0(
-  'Done processing inconsistencies for ', eval_area, 
-  '. The exported file is located at: hpq_r/',
-  new_dir, ' folder'
-))

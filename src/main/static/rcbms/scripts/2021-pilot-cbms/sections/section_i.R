@@ -1,5 +1,8 @@
 #============================================================
 # Formal financial account/s
+
+print('Processing Section I...')
+
 section_i <- hpq_data$SECTION_I %>% 
   left_join(rov, by = 'case_id') %>% 
   filter(HSN < 7777, RESULT_OF_VISIT == 1, pilot_area == eval_area) %>% 

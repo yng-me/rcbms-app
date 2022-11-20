@@ -8,6 +8,7 @@
 #    filter(is.na(eval(as.name(g_letters[i]))), is.na()) %>% 
 #    select(case_id, pilot_area, !!as.name(g_letters[i]))
 #}
+print('Processing Section G...')
 
 cv_g_missing <- section_f_ang_g %>% 
   filter(
@@ -18,5 +19,3 @@ cv_g_missing <- section_f_ang_g %>%
 
 #list2env(g_list, envir = .GlobalEnv)
 #rm(g_list, f2_list, section_f_ang_g)
-
-print('Section G complete!')

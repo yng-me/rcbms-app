@@ -301,10 +301,7 @@ ipcRenderer.on('load-export-logs', (event, data) => {
 })
 
 //  Output preview =====================================================
-
-const withOutputFolder = ref(false)
-const openOutputFile = () => ipcRenderer.send('open-output-folder')
-ipcRenderer.on('with-output-folder', (event, data) => withOutputFolder.value = data)
+const openOutputFile = () => ipcRenderer.send('open-output-folder', rConfig.use_pilot_data)
 
 const refreshing = ref(false)
 const refreshApp = () => {
@@ -499,6 +496,7 @@ watch(selectedCSDBE, (newValue) => {
           <Generate 
               @close="stopProcessing" 
               :loading="loading" 
+              :is-pilot-mode="rConfig.use_pilot_data"
               @done-processing="doneProcessing"
               @stop-processing="stopProcessing"
               :time-elapsed="`${hr}:${min}:${sec}`"

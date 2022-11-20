@@ -1,4 +1,4 @@
-source('./utils/library.R')
+#source('./utils/library.R')
 
 # ------------------------------------------------------------------
 convert_age_cv <- function(from, to = '2021-10-01') {
@@ -68,7 +68,7 @@ hpq <- list()
           mutate(birthday = ymd(A06DATEBORN))
       )
       
-      hpq[['SECTION_A_E')]] <- hpq_individual
+      hpq[['SECTION_A_E']] <- hpq_individual
       
     } else if (paths[j] == 'SECTION_P1_P4') {
       
@@ -124,14 +124,15 @@ export_paths <- c(
   distinct_files
 )
 
+if_else(!dir.exists('./data/parquet'), dir.create('./data/parquet', showWarnings = F), F)
   
 for(path in seq_along(export_paths)) {
-  extract <- paste0(areas$geo, '_', export_paths[path])
-  data <- do.call('rbind', hpq[extract]) %>% tibble() 
+  # extract <- paste0(areas$geo, '_', )
+  data <- do.call('rbind', hpq[export_paths[path]]) %>% tibble() 
   write_parquet(data, paste0('./data/parquet/', export_paths[path], '.parquet'))
 }
 
-rm(hpq, sections, hpq_data, extract, data, hpq_individual, areas, files, paths)
+rm(hpq, sections, hpq_data, data, hpq_individual, files, paths)
 
 print('--------------------------------------------------------------')
 print('Data files successfully converted to Parquet format.')

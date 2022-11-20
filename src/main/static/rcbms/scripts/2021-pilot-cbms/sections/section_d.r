@@ -1,3 +1,5 @@
+print('Processing Section D...')
+
 section_d <- hpq_individual %>%
   filter(HSN < 7777, RESULT_OF_VISIT == 1) %>% 
   select(case_id, pilot_area, LINENO, A01HHMEM, A07AGE, age_computed, starts_with('D'))
@@ -70,5 +72,3 @@ cv_d08 <- section_d %>%
 
 
 rm(section_d)
-
-print('Section D complete!')
