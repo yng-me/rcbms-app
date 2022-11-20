@@ -134,12 +134,14 @@ const mountedPayload = () => {
   const p = rConfig().run_after_edit ? withEditedData().path : withDownloadedData().path
   const csdbeList = getFileLabel(csdbeCheck(p).files)
 
+  const source = rConfig().use_pilot_data ? '2021-pilot-cbms' : '2022-cbms'
+
   return {
     rConfig: rConfig(), 
     exportLog: exportLogCheck().data,
     withRData: withRData(), 
     withPilotData: withPilotData(),
-    textDataCheck: textDataCheck(), 
+    textDataCheck: textDataCheck(source), 
     withEditedData: { ...withEditedData(), isAvailable: csdbeCheck(withEditedData().path).isAvailable }, 
     withDownloadedData: { ...withDownloadedData(), isAvailable: csdbeCheck(withDownloadedData().path).isAvailable }, 
     withJustification: withJustification(), 
@@ -180,7 +182,7 @@ ipcMain.on('update-r-config', (event, data) => {
 })
 
 ipcMain.on('check-text-data', (event, data) => {
-  event.reply('check-text-data', textDataCheck())
+  event.reply('check-text-data', textDataCheck(data))
 })
 
 ipcMain.on('configure-path', (event, payload) => {
