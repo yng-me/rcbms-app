@@ -34,6 +34,7 @@ export const pilotDataLoader = () : void => {
 
     const { csconcat_path } = withCSProInstalled()
     const { path } = withPilotData()
+    const dataDir = join('rcbms', 'scripts', '2021-pilot-cbms', 'data')
     const refDir = join('rcbms', 'scripts', '2021-pilot-cbms', 'references')
     const inputDict = withPilotDataDict().path
 
@@ -51,7 +52,7 @@ export const pilotDataLoader = () : void => {
             event.reply('data-loaded', {
                 error: true,
                 message: 'There was a problem loading the reference files. Please restart the RCBMS App.'
-        });
+            });
       }
 
     }
@@ -70,19 +71,16 @@ export const pilotDataLoader = () : void => {
           })
           
           const csdbeConcat = csdbe.filter(el => /\.csdb$/g.test(el) && pilotGeo.includes(el.substring(1, 6)))
-            // .filter(file => data.files.includes(file))
             .map(item => join(path, item));
-
-            
+          
             let csdbeAll = '';
             csdbeConcat.forEach(text => csdbeAll += `InputData=${text}\n`)
-            
             
             // Read concat text and insert the encrypted files with password
             const pffStartConcat = '[Run Information]\nVersion=CSPro 7.7\nAppType=Concatenate\nShowInApplicationListing=Never\n\n[Files]'
             const pffEnd = '[Parameters]\nLanguage=EN\nViewListing=Never\nViewResults=No\nInputOrder=Sequential'
             const outputCSDBE = join(pilotDirectory, 'data', 'csdbe', 'concatenated-pilot.csdbe|password=293fnj<>aser@&e')
-            
+
             
             const concatPffTxt = `${pffStartConcat}\n${csdbeAll}OutputData=${outputCSDBE}\nInputDict=${inputDict}\nListing=${logList}\n\n${pffEnd}`;
             const concatPffTemp = temp.openSync({ suffix: '.pff' });
@@ -92,12 +90,22 @@ export const pilotDataLoader = () : void => {
             console.log(concatPffTxt);
       
             exec(`"${csconcat_path}" "${concatPffTemp.path}"`, (con) => {
-              temp.cleanupSync()
+                temp.cleanupSync()
 
-            //   const { csexport_path } = withCSProInstalled()
+                const { csexport_path } = withCSProInstalled();
+                const pffPath = join(app.getAppPath(), 'static', 'pff', 'pilot');
 
-      
+                if(!fs.existsSync(join(dataDir, 'text'))) fs.mkdirSync(join(dataDir, 'text'))
+
+                execSync(`"${csexport_path}" "${join(pffPath, 'Exported.exf.pff')}"`)
+                execSync(`"${csexport_path}" "${join(pffPath, 'All.exf.pff')}"`)
+
+                event.reply('data-loaded', {
+                    error: false,
+                    message: 'Data loaded successfully'
+                })
             })
+
         })
 
     } catch {
