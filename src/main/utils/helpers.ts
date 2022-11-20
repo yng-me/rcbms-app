@@ -116,6 +116,17 @@ export const withReferenceDictionary = () => {
     return { isAvailable: fs.pathExistsSync(paths.reference_path), path: paths.reference_path, key: 'reference_path' } 
 }
 
+export const withPilotData = () => {
+    const { paths } = rConfig()
+    return { isAvailable: fs.pathExistsSync(paths.pilot_data_path), path: paths.pilot_data_path, key: 'pilot_data_path' } 
+}
+
+export const withPilotDataDict = () => {
+    const { paths } = rConfig()
+    return { isAvailable: fs.pathExistsSync(paths.pilot_data_dict_path), path: paths.reference_path, key: 'pilot_data_dict_path' } 
+}
+
+
 // Reference
 export const withParquetData = () => {
 
@@ -240,7 +251,39 @@ export const getFileLabel = (files : string[]) => {
         console.log('Error');
         return [
             { file: '', ean: '', code: '', cityMun: '', brgy: '' }
+        ]
+    }
 
+}
+
+
+export const getPilotFileLabel = (files : string[]) => {
+    try {         
+
+        const psgc = join(base, 'references', 'psgc.xlsx')
+        const workbook = XLSX.readFile(psgc);
+        const sheet_name_list = workbook.SheetNames;
+        const xlData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]])
+            .map((item : any) => {
+                return {
+                    code: item['Correspondence Code'],
+                    cityMun: item['City/Municipality'],
+                    brgy: item['Name']
+                }
+            })
+            
+        return files.map((file : string) => {
+            return {
+                file,
+                ean: file.substring(10, 16),
+                ...xlData.find(el => el.code == file.substring(1, 10))
+            }
+        })
+
+    } catch {
+        console.log('Error');
+        return [
+            { file: '', ean: '', code: '', cityMun: '', brgy: '' }
         ]
     }
 

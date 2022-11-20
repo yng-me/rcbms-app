@@ -4,6 +4,7 @@ import os from 'os'
 
 const isMac = process.platform === 'darwin'
 export const base = isMac ? join(os.homedir(), 'Desktop', 'R Codes', '2022-cbms') : 'C:\\rcbms'
+export const pilotDirectory = isMac ? join(os.homedir(), 'Desktop', 'R Codes', '2021-pilot-cbms') : join('C:', 'rcbms', 'scripts', '2021-pilot-cbms')
 
 export interface Paths {
     r_path: string
@@ -16,8 +17,11 @@ export interface Paths {
     output_path: string
     cspro_path: string
     csconcat_path: string
+    pilot_output_path: string
     csexport_path: string
     reference_path: string
+    pilot_data_path: string
+    pilot_data_dict_path: string
 }
 
 export interface RConfig {
@@ -28,6 +32,7 @@ export interface RConfig {
     save_by_area?: boolean
     convert_to_rdata: boolean
     append_new_record: boolean
+    use_pilot_data: boolean
     use_raw_data_from_tablet: boolean
     paths: Paths
 }
@@ -83,19 +88,23 @@ export const config : RConfig = {
     save_by_area: false,
     convert_to_rdata: false,
     append_new_record : false,
+    use_pilot_data: false,
     use_raw_data_from_tablet: false,
     paths: {
         r_path: dependenciesPath().r_path,
         rstudio_path: 'C:\\Program Files\\RStudio\\bin\\rstudio.exe',
         quarto_path: 'C:\\Program Files\\RStudio\\bin\\quarto\\bin\\quarto.exe',
-        rdata_path: isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/hpq.Rdata' : join(base, 'data', 'hpq.Rdata'),
+        rdata_path: join(base, 'data', 'hpq.Rdata'),
         before_edit_path: 'C:\\PSA SYSTEMS FOLDER\\CBMS-ROLLOUT\\HPQ\\DOWNLOADED',
         after_edit_path: 'C:\\PSA SYSTEMS FOLDER\\CBMS-ROLLOUT\\HPQ\\EDITED',
-        justification_path: isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/references/justifications.xlsx' : join(base, 'references\\justifications.xlsx'),
-        output_path: isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/output' : join(base, 'output'),
-        reference_path: isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/references/dictionary.xlsx' : join(base, 'references\\dictionary.xlsx'),
+        justification_path: join(base, 'references', 'justifications.xlsx'),
+        output_path: join(base, 'output'),
+        pilot_output_path: pilotDirectory,
+        reference_path: join(base, 'references', 'dictionary.xlsx'),
         cspro_path: dependenciesPath().cspro_path,
         csconcat_path: dependenciesPath().csconcat_path,
-        csexport_path: dependenciesPath().csexport_path
+        csexport_path: dependenciesPath().csexport_path,
+        pilot_data_path: join(base, 'data', 'pilot'),
+        pilot_data_dict_path: join(base, 'scripts', '2021-pilot-cbms', 'references', 'HPQF2_PILOT_DICT.dcf')
   }
 }

@@ -1,0 +1,75 @@
+# =============================================================================
+# TABULATION CONFIG (v0.1.0)
+# =============================================================================
+# Define level of disaggregation
+## Options: 
+## - all
+## - pilot_area
+## - brgy_name
+
+disaggregation: pilot_area
+
+
+# =============================================================================
+# Select specific Pilot Area if needed
+## Options:
+## - all
+## - 'San Gabriel, La Union'
+## - 'Sual, Pangasinan'
+## - 'Santa Maria, Isabela'
+## - 'Samal, Bataan'
+## - 'City of Sipalay, Negros'
+## - 'Dauin, Negros Oriental'
+## - 'City of Baybay, Leyte'
+## - 'City of Baguio'
+## - 'City of Bayugan, Agusan del Sur'
+
+pilot_area: all
+
+# =============================================================================
+# Define mode of generating the output
+## Options:
+## - generate_output
+## - generate_reports
+## - generate_temp
+## - generate_requests
+## - additional_tables
+## - generate_inconsistencies
+## - generate_inconsistencies_with_output
+
+mode: generate_inconsistencies_with_output
+
+# =============================================================================
+# Generate Multidimensional Poverty Index (MPI)
+## Options:
+## - true
+## - false
+
+generate_mpi: false
+
+# =============================================================================
+# Select MPI version to generate
+## Options:
+## - all
+## - interim
+## - cbms
+
+mpi_verson: cbms
+
+# =============================================================================
+# Specify if you need to generate barangay profile from BPQ
+## Options:
+## - true
+## - false
+
+generate_bpq: false
+
+# =============================================================================
+# Specify if you need to convert the data files into a parquet format
+## Options:
+## - true
+## - false
+
+covert_to_parquet_first: false
+
+
