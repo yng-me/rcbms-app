@@ -1,4 +1,6 @@
 
+print('Processing Section L...')
+
 gather_section_l <- function(data, var, length, ...) {
   
   df_list <- list()

@@ -1,5 +1,6 @@
 #CONSISTENCY CHECK
 #HPQ. Q. WATER, SANITATION, AND HYGIENE
+print('Processing Section Q...')
 
 section_q <- hpq_data$SECTION_Q %>%
   left_join(rov, by = 'case_id') %>% 
@@ -433,4 +434,3 @@ cv_hwa_c2_b <- section_q %>%
 #=================================================================
 rm(section_q)
 
-print('Section Q complete!')

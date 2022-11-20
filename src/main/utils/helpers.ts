@@ -82,10 +82,14 @@ export const withEditedData = () => {
 }
 
 // Output folder
-export const withOutputFolder = () => {
-    const { paths } = rConfig()
+export const withOutputFolder = (use_pilot_data: boolean = false) => {
+    const path = use_pilot_data 
+        ? rConfig().paths.pilot_output_path
+        : rConfig().paths.output_path
+    
+    const key = use_pilot_data ? 'pilot_output_path' : 'output_path'
 
-    return { isAvailable: fs.pathExistsSync(paths.output_path), path: paths.output_path, key: 'output_path' } 
+    return { isAvailable: fs.pathExistsSync(path), path, key } 
 }
 
 // Data dictionary

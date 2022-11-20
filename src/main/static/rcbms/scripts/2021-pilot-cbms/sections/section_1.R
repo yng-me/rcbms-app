@@ -1,4 +1,5 @@
 # # # 1. =========================================================================
+print('Processing Crossed-section...')
 
 form3_files <- read.xlsx('./references/waiver_case_id.xlsx')
 
@@ -123,4 +124,3 @@ cv_hhsize_10_and_more <- hpq_individual %>%
 #   )
 # 
 
-print('Crossed-section complete!')

@@ -1,3 +1,6 @@
+
+print('Processing Section K...')
+
 section_k <- hpq_data$SECTION_K %>%
   left_join(rov, by = 'case_id') %>% 
   filter(HSN < 7777, RESULT_OF_VISIT == 1, pilot_area == eval_area) %>%
@@ -23,4 +26,3 @@ list2env(k_not_in_vs, envir = .GlobalEnv)
 list2env(k_na, envir = .GlobalEnv)
 rm(k_not_in_vs, k_na, section_k)
 
-print('Section K complete!')

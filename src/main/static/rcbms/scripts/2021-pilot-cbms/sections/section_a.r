@@ -1,4 +1,7 @@
 # SECTION A
+
+print('Processing Section A...')
+
 section_a_reg <- hpq_individual %>% 
   filter(HSN < 7777, RESULT_OF_VISIT == 1) %>% 
   mutate(A01HHMEM = str_trim(A01HHMEM)) %>% 
@@ -406,5 +409,3 @@ cv_a16 <- section_a_reg %>%
 
 # =========================================================
 rm(section_a_reg)
-
-print('Section A complete!')

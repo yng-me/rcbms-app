@@ -1,3 +1,5 @@
+print('Processing Section N...')
+
 section_n <- hpq_data$SECTION_N %>%
   left_join(rov, by = 'case_id') %>% 
   filter(HSN < 7777, RESULT_OF_VISIT == 1, pilot_area == eval_area) %>% 
@@ -116,4 +118,3 @@ cv_n10z <- section_n %>%
 
 rm(section_n)
 
-print('Section N complete!')

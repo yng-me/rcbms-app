@@ -1,3 +1,5 @@
+print('Processing Section F...')
+
 hpq_section_g <- hpq_data$SECTION_G %>% 
   filter(HSN < 7777, pilot_area == eval_area) %>% 
   select(case_id, TOTALFOOD = G_TOTALFOOD, starts_with('G')) %>% 
@@ -83,5 +85,3 @@ cv_food_total_not_same <- section_f_ang_g %>%
 
 
 list2env(f2_list, envir = .GlobalEnv)
-
-print('Section F complete!')

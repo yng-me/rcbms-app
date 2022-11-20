@@ -1,4 +1,6 @@
 ## ================== Mother's residence ==================
+print('Processing Section B...')
+
 section_b <- hpq_individual %>% 
   filter(HSN < 7777, RESULT_OF_VISIT == 1) %>% 
   select(case_id, REGION:CITY, pilot_area, LINENO, A01HHMEM, A07AGE, age_computed, starts_with('B'))
@@ -471,5 +473,3 @@ cv_b10_valueset <- section_b %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, B10TIMES)
 
 rm(section_b)
-
-print('Section B complete!')

@@ -1,3 +1,6 @@
+
+print('Processing Section J...')
+
 section_j_hh <- suppressWarnings(
   hpq_data$SECTION_J %>%
   left_join(rov, by = 'case_id') %>% 
@@ -623,4 +626,3 @@ cv_a17_pwd_functional <- section_a_reg %>%
 # ---------------------------------------------------------
 
 
-print('Section J complete!')

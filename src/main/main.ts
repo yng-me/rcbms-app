@@ -146,7 +146,7 @@ const mountedPayload = () => {
     withEditedData: { ...withEditedData(), isAvailable: csdbeCheck(withEditedData().path).isAvailable }, 
     withDownloadedData: { ...withDownloadedData(), isAvailable: csdbeCheck(withDownloadedData().path).isAvailable }, 
     withJustification: withJustification(), 
-    withOutputFolder: withOutputFolder(),
+    withOutputFolder: withOutputFolder(rConfig().use_pilot_data),
     withRInstalled: os ? { isAvailable : true, path: 'Not applicable' } : withRInstalled(), 
     withRStudioInstalled: os ? { isAvailable : true, path: 'Not applicable' } : withRStudioInstalled(), 
     withQuartoInstalled: os ? { isAvailable : true, path: 'Not applicable' } : withQuartoInstalled(), 
@@ -166,8 +166,8 @@ piloExecuter()
 dataLoader()
 
 ipcMain.on('open-output-folder', (event, data) => {
-  const outputFolder = rConfig().paths.output_path
-  const output = os ? `open "/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/output"` : `start "" "${outputFolder}"`
+  const { path } = withOutputFolder(data)
+  const output = os ? `open "/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/output"` : `start "" "${path}"`
   exec(output);
 })
 

@@ -1,6 +1,8 @@
 source('./utils/library.R')
 source('./utils/references.R')
 
+print('Importing data...')
+
 if(config$covert_to_parquet_first == TRUE) {
   source('./utils/parquet.R')  
 }

@@ -22,7 +22,10 @@ export const piloExecuter = () => {
       
       rSpawn.stdout.on('data', (data) => {
 
-          if(data.toString().search('Loading packages...') != -1) {
+        console.log(data.toString());
+        
+
+          if(data.toString().search('(Processing|Importing|Loading|Saving|Preparing) .*') != -1) {
             const rStatus = {
               error: false,
               count: 1,
@@ -40,7 +43,6 @@ export const piloExecuter = () => {
               log: replacer(data.toString())
             }
             event.reply('rstatus', rStatus)
-
           }
 
           if(data.toString().search("Error in install.packages") != -1 || data.toString().search('[Permission|Access] denied') != -1) {
@@ -53,15 +55,11 @@ export const piloExecuter = () => {
             event.reply('rstatus', rStatus)
 
             rSpawn.kill('SIGKILL')
-
           }
 
       });
 
       rSpawn.stderr.on('data', (data) => {
-          console.log('stderr: ' + data);
-          console.log(data.toString().search("error"));
-          console.log(rSpawn.connected);
 
           if ((data.toString().search("[Ee]rror") != -1 || data.toString().search('[Permission|Access] denied') != -1) ) {
 
@@ -85,7 +83,7 @@ export const piloExecuter = () => {
             rSpawn.kill('SIGKILL')
             rSpawn.stderr.destroy()
             rSpawn.stdout.destroy()
-            event.reply('stop-processing')
+            event.reply('done-processing')
           }
       })
 

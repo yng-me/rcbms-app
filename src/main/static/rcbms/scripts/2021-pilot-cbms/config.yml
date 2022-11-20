@@ -70,6 +70,6 @@ generate_bpq: false
 ## - true
 ## - false
 
-covert_to_parquet_first: false
+covert_to_parquet_first: true
 
 
