@@ -1,6 +1,7 @@
 import { dialog } from 'electron'
 import fs from 'fs-extra'
 import { withTextData } from '../../utils/helpers'
+import { expectedTextFiles } from '../../utils/constants'
 
 interface TXT {
     error: boolean
@@ -18,9 +19,14 @@ let payload : TXT = {
     count: 0
 }
 
-export const textDataCheck = () : TXT => {
+export const textDataCheck = (source : string) : TXT => {
 
     if(withTextData().isAvailable) {
+
+        const l = {
+            '2021-pilot-cbms': 120,
+            '2022-cbms': 29
+        }[source]
 
         try {
         
@@ -35,25 +41,7 @@ export const textDataCheck = () : TXT => {
                 .filter(el => /\.(txt|TXT)$/g.test(el))
                 .sort((a, b) => a.localeCompare(b))
         
-            const expectedTextFiles = [
-                'CERTIFICATION.TXT',    'GEO_ID.TXT',
-                'INTERVIEW_RECORD.TXT', 'SECTION_A.TXT',
-                'SECTION_B.txt',        'SECTION_C.txt',
-                'SECTION_D.txt',        'SECTION_E.txt',
-                'SECTION_F.TXT',        'SECTION_F1.TXT',
-                'SECTION_G_NEW.TXT',    'SECTION_G1_NEW.TXT',
-                'SECTION_H.TXT',        'SECTION_H1.TXT',
-                'SECTION_I.TXT',        'SECTION_J.TXT',
-                'SECTION_K.TXT',        'SECTION_L.TXT',
-                'SECTION_L1.TXT',       'SECTION_M.TXT',
-                'SECTION_N.TXT',        'SECTION_O.TXT',
-                'SECTION_O1.TXT',       'SECTION_P.TXT',
-                'SECTION_P1.TXT',       'SECTION_Q.TXT',
-                'SECTION_R.TXT',        'SECTION_S.TXT',
-                'SUMMARY_OF_VISIT.TXT'
-            ];
-        
-            if(validTextFiles.length === 29 && JSON.stringify(validTextFiles) == JSON.stringify(expectedTextFiles)) {
+            if(validTextFiles.length === l && JSON.stringify(validTextFiles) == JSON.stringify(expectedTextFiles[source])) {
         
                 return {
                     error: false,

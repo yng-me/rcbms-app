@@ -191,7 +191,7 @@ const loadData = () => {
 
 ipcRenderer.on('data-loaded', (event, payload) => { 
   if(!payload.error) {
-    ipcRenderer.send('check-text-data')
+    ipcRenderer.send('check-text-data', rConfig.use_pilot_data)
   } else {
     setTimeout(() => {
       loading.value = false
@@ -314,12 +314,8 @@ const refreshApp = () => {
 
 const loadDataDialog = () => {
   if(rConfig.use_pilot_data) {
-    console.log('a');
-    
     loadData()
   } else {
-    console.log('b');
-    
     if(checks.textDataCheck.isAvailable && !data.errors.length) {
       show.loadDataConfirm = true
     } else {
@@ -394,7 +390,7 @@ watch(selectedCSDBE, (newValue) => {
                 <span v-if="loading" class="flex items-center justify-center">
                     <span class="w-3.5 h-3.5 border-l border-teal-500 rounded-full animate-spin"></span>
                 </span>
-                <svg v-if="checks.textDataCheck.isAvailable && !loading && !data.errors.length" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <svg v-if="(checks.textDataCheck.isAvailable && !loading && !data.errors.length)" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               </button>
               <button 
                 :disabled="cannotRunScript"
