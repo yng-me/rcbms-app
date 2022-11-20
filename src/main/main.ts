@@ -35,7 +35,8 @@ import {
   toParquet,
   withRCBMSFolder,
   getFileLabel,
-  withPilotData
+  withPilotData,
+  getVersion
 } from './utils/helpers'
 
 // execution
@@ -126,6 +127,11 @@ app.on('window-all-closed', function () {
 ipcMain.on('before-mount', (event, data) => {
   const r = rcbmsCheck()
   updateRCBMS()
+
+  const { seen } = getVersion()
+  if(seen == undefined || seen == false) {
+    event.reply('show-changelog')
+  }
 
   event.reply('done-copying-resources', r.loading)
 })
@@ -372,4 +378,10 @@ autoUpdater.on('download-progress', (p) => {
   msg = msg + ' - Downloaded ' + p.percent + '%';
   msg = msg + ' (' + p.transferred + "/" + p.total + ')';
   sendStatusToWindow(p, 'percent');
+})
+
+
+ipcMain.on('seen-changelog', () => {
+  const v = getVersion()
+  fs.writeJSONSync(v.path, { version: v.version, seen: true })
 })

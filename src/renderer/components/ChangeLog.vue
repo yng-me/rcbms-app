@@ -7,6 +7,27 @@ import ChangeLogItem from './ChangeLogItem.vue';
 
 const changeLogs = reactive([
     {
+        version: 'RCBMS v1.0.5',
+        releaseDate: '21 November 2022',
+        logs: [ 
+            {
+                feature: 'Integration with 2021 Pilot CBMS',
+                type: 'feature',
+                info: [
+                    '2021 Pilot CBMS data can now be loaded to RCBMS to generate list of cases with inconsistencies',
+                    'To enable the feature, go to Settings > Options > toggle ON the <span class="font-semibold">Use 2021 Pilot CBMS data<span>.'
+                ]
+            },
+            {
+                feature: 'Mismatch EA number',
+                type: 'bug fix',
+                info: [
+                    'EA number generated in Excel file is now consistent with the Case ID.',
+                ]
+            },
+        ]  
+    },
+    {
         version: 'RCBMS v1.0.4',
         releaseDate: '18 November 2022',
         logs: [ 

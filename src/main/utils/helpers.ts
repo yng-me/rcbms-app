@@ -199,12 +199,11 @@ export const toParquet = (path: string) => {
     `
 }
 
-
 export const getVersion = () => {
     
     const path = join(withRCBMSFolder().path, 'utils', 'version.json')
 
-    let v = { path, version: '' }
+    let v = { path, version: '', seen: false }
     
     if(!fs.existsSync(path)) {
         try {
@@ -218,9 +217,15 @@ export const getVersion = () => {
         } catch {
             console.log('Error in creating version file');
         }
+
     } else {
-        const { version } = fs.readJSONSync(path)
-        v = { ...v, version }
+        const o = fs.readJSONSync(path)
+        let seen = o.seen
+        if(o.seen == undefined) {
+            seen = true
+        }
+
+        v = { ...v, version: o.version,  seen }
     }
 
     return v
