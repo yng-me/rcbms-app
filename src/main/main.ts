@@ -141,7 +141,7 @@ const mountedPayload = () => {
     rConfig: rConfig(), 
     exportLog: exportLogCheck().data,
     withRData: withRData(), 
-    withPilotData: withPilotData(),
+    withPilotData: { ...withPilotData(), isAvailable: csdbeCheck(withPilotData().path, '.csdb').isAvailable },
     textDataCheck: textDataCheck(source), 
     withEditedData: { ...withEditedData(), isAvailable: csdbeCheck(withEditedData().path).isAvailable }, 
     withDownloadedData: { ...withDownloadedData(), isAvailable: csdbeCheck(withDownloadedData().path).isAvailable }, 

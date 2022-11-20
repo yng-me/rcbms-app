@@ -1,6 +1,6 @@
 import { dialog } from 'electron'
 import fs from 'fs-extra'
-import { join } from 'path'
+import { join, extname } from 'path'
 import { withTextData } from '../../utils/helpers'
 import { expectedTextFiles } from '../../utils/constants'
 
@@ -26,14 +26,14 @@ export const textDataCheck = (source : string) : TXT => {
     let path = withTextData().path
     let count = 29
 
-    if(source === '2021-pilot-cbms') {
+    if(source == '2021-pilot-cbms') {
         path = join('C:', 'rcbms', 'scripts', '2021-pilot-cbms', 'data', 'text')
         count = 120
     }
 
     const sourceDir = {
         '2021-pilot-cbms': fs.existsSync(path),
-        '2021-cbms': withTextData().isAvailable
+        '2022-cbms': withTextData().path
     }[source] 
 
     if(sourceDir) {
@@ -48,7 +48,7 @@ export const textDataCheck = (source : string) : TXT => {
                 if(item.isFile()) textFiles.push(item.name);
             })
             const validTextFiles = textFiles
-                .filter(el => /\.(txt|TXT)$/g.test(el))
+                .filter(el => extname(el) === '.txt' || extname(el) === '.TXT')
                 .sort((a, b) => a.localeCompare(b))
         
             if(validTextFiles.length === count && JSON.stringify(validTextFiles) == JSON.stringify(expectedTextFiles[source])) {

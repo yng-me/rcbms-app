@@ -279,15 +279,16 @@ const cannotRunScript = computed(() => {
   (!checks.withRData.isAvailable && rConfig.use_rdata) || // no Rdata
   !checks.withRInstalled.isAvailable || 
   !checks.withRStudioInstalled.isAvailable || 
-  !checks.withQuartoInstalled.isAvailable // R, RStudio, and Quarto not installed
+  (!checks.withQuartoInstalled.isAvailable && !rConfig.use_pilot_data) // R, RStudio, and Quarto not installed
 })
 
-const cannotLoadData = computed(() => {
+const canLoadData = computed(() => {
   const before = checks.withDownloadedData.isAvailable && !rConfig.run_after_edit
   const after = checks.withEditedData.isAvailable && rConfig.run_after_edit
+  const isPilotMode = checks.withPilotData.isAvailable && rConfig.use_pilot_data
 
-  // return (!before && !after) || rConfig.use_rdata
-  return false
+  return (before || after || isPilotMode) && !rConfig.use_rdata
+
 })
 
 const endTimer = ref(true)
@@ -381,8 +382,8 @@ watch(selectedCSDBE, (newValue) => {
           <div class="mx-auto max-w-4xl px-10 sm:flex items-center sm:space-y-0 space-y-3 gap-3 justify-center mt-3">
               <button 
                 @click.prevent="loadDataDialog"
-                :disabled="loading || cannotLoadData"
-                :class="cannotLoadData? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'"
+                :disabled="loading || !canLoadData"
+                :class="!canLoadData? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'"
                 class="sm:w-auto w-full flex items-center justify-center text-xs space-x-2 rounded-xl px-4 py-2 bg-gradient-to-tr tracking-wider"
               >
                 <span class=" whitespace-nowrap truncate">
