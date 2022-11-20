@@ -123,7 +123,7 @@ export const withPilotData = () => {
 
 export const withPilotDataDict = () => {
     const { paths } = rConfig()
-    return { isAvailable: fs.pathExistsSync(paths.pilot_data_dict_path), path: paths.reference_path, key: 'pilot_data_dict_path' } 
+    return { isAvailable: fs.pathExistsSync(paths.pilot_data_dict_path), path: paths.pilot_data_dict_path, key: 'pilot_data_dict_path' } 
 }
 
 

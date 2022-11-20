@@ -37,7 +37,8 @@ const prompt = [
     message: 'Cannot locate justification file. Please save it in C:/rcmbs/references. Rename it to justification.xlsx' 
   },
   { id: 'clear', title: 'Clear data', message: 'No available data to clear.' },
-  { id: 'before_edit_path', title: 'Tablet data', message: 'No available data to.' },
+  { id: 'before_edit_path', title: 'Tablet data', message: 'No available data to load.' },
+  { id: 'use_pilot_data', title: 'Pilot data', message: 'No available data to load.' },
 ]
 
 const emit = defineEmits(['updateConfig'])

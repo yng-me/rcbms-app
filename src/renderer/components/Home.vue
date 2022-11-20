@@ -177,8 +177,8 @@ const loadData = () => {
     
     setTimeout(() => {      
       if(rConfig.use_pilot_data) {
-        alert('here!')
-        // ipcRenderer.send('load-pilot-data')
+        // alert('here!')
+        ipcRenderer.send('load-pilot-data')
       } else {
         ipcRenderer.send('load-data', {
           myhalf,

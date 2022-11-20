@@ -6,8 +6,6 @@ import { exec, execSync } from 'child_process'
 const temp = require('temp')
 temp.track()
 
-import { csdbeCheck } from './checker/with-csdbe'
-
 import { withPilotDataDict, withPilotData, withCSProInstalled } from '../utils/helpers'
 import { pilotDirectory } from '../utils/constants'
 
@@ -36,84 +34,78 @@ export const pilotDataLoader = () : void => {
 
     const { csconcat_path } = withCSProInstalled()
     const { path } = withPilotData()
-        
-    if(!csdbeCheck(path).isAvailable) {
+    const refDir = join('rcbms', 'scripts', '2021-pilot-cbms', 'references')
+    const inputDict = withPilotDataDict().path
 
-        event.reply('data-loaded', noDataError)
-        dialog.showErrorBox('CSDBE Data', 'No available data. Please download first from the DPS server.')
+    if(!withPilotDataDict().isAvailable) {
       
-    } else {
-      
-        const refDir = join('rcbms', 'scripts', '2021-pilot-cbms', 'references')
-        const inputDict = withPilotDataDict().path
-
-        if(!withPilotDataDict().isAvailable) {
-          
-            const pathFrom = join(app.getAppPath(), 'static', refDir, 'HPQF2_PILOT_DICT.dcf')
-      
-            try {
-                fs.copySync(pathFrom, inputDict);
-      
-            } catch(err) {
-      
-                dialog.showErrorBox('Loading Data', 'There was a problem loading the reference files. Please restart the RCBMS App.')
-      
-                event.reply('data-loaded', {
-                    error: true,
-                    message: 'There was a problem loading the reference files. Please restart the RCBMS App.'
-            });
-          }
-
-        }
-
+        const pathFrom = join(app.getAppPath(), 'static', refDir, 'HPQF2_PILOT_DICT.dcf')
+  
         try {
-
-            const logList = join('C:', refDir, 'log.lst')
-            fs.writeFileSync(logList, '')
-
-            fs.promises.readdir(path, { withFileTypes: true }).then(res => {
-          
-              // Filter only valid csdbe files
-              let csdbe: string[] = []
-              res.forEach(item => {
-                if(item.isFile()) csdbe.push(item.name);
-              })
-              
-              const csdbeConcat = csdbe.filter(el => /\.csdb$/g.test(el) && pilotGeo.includes(el.substring(1, 6)))
-                .filter(file => data.files.includes(file))
-                .map(item => join(path, item));
-
-                let csdbeAll = '';
-                csdbeConcat.forEach(text => csdbeAll += `InputData=${text}\n`)
-                
-                // Read concat text and insert the encrypted files with password
-                const pffStartConcat = '[Run Information]\nVersion=CSPro 7.7\nAppType=Concatenate\nShowInApplicationListing=Never\n\n[Files]'
-                const pffEnd = '[Parameters]\nLanguage=EN\nViewListing=Never\nViewResults=No\nInputOrder=Sequential'
-                const outputCSDBE = join(pilotDirectory, 'data', 'csdbe', 'concatenated-pilot.csdbe|password=293fnj<>aser@&e')
-
-          
-                const concatPffTxt = `${pffStartConcat}\n${csdbeAll}OutputData=${outputCSDBE}\nInputDict=${inputDict}\nListing=${logList}\n\n${pffEnd}`;
-                const concatPffTemp = temp.openSync({ suffix: '.pff' });
-          
-                fs.writeSync(concatPffTemp.fd, concatPffTxt);
-                fs.closeSync(concatPffTemp.fd);
-          
-                exec(`"${csconcat_path}" "${concatPffTemp.path}"`, (con) => {
-                  temp.cleanupSync()
-
-                //   const { csexport_path } = withCSProInstalled()
-
-          
-                })
-            })
-
-        } catch {
-
-          event.reply('data-loaded', noDataError)        
-          dialog.showErrorBox('Loading Data', 'There was a problem loading the data files. Please restart the RCBMS App and download the data from the DPS server.')
-          
-        }
+            fs.copySync(pathFrom, inputDict);
+  
+        } catch(err) {
+  
+            dialog.showErrorBox('Loading Data', 'There was a problem loading the reference files. Please restart the RCBMS App.')
+  
+            event.reply('data-loaded', {
+                error: true,
+                message: 'There was a problem loading the reference files. Please restart the RCBMS App.'
+        });
       }
+
+    }
+
+    try {
+
+        const logList = join('C:', refDir, 'log.lst')
+        fs.writeFileSync(logList, '')
+
+        fs.promises.readdir(path, { withFileTypes: true }).then(res => {
+      
+          // Filter only valid csdbe files
+          let csdbe: string[] = []
+          res.forEach(item => {
+            if(item.isFile()) csdbe.push(item.name);
+          })
+          
+          const csdbeConcat = csdbe.filter(el => /\.csdb$/g.test(el) && pilotGeo.includes(el.substring(1, 6)))
+            // .filter(file => data.files.includes(file))
+            .map(item => join(path, item));
+
+            
+            let csdbeAll = '';
+            csdbeConcat.forEach(text => csdbeAll += `InputData=${text}\n`)
+            
+            
+            // Read concat text and insert the encrypted files with password
+            const pffStartConcat = '[Run Information]\nVersion=CSPro 7.7\nAppType=Concatenate\nShowInApplicationListing=Never\n\n[Files]'
+            const pffEnd = '[Parameters]\nLanguage=EN\nViewListing=Never\nViewResults=No\nInputOrder=Sequential'
+            const outputCSDBE = join(pilotDirectory, 'data', 'csdbe', 'concatenated-pilot.csdbe|password=293fnj<>aser@&e')
+            
+            
+            const concatPffTxt = `${pffStartConcat}\n${csdbeAll}OutputData=${outputCSDBE}\nInputDict=${inputDict}\nListing=${logList}\n\n${pffEnd}`;
+            const concatPffTemp = temp.openSync({ suffix: '.pff' });
+            
+            fs.writeSync(concatPffTemp.fd, concatPffTxt);
+            fs.closeSync(concatPffTemp.fd);
+            console.log(concatPffTxt);
+      
+            exec(`"${csconcat_path}" "${concatPffTemp.path}"`, (con) => {
+              temp.cleanupSync()
+
+            //   const { csexport_path } = withCSProInstalled()
+
+      
+            })
+        })
+
+    } catch {
+
+      event.reply('data-loaded', noDataError)        
+      dialog.showErrorBox('Loading Data', 'There was a problem loading the data files. Please restart the RCBMS App and download the data from the DPS server.')
+      
+    }
     })
 } 
 
