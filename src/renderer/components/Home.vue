@@ -191,7 +191,8 @@ const loadData = () => {
 
 ipcRenderer.on('data-loaded', (event, payload) => { 
   if(!payload.error) {
-    ipcRenderer.send('check-text-data', rConfig.use_pilot_data)
+    const source = rConfig.use_pilot_data ? '2021-pilot-cbms' : '2022-cbms'
+    ipcRenderer.send('check-text-data', source)
   } else {
     setTimeout(() => {
       loading.value = false
@@ -384,7 +385,7 @@ watch(selectedCSDBE, (newValue) => {
                 class="sm:w-auto w-full flex items-center justify-center text-xs space-x-2 rounded-xl px-4 py-2 bg-gradient-to-tr tracking-wider"
               >
                 <span class=" whitespace-nowrap truncate">
-                    <span v-if="checks.textDataCheck.isAvailable && !data.errors.length && !loading">Data Loaded</span>
+                    <span v-if="checks.textDataCheck.isAvailable && !data.errors.length && !loading">{{rConfig.use_pilot_data ? 'Pilot ' : ''}}Data Loaded</span>
                     <span v-else>{{ loading ? `Loading ${rConfig.use_pilot_data ? 'Pilot' : ''} Data` : `Load ${rConfig.use_pilot_data ? 'Pilot' : ''} Data` }} </span>
                 </span>
                 <span v-if="loading" class="flex items-center justify-center">
