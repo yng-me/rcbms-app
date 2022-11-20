@@ -44,6 +44,7 @@ import { dataLoader } from './modules/loader'
 import { updateRCBMS } from './modules/updater';
 import { base } from './utils/constants';
 import { pilotDataLoader } from './modules/loader-pilot';
+import { piloExecuter } from './modules/executer-pilot';
 
 const os = process.platform === 'darwin'
 const dev = process.env.NODE_ENV === 'development'
@@ -161,6 +162,7 @@ ipcMain.on('mounted', (event, data) => {
 
 executer()
 pilotDataLoader()
+piloExecuter()
 dataLoader()
 
 ipcMain.on('open-output-folder', (event, data) => {

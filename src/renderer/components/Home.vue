@@ -222,7 +222,11 @@ const runScript = () => {
   loadingOutput.value = true
   show.runScript = true
   loading.value = true
-  ipcRenderer.send('run-script')
+
+  rConfig.use_pilot_data 
+    ? ipcRenderer.send('run-script-pilot') 
+    : ipcRenderer.send('run-script')
+
   setTimeout(() => {
     _sec.value++
   }, 1000);
