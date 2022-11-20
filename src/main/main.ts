@@ -34,7 +34,8 @@ import {
   withParquetData,
   toParquet,
   withRCBMSFolder,
-  getFileLabel
+  getFileLabel,
+  withPilotData
 } from './utils/helpers'
 
 // execution
@@ -42,6 +43,7 @@ import { executer } from './modules/executer'
 import { dataLoader } from './modules/loader'
 import { updateRCBMS } from './modules/updater';
 import { base } from './utils/constants';
+import { pilotDataLoader } from './modules/loader-pilot';
 
 const os = process.platform === 'darwin'
 const dev = process.env.NODE_ENV === 'development'
@@ -136,6 +138,7 @@ const mountedPayload = () => {
     rConfig: rConfig(), 
     exportLog: exportLogCheck().data,
     withRData: withRData(), 
+    withPilotData: withPilotData(),
     textDataCheck: textDataCheck(), 
     withEditedData: { ...withEditedData(), isAvailable: csdbeCheck(withEditedData().path).isAvailable }, 
     withDownloadedData: { ...withDownloadedData(), isAvailable: csdbeCheck(withDownloadedData().path).isAvailable }, 
@@ -155,8 +158,8 @@ ipcMain.on('mounted', (event, data) => {
 })
 
 executer()
+pilotDataLoader()
 dataLoader()
-
 
 ipcMain.on('open-output-folder', (event, data) => {
   const outputFolder = rConfig().paths.output_path
@@ -172,7 +175,7 @@ ipcMain.on('update-r-config', (event, data) => {
     setTimeout(() => {
       event.reply('yaml-config-saved')
       event.reply('mounted', { ...mountedPayload(), rConfig: payload })
-    }, 1000);
+    }, 750);
   })
 })
 
@@ -180,12 +183,11 @@ ipcMain.on('check-text-data', (event, data) => {
   event.reply('check-text-data', textDataCheck())
 })
 
-
 ipcMain.on('configure-path', (event, payload) => {
   dialog.showOpenDialog({properties: [payload.property] }).then((response : any) => {
     if (!response.canceled) {
       // console.log(payload);
-      // console.log(response.filePaths[0]);
+      console.log(response.filePaths[0]);
 
       const newPath = response.filePaths[0];
       const updatedConfig = { 

@@ -10,6 +10,10 @@ export default {
     name: 'Dashboard',
     components: { Bar },
     props: {
+        isPilotMode: {
+            type: Boolean,
+            default: false
+        },
         keys: {
             type: Object
         },
@@ -150,7 +154,7 @@ export default {
 
 
 <template>
-    <div v-if="logs?.length" class="mt-8 border-t pb-8 bg-gradient-to-b from-gray-100">
+    <div v-if="logs?.length && !isPilotMode" class="mt-8 border-t pb-8 bg-gradient-to-b from-gray-100">
         <div class="px-5 pt-4">
           <div class="flex items-center justify-between mb-2">
             <h3 class="">Frequency of inconsistences by section</h3>
