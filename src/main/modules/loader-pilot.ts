@@ -95,7 +95,7 @@ export const pilotDataLoader = () : void => {
                 const { csexport_path } = withCSProInstalled();
                 const pffPath = join(app.getAppPath(), 'static', 'pff', 'pilot');
 
-                if(!fs.existsSync(join(dataDir, 'text'))) fs.mkdirSync(join(dataDir, 'text'))
+                if(!fs.existsSync(join('C:', dataDir, 'text'))) fs.mkdirSync(join('C:', dataDir, 'text'))
 
                 execSync(`"${csexport_path}" "${join(pffPath, 'Exported.exf.pff')}"`)
                 execSync(`"${csexport_path}" "${join(pffPath, 'All.exf.pff')}"`)
