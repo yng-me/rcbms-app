@@ -21,6 +21,10 @@ dist
 dist-ssr
 
 
+src/main/static/rcbms/scripts/2021-pilot-cbms/data/*
+src/main/static/rcbms/scripts/2021-pilot-cbms/data/
+src/main/static/rcbms/scripts/2021-pilot-cbms/output/
+src/main/static/rcbms/scripts/2021-pilot-cbms/output/*
 src/main/static/rcbms/data/*
 src/main/static/rcbms/*.html
 src/main/static/rcbms/*.js
