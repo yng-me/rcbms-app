@@ -71,7 +71,7 @@ ipcRenderer.on('percent', (event, data) => {
         <TableMain @back="showTable = false" />
     </div>
   </transition>
-  <Footer :newUpdateAvailable="newUpdateAvailable"></Footer>
+  <Footer></Footer>
 </template>
 
 

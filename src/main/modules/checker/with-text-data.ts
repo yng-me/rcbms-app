@@ -1,6 +1,8 @@
 import { dialog } from 'electron'
 import fs from 'fs-extra'
+import { join, extname } from 'path'
 import { withTextData } from '../../utils/helpers'
+import { expectedTextFiles } from '../../utils/constants'
 
 interface TXT {
     error: boolean
@@ -18,13 +20,27 @@ let payload : TXT = {
     count: 0
 }
 
-export const textDataCheck = () : TXT => {
+export const textDataCheck = (source = '2022-cbms') : TXT => {
 
-    if(withTextData().isAvailable) {
 
+    let path = withTextData().path
+    let count = 29
+
+    if(source == '2021-pilot-cbms') {
+        path = join('C:', 'rcbms', 'scripts', '2021-pilot-cbms', 'data', 'text')
+        count = 120
+    }
+
+    const sourceDir = {
+        '2021-pilot-cbms': fs.existsSync(path),
+        '2022-cbms': withTextData().isAvailable
+    }[source] 
+
+    if(sourceDir) {
+        
         try {
         
-            const res = fs.readdirSync(withTextData().path, { withFileTypes: true }) 
+            const res = fs.readdirSync(path, { withFileTypes: true }) 
             
             let textFiles: string[] = []
         
@@ -32,28 +48,10 @@ export const textDataCheck = () : TXT => {
                 if(item.isFile()) textFiles.push(item.name);
             })
             const validTextFiles = textFiles
-                .filter(el => /\.(txt|TXT)$/g.test(el))
+                .filter(el => extname(el) === '.txt' || extname(el) === '.TXT')
                 .sort((a, b) => a.localeCompare(b))
         
-            const expectedTextFiles = [
-                'CERTIFICATION.TXT',    'GEO_ID.TXT',
-                'INTERVIEW_RECORD.TXT', 'SECTION_A.TXT',
-                'SECTION_B.txt',        'SECTION_C.txt',
-                'SECTION_D.txt',        'SECTION_E.txt',
-                'SECTION_F.TXT',        'SECTION_F1.TXT',
-                'SECTION_G_NEW.TXT',    'SECTION_G1_NEW.TXT',
-                'SECTION_H.TXT',        'SECTION_H1.TXT',
-                'SECTION_I.TXT',        'SECTION_J.TXT',
-                'SECTION_K.TXT',        'SECTION_L.TXT',
-                'SECTION_L1.TXT',       'SECTION_M.TXT',
-                'SECTION_N.TXT',        'SECTION_O.TXT',
-                'SECTION_O1.TXT',       'SECTION_P.TXT',
-                'SECTION_P1.TXT',       'SECTION_Q.TXT',
-                'SECTION_R.TXT',        'SECTION_S.TXT',
-                'SUMMARY_OF_VISIT.TXT'
-            ];
-        
-            if(validTextFiles.length === 29 && JSON.stringify(validTextFiles) == JSON.stringify(expectedTextFiles)) {
+            if(validTextFiles.length === count && JSON.stringify(validTextFiles) == JSON.stringify(expectedTextFiles[source])) {
         
                 return {
                     error: false,

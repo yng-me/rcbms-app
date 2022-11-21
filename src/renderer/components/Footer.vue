@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 // @ts-ignore
+import { ipcRenderer } from '../electron';
 import { ref, watch } from 'vue';
 // @ts-ignore
 import { version } from '../../../package.json'
@@ -14,11 +15,23 @@ import ChangeLog from './ChangeLog.vue';
 
 const showAbout = ref(false)
 const showChangelog = ref(false)
-const props = defineProps(['newUpdateAvailable'])
+const seen = ref(true)
+// const props = defineProps(['newUpdateAvailable'])
 
-watch(() => props.newUpdateAvailable, () => {
+ipcRenderer.on('show-changelog', () => {
+  seen.value = false
   showChangelog.value = true
 })
+
+const hideChangelog = () => {
+  showChangelog.value = false
+  if(!seen.value) {
+    ipcRenderer.send('seen-changelog')
+  }
+}
+// watch(() => props.newUpdateAvailable, () => {
+//   showChangelog.value = true
+// })
 
 </script>
 
@@ -44,7 +57,7 @@ watch(() => props.newUpdateAvailable, () => {
     <BaseModal @close="showAbout = false" :closeable="false" :show="showAbout" usage="dialog" max-width="4xl">
       <AboutUs @close="showAbout = false" />
     </BaseModal>
-    <BaseModal @close="showChangelog = false" :closeable="false" :show="showChangelog" usage="dialog" max-width="4xl">
-      <ChangeLog @close="showChangelog = false" />
+    <BaseModal @close="hideChangelog" :closeable="false" :show="showChangelog" usage="dialog" max-width="4xl">
+      <ChangeLog @close="hideChangelog" />
     </BaseModal>
 </template>

@@ -58,7 +58,9 @@ import {
   withDownloadedData,
   withParquetData,
   withRCBMSFolder,
-  getFileLabel
+  getFileLabel,
+  withPilotData,
+  getVersion
 } from './utils/helpers'
 
 // execution
@@ -66,6 +68,8 @@ import { executer } from './modules/executer'
 import { dataLoader } from './modules/loader'
 import { updateRCBMS } from './modules/updater';
 import { base } from './utils/constants';
+import { pilotDataLoader } from './modules/loader-pilot';
+import { piloExecuter } from './modules/executer-pilot';
 
 const isMac = process.platform === 'darwin'
 const dev = process.env.NODE_ENV === 'development'
@@ -148,6 +152,11 @@ ipcMain.on('before-mount', (event, data) => {
   const r = rcbmsCheck()
   updateRCBMS()
 
+  const { seen } = getVersion()
+  if(seen == undefined || seen == false) {
+    event.reply('show-changelog')
+  }
+
   event.reply('done-copying-resources', r.loading)
 })
 
@@ -156,19 +165,22 @@ const mountedPayload = () => {
   const p = rConfig().run_after_edit ? withEditedData().path : withDownloadedData().path
   const csdbeList = getFileLabel(csdbeCheck(p).files)
 
+  const source = rConfig().use_pilot_data ? '2021-pilot-cbms' : '2022-cbms'
+
   return {
     rConfig: rConfig(), 
     exportLog: exportLogCheck().data,
     withRData: withRData(), 
-    textDataCheck: textDataCheck(), 
+    withPilotData: { ...withPilotData(), isAvailable: csdbeCheck(withPilotData().path, '.csdb').isAvailable },
+    textDataCheck: textDataCheck(source), 
     withEditedData: { ...withEditedData(), isAvailable: csdbeCheck(withEditedData().path).isAvailable }, 
     withDownloadedData: { ...withDownloadedData(), isAvailable: csdbeCheck(withDownloadedData().path).isAvailable }, 
     withJustification: withJustification(), 
-    withOutputFolder: withOutputFolder(),
-    withRInstalled: isMac ? { isAvailable : true, path: 'Not applicable' } : withRInstalled(), 
-    withRStudioInstalled: isMac ? { isAvailable : true, path: 'Not applicable' } : withRStudioInstalled(), 
-    withQuartoInstalled: isMac ? { isAvailable : true, path: 'Not applicable' } : withQuartoInstalled(), 
-    withCSProInstalled: isMac ? { isAvailable : true, path: 'Not applicable' } : withCSProInstalled(),
+    withOutputFolder: withOutputFolder(rConfig().use_pilot_data),
+    withRInstalled: os ? { isAvailable : true, path: 'Not applicable' } : withRInstalled(), 
+    withRStudioInstalled: os ? { isAvailable : true, path: 'Not applicable' } : withRStudioInstalled(), 
+    withQuartoInstalled: os ? { isAvailable : true, path: 'Not applicable' } : withQuartoInstalled(), 
+    withCSProInstalled: os ? { isAvailable : true, path: 'Not applicable' } : withCSProInstalled(),
     withParquetData: withParquetData().isAvailable,
     csdbeList
   }
@@ -179,12 +191,13 @@ ipcMain.on('mounted', (event, data) => {
 })
 
 executer()
+pilotDataLoader()
+piloExecuter()
 dataLoader()
 
-
 ipcMain.on('open-output-folder', (event, data) => {
-  const outputFolder = rConfig().paths.output_path
-  const output = isMac ? `open "/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/output"` : `start "" "${outputFolder}"`
+  const { path } = withOutputFolder(data)
+  const output = os ? `open "/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/output"` : `start "" "${path}"`
   exec(output);
 })
 
@@ -196,20 +209,19 @@ ipcMain.on('update-r-config', (event, data) => {
     setTimeout(() => {
       event.reply('yaml-config-saved')
       event.reply('mounted', { ...mountedPayload(), rConfig: payload })
-    }, 1000);
+    }, 750);
   })
 })
 
 ipcMain.on('check-text-data', (event, data) => {
-  event.reply('check-text-data', textDataCheck())
+  event.reply('check-text-data', textDataCheck(data))
 })
-
 
 ipcMain.on('configure-path', (event, payload) => {
   dialog.showOpenDialog({properties: [payload.property] }).then((response : any) => {
     if (!response.canceled) {
       // console.log(payload);
-      // console.log(response.filePaths[0]);
+      console.log(response.filePaths[0]);
 
       const newPath = response.filePaths[0];
       const updatedConfig = { 
@@ -386,4 +398,10 @@ autoUpdater.on('download-progress', (p) => {
   msg = msg + ' - Downloaded ' + p.percent + '%';
   msg = msg + ' (' + p.transferred + "/" + p.total + ')';
   sendStatusToWindow(p, 'percent');
+})
+
+
+ipcMain.on('seen-changelog', () => {
+  const v = getVersion()
+  fs.writeJSONSync(v.path, { version: v.version, seen: true })
 })

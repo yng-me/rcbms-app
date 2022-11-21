@@ -2,6 +2,8 @@
 
 import { computed, reactive, ref } from 'vue';
 import { ipcRenderer } from '../electron'
+import { RConfig, UpdateConfig } from '../utils/types'
+
 // @ts-ignore
 import Configuration from './Configuration.vue';
 
@@ -10,13 +12,14 @@ const showMenu = ref(false)
 
 const props = defineProps(['checks'])
 
-const rConfig : any = reactive({
+const rConfig = reactive<RConfig>({
   run_after_edit: false,
   use_rdata: false,
   include_justifiction: false,
   clear: false,
   convert_to_rdata: true,
-  use_raw_data_from_tablet: false
+  use_raw_data_from_tablet: false,
+  use_pilot_data: false
 })
 
 const show = ref(false)
@@ -28,14 +31,19 @@ const modal = reactive({
 const prompt = [
   { id: 'use_rdata', title: 'Use RData', message: 'No RData available. Check C:/rcmbs/data folder.' },
   { id: 'run_after_edit', title: 'Run after-edit checks', message: 'No data available.' },
-  { id: 'include_justifiction', title: 'Include justifications', message: 'Cannot locate justification file. Please save it in C:/rcmbs/references. Rename it to justification.xlsx' },
+  { 
+    id: 'include_justifiction', 
+    title: 'Include justifications', 
+    message: 'Cannot locate justification file. Please save it in C:/rcmbs/references. Rename it to justification.xlsx' 
+  },
   { id: 'clear', title: 'Clear data', message: 'No available data to clear.' },
-  { id: 'before_edit_path', title: 'Tablet data', message: 'No available data to.' },
+  { id: 'before_edit_path', title: 'Tablet data', message: 'No available data to load.' },
+  { id: 'use_pilot_data', title: 'Pilot data', message: 'No available data to load.' },
 ]
 
 const emit = defineEmits(['updateConfig'])
 
-const updateConfigR = (config : string, val: string) => {
+const updateConfigR = (config : string, val: keyof RConfig) => {
 
   if(!props.checks[config].isAvailable) {
 
@@ -43,7 +51,6 @@ const updateConfigR = (config : string, val: string) => {
     const msgPrompt = `${msg.title}: ${msg.message}`
     alert(msgPrompt)
 
-    // @ts-ignore
     rConfig[val] = false
 
   } else {
@@ -64,7 +71,8 @@ ipcRenderer.on('mounted', (event, data) => {
   rConfig.convert_to_rdata = data.rConfig.convert_to_rdata
   rConfig.include_justifiction = data.rConfig.include_justifiction
   rConfig.clear = data.rConfig.clear
-  rConfig.use_raw_data_from_tablet = data.rConfig.use_raw_data_from_tablet
+  rConfig.use_raw_data_from_tablet = data.rConfig.use_raw_data_from_tablet,
+  rConfig.use_pilot_data = data.rConfig.use_pilot_data
 })
 
 ipcRenderer.on('yaml-config-saved', () => isWritingFile.value = false)
@@ -75,9 +83,16 @@ const checksConfig = computed(() => {
   const keys = Object.keys(props.checks)
   return keys.filter(el => el !== 'withData' && el != 'csdbeCheck' && el != 'textDataCheck')
     .map(item => {
+
+      let path = props.checks[item].path ? props.checks[item].path : ''
+
+      if (path.length > 45) {
+        path = path.substr(0, 25) + '...' + path.substr(path.length-20, path.length);
+      }
+      
       return {
         isAvailable: props.checks[item].isAvailable,
-        path: props.checks[item] ? props.checks[item].path : '',
+        path,
         label: props.checks[item].label,
         property: props.checks[item].property,
         config: props.checks[item].key
@@ -132,13 +147,13 @@ ipcRenderer.on('saved-path-config', (event, name) => {
                 <!-- :class="viewStatus ? 'text-gray-400' : 'text-teal-600'"  -->
                 <button 
                   @click.prevent="viewStatus = false"
-                  :class="!viewStatus ? 'text-teal-600' : 'text-gray-300'" class="hover:text-teal-700 tracking-widest uppercase hover:font-medium">
+                  :class="!viewStatus ? 'text-teal-600' : 'text-gray-300'" class="hover:text-teal-700 font-semibold tracking-widest uppercase hover:font-medium">
                   <span class="">Options</span>
                 </button> 
                 <!-- <span class="opacitiy-40 text-gray-200">|</span> -->
                 <button 
                   @click.prevent="viewStatus = true"
-                  :class="viewStatus ? 'text-teal-600' : 'text-gray-300'" class="hover:text-teal-700 tracking-widest uppercase hover:font-medium">
+                  :class="viewStatus ? 'text-teal-600' : 'text-gray-300'" class="hover:text-teal-700 font-semibold tracking-widest uppercase hover:font-medium">
                   <span>Configuration</span>
                 </button>
               </div>
@@ -158,6 +173,7 @@ ipcRenderer.on('saved-path-config', (event, name) => {
                     :is-available="i.isAvailable" 
                     :title="i.label"
                     :description="i.path"
+                    :isPilotMode="rConfig.use_pilot_data"
                     :property="i.property"
                     :config="i.config"
                   />
@@ -165,7 +181,7 @@ ipcRenderer.on('saved-path-config', (event, name) => {
               </ul>
             </template>
             <template v-else>
-              <label class="px-4 py-2.5 border-t w-full flex items-center justify-between hover:bg-gray-50">
+              <label :class="rConfig.use_pilot_data? 'text-gray-300' : 'hover:bg-gray-50'" class="px-4 py-2.5 border-t w-full flex items-center justify-between">
                 <span class="flex items-center space-x-2">
                   <svg class="w-4 h-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
                   <span>Use Rdata file</span>
@@ -173,30 +189,31 @@ ipcRenderer.on('saved-path-config', (event, name) => {
                 <span class="switch">
                   <input 
                     @change="updateConfigR('withRData', 'use_rdata')" 
-                    v-model="rConfig.use_rdata" 
+                    v-model="rConfig.use_rdata"
+                    :disabled="rConfig.use_pilot_data" 
                     name="use-rdata" 
                     type="checkbox" 
                   />
                   <span class="slider round"></span>
                 </span>
               </label>
-              <label :class="rConfig.use_rdata ? 'text-gray-300' : 'hover:bg-gray-50'" class="px-4 py-2.5 border-t w-full flex items-center justify-between">
+              <label :class="rConfig.use_rdata || rConfig.use_pilot_data? 'text-gray-300' : 'hover:bg-gray-50'" class="px-4 py-2.5 border-t w-full flex items-center justify-between">
                 <span class="flex items-center space-x-2">
                   <svg class="w-4 h-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                   <span >Use raw data from tablet</span>
                 </span>
                 <span class="switch">
                   <input 
-                    @change="updateConfigR('withDownloadedData', 'before_edit_path')" 
+                    @change="updateConfigR('withDownloadedData', 'run_after_edit')" 
                     v-model="rConfig.use_raw_data_from_tablet" 
-                    :disabled="rConfig.use_rdata"
+                    :disabled="rConfig.use_rdata || rConfig.use_pilot_data"
                     name="run-after-edit" 
                     type="checkbox" 
                   />
                   <span class="slider round"></span>
                 </span>
               </label>
-              <label class="px-4 py-2.5 border-t w-full flex items-center justify-between hover:bg-gray-50">
+              <label :class="rConfig.use_pilot_data? 'text-gray-300' : 'hover:bg-gray-50'" class="px-4 py-2.5 border-t w-full flex items-center justify-between">
                 <span class="flex items-center space-x-2">
                   <svg class="w-4 h-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                   <span >Run after-edit checks</span>
@@ -205,14 +222,14 @@ ipcRenderer.on('saved-path-config', (event, name) => {
                   <input 
                     @change="updateConfigR('withEditedData', 'run_after_edit')" 
                     v-model="rConfig.run_after_edit" 
+                    :disabled="rConfig.use_pilot_data"
                     name="run-after-edit" 
                     type="checkbox" 
                   />
                   <span class="slider round"></span>
                 </span>
               </label>
-              
-              <label  class="px-4 py-2.5 border-t w-full flex items-center justify-between hover:bg-gray-50">
+              <label :class="rConfig.use_pilot_data? 'text-gray-300' : 'hover:bg-gray-50'" class="px-4 py-2.5 border-t w-full flex items-center justify-between">
                 <span class="flex items-center space-x-2">
                   <svg class="w-4 h-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>
                   <span>Include justifications</span>
@@ -220,14 +237,15 @@ ipcRenderer.on('saved-path-config', (event, name) => {
                 <span class="switch">
                   <input 
                     @change="updateConfigR('withJustification', 'include_justifiction')" 
-                    v-model="rConfig.include_justifiction" 
+                    v-model="rConfig.include_justifiction"
+                    :disabled="rConfig.use_pilot_data"
                     name="include-justifiction" 
                     type="checkbox" 
                   />
                   <span class="slider round"></span>
                 </span>
               </label>
-              <label :class="rConfig.use_rdata ? 'text-gray-300' : 'hover:bg-gray-50'" class="px-4 py-2.5 border-t w-full flex items-center justify-between">
+              <label :class="rConfig.use_rdata || rConfig.use_pilot_data? 'text-gray-300' : 'hover:bg-gray-50'" class="px-4 py-2.5 border-t w-full flex items-center justify-between">
                 <span class="flex items-center space-x-2">
                   <svg class="w-4 h-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
                   <span>Convert to Rdata</span>
@@ -236,14 +254,14 @@ ipcRenderer.on('saved-path-config', (event, name) => {
                   <input 
                     @change="updateConfigR('withRData', 'use_rdata')" 
                     v-model="rConfig.convert_to_rdata" 
-                    :disabled="rConfig.use_rdata"
+                    :disabled="rConfig.use_rdata || rConfig.use_pilot_data"
                     name="use-rdata" 
                     type="checkbox" 
                   />
                   <span class="slider round"></span>
                 </span>
               </label>
-              <label :class="rConfig.use_rdata ? 'text-gray-300' : 'hover:bg-gray-50'" class="px-4 py-2.5 border-t w-full flex items-center justify-between">
+              <label :class="rConfig.use_rdata || rConfig.use_pilot_data? 'text-gray-300' : 'hover:bg-gray-50'" class="px-4 py-2.5 border-t w-full flex items-center justify-between">
                 <span class="flex items-center space-x-2">
                   <svg class="w-4 h-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path></svg>
                   <span>Clear data files after execution</span>
@@ -251,8 +269,24 @@ ipcRenderer.on('saved-path-config', (event, name) => {
                 <span class="switch">
                   <input 
                     @change="updateConfigR('withData', 'clear')" 
-                    :disabled="rConfig.use_rdata"
+                    :disabled="rConfig.use_rdata || rConfig.use_pilot_data"
                     v-model="rConfig.clear" 
+                    name="clear" 
+                    type="checkbox" 
+                  />
+                  <span class="slider round"></span>
+                </span>
+              </label>
+              <label :class="rConfig.use_rdata? 'text-gray-300' : 'hover:bg-gray-50'" class="px-4 py-2.5 border-t w-full flex items-center justify-between">
+                <span class="flex items-center space-x-2">
+                  <svg class="w-4 h-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                  <span>Use 2021 Pilot CBMS data</span>
+                </span>
+                <span class="switch">
+                  <input 
+                    @change="updateConfigR('withPilotData', 'use_pilot_data')" 
+                    :disabled="rConfig.use_rdata"
+                    v-model="rConfig.use_pilot_data" 
                     name="clear" 
                     type="checkbox" 
                   />

@@ -50,15 +50,28 @@ export const executer = () => {
 
           }
 
-      });
 
+          if(data.toString().search("Error in install.packages") != -1 || data.toString().search('[Permission|Access] denied') != -1) {
+            const rStatus = {
+              error: true,
+              count: 0,
+              message: replacer(data.toString()),
+              log: replacer(data.toString())
+            }
+            event.reply('rstatus', rStatus)
+
+            rSpawn.kill('SIGKILL')
+
+          }
+
+      });
 
       rSpawn.stderr.on('data', (data) => {
           console.log('stderr: ' + data);
           console.log(data.toString().search("error"));
           console.log(rSpawn.connected);
 
-          if ((data.toString().search("error") != -1) ) {
+          if ((data.toString().search("[Ee]rror") != -1 || data.toString().search('[Permission|Access] denied') != -1) ) {
 
             const rStatus = {
               error: true,
@@ -69,8 +82,9 @@ export const executer = () => {
             
             event.reply('rstatus', rStatus)
             // console.log('process has been killed - "error" keyword found in stderr!');
-            rSpawn.kill('SIGTERM');
+            rSpawn.kill('SIGKILL')
           }
+
       });
 
       rSpawn.on('close', function (code) {

@@ -82,10 +82,14 @@ export const withEditedData = () => {
 }
 
 // Output folder
-export const withOutputFolder = () => {
-    const { paths } = rConfig()
+export const withOutputFolder = (use_pilot_data: boolean = false) => {
+    const path = use_pilot_data 
+        ? rConfig().paths.pilot_output_path
+        : rConfig().paths.output_path
+    
+    const key = use_pilot_data ? 'pilot_output_path' : 'output_path'
 
-    return { isAvailable: fs.pathExistsSync(paths.output_path), path: paths.output_path, key: 'output_path' } 
+    return { isAvailable: fs.pathExistsSync(path), path, key } 
 }
 
 // Data dictionary
@@ -115,6 +119,17 @@ export const withReferenceDictionary = () => {
 
     return { isAvailable: fs.pathExistsSync(paths.reference_path), path: paths.reference_path, key: 'reference_path' } 
 }
+
+export const withPilotData = () => {
+    const { paths } = rConfig()
+    return { isAvailable: fs.pathExistsSync(paths.pilot_data_path), path: paths.pilot_data_path, key: 'pilot_data_path' } 
+}
+
+export const withPilotDataDict = () => {
+    const { paths } = rConfig()
+    return { isAvailable: fs.pathExistsSync(paths.pilot_data_dict_path), path: paths.pilot_data_dict_path, key: 'pilot_data_dict_path' } 
+}
+
 
 // Reference
 export const withParquetData = () => {
@@ -162,12 +177,11 @@ export const toParquet = (path: string) => {
     `
 }
 
-
 export const getVersion = () => {
     
     const path = join(withRCBMSFolder().path, 'utils', 'version.json')
 
-    let v = { path, version: '' }
+    let v = { path, version: '', seen: false }
     
     if(!fs.existsSync(path)) {
         try {
@@ -181,9 +195,15 @@ export const getVersion = () => {
         } catch {
             console.log('Error in creating version file');
         }
+
     } else {
-        const { version } = fs.readJSONSync(path)
-        v = { ...v, version }
+        const o = fs.readJSONSync(path)
+        let seen = o.seen
+        if(o.seen == undefined) {
+            seen = true
+        }
+
+        v = { ...v, version: o.version,  seen }
     }
 
     return v
@@ -218,7 +238,39 @@ export const getFileLabel = (files : string[]) => {
         console.log('Error');
         return [
             { file: '', ean: '', code: '', cityMun: '', brgy: '' }
+        ]
+    }
 
+}
+
+
+export const getPilotFileLabel = (files : string[]) => {
+    try {         
+
+        const psgc = join(base, 'references', 'psgc.xlsx')
+        const workbook = XLSX.readFile(psgc);
+        const sheet_name_list = workbook.SheetNames;
+        const xlData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]])
+            .map((item : any) => {
+                return {
+                    code: item['Correspondence Code'],
+                    cityMun: item['City/Municipality'],
+                    brgy: item['Name']
+                }
+            })
+            
+        return files.map((file : string) => {
+            return {
+                file,
+                ean: file.substring(10, 16),
+                ...xlData.find(el => el.code == file.substring(1, 10))
+            }
+        })
+
+    } catch {
+        console.log('Error');
+        return [
+            { file: '', ean: '', code: '', cityMun: '', brgy: '' }
         ]
     }
 

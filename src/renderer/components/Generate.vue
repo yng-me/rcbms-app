@@ -22,7 +22,7 @@ const showOutputFolder = ref(false)
 const showLogs = ref(false)
 
 const emits = defineEmits(['close', 'stop-processing', 'done-processing'])
-const props = defineProps(['loading', 'timeElapsed'])
+const props = defineProps(['loading', 'timeElapsed', 'isPilotMode'])
 
 const data : any = reactive({
     logs: []
@@ -74,9 +74,7 @@ const killProcess = () => {
     emits('close')
 }
 
-const withOutputFolder = ref(false)
-const openOutputFile = () => ipcRenderer.send('open-output-folder')
-ipcRenderer.on('with-output-folder', (event, data) => withOutputFolder.value = data)
+const openOutputFile = () => ipcRenderer.send('open-output-folder', props.isPilotMode)
 
 
 

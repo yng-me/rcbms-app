@@ -2,6 +2,8 @@
 
 import { ipcRenderer } from '../electron'
 import { onMounted, reactive, ref, onBeforeMount, computed, watch } from 'vue';
+import { RConfig, UpdateConfig } from '../utils/types'
+
 // @ts-ignore
 import Dashboard from './Dashboard.vue';
 // @ts-ignore
@@ -48,13 +50,14 @@ ipcRenderer.on('done-copying-resources', (event, data) => {
 })
 
 // MOUNTED
-const rConfig : any = reactive({
+const rConfig = reactive<RConfig>({
   run_after_edit: false,
   use_rdata: false,
   include_justifiction: false,
   clear: false,
-  use_raw_data_from_tablet: false
-
+  convert_to_rdata: false,
+  use_raw_data_from_tablet: false,
+  use_pilot_data: false
 })
 
 const checks = reactive({
@@ -69,6 +72,7 @@ const checks = reactive({
   withRStudioInstalled: { isAvailable: false },
   withQuartoInstalled: { isAvailable: false },
   withCSProInstalled: { isAvailable: false },
+  withPilotData: { isAvailable: false }
 })
 
 const loading = ref(false)
@@ -83,6 +87,7 @@ ipcRenderer.on('mounted', (event, payload) => {
   rConfig.clear = payload.rConfig.clear
   rConfig.convert_to_rdata = payload.rConfig.convert_to_rdata  
   rConfig.use_raw_data_from_tablet = payload.rConfig.use_raw_data_from_tablet
+  rConfig.use_pilot_data = payload.rConfig.use_pilot_data
 
   data.csdbeList = payload.csdbeList
 
@@ -94,9 +99,11 @@ ipcRenderer.on('mounted', (event, payload) => {
   const { withEditedData } = payload
   const { textDataCheck } = payload
   const { withRData } = payload
+  const { withPilotData } = payload
 
   const b = !payload.rConfig.run_after_edit && withDownloadedData.isAvailable
   const a = payload.rConfig.run_after_edit && withEditedData.isAvailable
+  // const c = payload.rConfig.use_pilot_data && withPilotData.isAvailable
 
   if(!a && !b && !withRData.isAvailable && !textDataCheck.isAvailable) {
     data.errors.push({ message: 'No available data to load. Please download first from DPS Server or load the <span class="font-semibold">hpq.Rdata</span> if available.' })
@@ -114,6 +121,8 @@ ipcRenderer.on('mounted', (event, payload) => {
   checks.withRStudioInstalled = { ...payload.withRStudioInstalled, label: 'RStudio installation path', property: 'openFile' }
   checks.withQuartoInstalled = { ...payload.withQuartoInstalled, label: 'Quarto installation path', property: 'openFile' }
   checks.withCSProInstalled = { ...payload.withCSProInstalled, label: 'CSPro installation path', property: 'openFile' }
+  checks.withPilotData = { ...withPilotData, label: '2021 Pilot CBMS data folder', property: 'openDirectory' }
+
   withParquetData.value = payload.withParquetData
 
   if(!payload.withRInstalled.isAvailable) {
@@ -146,7 +155,9 @@ ipcRenderer.on('mounted', (event, payload) => {
   
 })
 
-const updateConfig = (event : any) => rConfig[event.key] = event.val
+const updateConfig = (event : UpdateConfig) => {
+  rConfig[event.key] = event.val
+}
 
 const show = reactive({
   runScript: false,
@@ -159,21 +170,28 @@ const myhalf = g + '800393e28d621d9471609fd2'
 // Load data ============================================================
 
 const loadData = () => {
+
     show.loadData = false
     loading.value = true
     
     setTimeout(() => {      
-      ipcRenderer.send('load-data', {
-        myhalf,
-        check: rConfig.run_after_edit,
-        files: [...selectedCSDBE.value]
-      })
-    }, 1000);
+      if(rConfig.use_pilot_data) {
+        // alert('here!')
+        ipcRenderer.send('load-pilot-data')
+      } else {
+        ipcRenderer.send('load-data', {
+          myhalf,
+          check: rConfig.run_after_edit,
+          files: [...selectedCSDBE.value]
+        })
+      }
+    }, 750);
 }
 
 ipcRenderer.on('data-loaded', (event, payload) => { 
   if(!payload.error) {
-    ipcRenderer.send('check-text-data')
+    const source = rConfig.use_pilot_data ? '2021-pilot-cbms' : '2022-cbms'
+    ipcRenderer.send('check-text-data', source)
   } else {
     setTimeout(() => {
       loading.value = false
@@ -203,7 +221,11 @@ const runScript = () => {
   loadingOutput.value = true
   show.runScript = true
   loading.value = true
-  ipcRenderer.send('run-script')
+
+  rConfig.use_pilot_data 
+    ? ipcRenderer.send('run-script-pilot') 
+    : ipcRenderer.send('run-script')
+
   setTimeout(() => {
     _sec.value++
   }, 1000);
@@ -257,14 +279,16 @@ const cannotRunScript = computed(() => {
   (!checks.withRData.isAvailable && rConfig.use_rdata) || // no Rdata
   !checks.withRInstalled.isAvailable || 
   !checks.withRStudioInstalled.isAvailable || 
-  !checks.withQuartoInstalled.isAvailable // R, RStudio, and Quarto not installed
+  (!checks.withQuartoInstalled.isAvailable && !rConfig.use_pilot_data) // R, RStudio, and Quarto not installed
 })
 
-const cannotLoadData = computed(() => {
+const canLoadData = computed(() => {
   const before = checks.withDownloadedData.isAvailable && !rConfig.run_after_edit
   const after = checks.withEditedData.isAvailable && rConfig.run_after_edit
+  const isPilotMode = checks.withPilotData.isAvailable && rConfig.use_pilot_data
 
-  return (!before && !after) || rConfig.use_rdata
+  return (before || after || isPilotMode) && !rConfig.use_rdata
+
 })
 
 const endTimer = ref(true)
@@ -278,10 +302,7 @@ ipcRenderer.on('load-export-logs', (event, data) => {
 })
 
 //  Output preview =====================================================
-
-const withOutputFolder = ref(false)
-const openOutputFile = () => ipcRenderer.send('open-output-folder')
-ipcRenderer.on('with-output-folder', (event, data) => withOutputFolder.value = data)
+const openOutputFile = () => ipcRenderer.send('open-output-folder', rConfig.use_pilot_data)
 
 const refreshing = ref(false)
 const refreshApp = () => {
@@ -295,10 +316,14 @@ const refreshApp = () => {
 
 
 const loadDataDialog = () => {
-  if(checks.textDataCheck.isAvailable && !data.errors.length) {
-    show.loadDataConfirm = true
+  if(rConfig.use_pilot_data) {
+    loadData()
   } else {
-    show.loadData = true
+    if(checks.textDataCheck.isAvailable && !data.errors.length) {
+      show.loadDataConfirm = true
+    } else {
+      show.loadData = true
+    }
   }
 }
 
@@ -323,7 +348,7 @@ watch(selectAllCSDBE, (newValue) => {
   }
 })
 
-watch(selectedCSDBE, () => {
+watch(selectedCSDBE, (newValue) => {
   if(selectedCSDBE.value.length < data.csdbeList.length) selectAllCSDBE.value = false
   if(selectedCSDBE.value.length === data.csdbeList.length) selectAllCSDBE.value = true
 })
@@ -332,7 +357,7 @@ watch(selectedCSDBE, () => {
 
 
 <template>
-    <div class="relative y-scroll-bar">
+    <div class=" y-scroll-bar">
         <NavMenu @updateConfig="updateConfig($event)" :checks="checks">
         <button 
             title="Refresh the app"
@@ -350,7 +375,7 @@ watch(selectedCSDBE, () => {
             </button>
         </template>
         </NavMenu>
-        <Hero />
+        <Hero :isPilotMode="rConfig.use_pilot_data" />
         <div v-if="!doneCopyingResources" class="mx-auto max-w-sm mt-8">
         <p class="text-center text-xs">Loading files and folders...</p>
         </div>
@@ -358,18 +383,18 @@ watch(selectedCSDBE, () => {
           <div class="mx-auto max-w-4xl px-10 sm:flex items-center sm:space-y-0 space-y-3 gap-3 justify-center mt-3">
               <button 
                 @click.prevent="loadDataDialog"
-                :disabled="loading || cannotLoadData"
-                :class="cannotLoadData? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'"
+                :disabled="loading || !canLoadData"
+                :class="!canLoadData? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'"
                 class="sm:w-auto w-full flex items-center justify-center text-xs space-x-2 rounded-xl px-4 py-2 bg-gradient-to-tr tracking-wider"
               >
                 <span class=" whitespace-nowrap truncate">
-                    <span v-if="checks.textDataCheck.isAvailable && !data.errors.length && !loading">Data Loaded</span>
-                    <span v-else>{{ loading ? 'Loading Data' : 'Load Data'}} </span>
+                    <span v-if="checks.textDataCheck.isAvailable && !data.errors.length && !loading">{{rConfig.use_pilot_data ? 'Pilot ' : ''}}Data Loaded</span>
+                    <span v-else>{{ loading ? `Loading ${rConfig.use_pilot_data ? 'Pilot' : ''} Data` : `Load ${rConfig.use_pilot_data ? 'Pilot' : ''} Data` }} </span>
                 </span>
                 <span v-if="loading" class="flex items-center justify-center">
                     <span class="w-3.5 h-3.5 border-l border-teal-500 rounded-full animate-spin"></span>
                 </span>
-                <svg v-if="checks.textDataCheck.isAvailable && !loading && !data.errors.length" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <svg v-if="(checks.textDataCheck.isAvailable && !loading && !data.errors.length)" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               </button>
               <button 
                 :disabled="cannotRunScript"
@@ -406,7 +431,7 @@ watch(selectedCSDBE, () => {
                 </div>
             </div>
           </div>
-          <Dashboard :logs="data.exportLog" :keys="data.exportLog[0]" />
+          <Dashboard :is-pilot-mode="rConfig.use_pilot_data" :logs="data.exportLog" :keys="data.exportLog[0]" />
         
         </template>
 
@@ -425,7 +450,7 @@ watch(selectedCSDBE, () => {
         </BaseModal>
 
         <BaseModal @close="show.loadData = false" :show="show.loadData" usage="dialog" max-width="2xl">
-          <DialogBox title="Select CSDBE Files to Extract">
+          <DialogBox @close="show.loadData = false" title="Select CSDBE Files to Extract">
             <div class="pt-4 flex flex-col space-y-4 overflow-auto max-h-96">
                <table class="w-full ">
                 <thead>
@@ -473,6 +498,7 @@ watch(selectedCSDBE, () => {
           <Generate 
               @close="stopProcessing" 
               :loading="loading" 
+              :is-pilot-mode="rConfig.use_pilot_data"
               @done-processing="doneProcessing"
               @stop-processing="stopProcessing"
               :time-elapsed="`${hr}:${min}:${sec}`"

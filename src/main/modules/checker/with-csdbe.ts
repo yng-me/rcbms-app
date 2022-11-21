@@ -1,5 +1,6 @@
 import fs from 'fs-extra'
 import { dialog } from 'electron'
+import { extname } from 'path'
 
 const isMac = process.platform === 'darwin'
 
@@ -13,7 +14,7 @@ interface CSDBE {
     path: string
 }
 
-export const csdbeCheck = (path : string) :CSDBE => {
+export const csdbeCheck = (path : string, ext = '.csdbe') :CSDBE => {
 
     let payload : CSDBE = {
         error: false,
@@ -48,8 +49,8 @@ export const csdbeCheck = (path : string) :CSDBE => {
                 dps.forEach((item : any) => {
                     if(item.isFile()) csdbe.push(item.name);
                 })
-
-                const csdbeConcat = csdbe.filter(el => /\.csdbe$/g.test(el))
+                
+                const csdbeConcat = csdbe.filter(el => extname(el) === ext)
 
                 if(csdbeConcat.length) {
 

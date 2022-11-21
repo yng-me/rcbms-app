@@ -6,6 +6,24 @@ import { rConfig } from './checker/with-rconfig'
 import { base } from '../utils/constants'
 // import { NsisUpdater } from "electron-updater"
 
+const applyUpdate = (files: string[]) => {
+
+    const p  = join(base, 'config.yml')
+
+    if(fs.pathExistsSync(p)) {
+        fs.rmSync(p, { recursive: true, force: true })
+    }
+    
+    rConfig()
+
+    files.forEach(el => {
+        const from = join(app.getAppPath(), 'static', 'rcbms', el)
+        const to = join(withRCBMSFolder().path, el)
+
+        fs.copySync(from, to, { recursive: true });
+    })
+
+}
 
 export const updateRCBMS = () => {
 
@@ -15,18 +33,12 @@ export const updateRCBMS = () => {
         ? require('../../../package.json').version
         : app.getVersion()
 
-    const p  = join(base, 'config.yml')
-
+    let seen = true
 
     if(version == '1.0.0') {
 
-        if(fs.pathExistsSync(p)) {
-            fs.rmSync(p, { recursive: true, force: true })
-        }
-    
-        rConfig()
-
         const filesToUpdate = [
+
             join('qmd', 'section-g.qmd'),
             join('qmd', 'section-m.qmd'),
             join('qmd', 'section-l.qmd'),
@@ -34,25 +46,15 @@ export const updateRCBMS = () => {
             join('utils', 'exports', 'export-summary.R'),
             join('references', 'export_settings.xlsx'),
             join('utils', 'exports', 'export-config.R'),
-            join('references', 'HPQF2_DICT.dcf')
+            join('references', 'HPQF2_DICT.dcf'),
+            join('utils', 'helpers', 'select_cv.R'),
+            'scripts',
         ]
 
-        filesToUpdate.forEach(el => {
-            const from = join(app.getAppPath(), 'static', 'rcbms', el)
-            const to = join(withRCBMSFolder().path, el)
-
-            fs.copySync(from, to, { recursive: true });
-        })
-
+        applyUpdate(filesToUpdate)
     }
 
     if(version == '1.0.1') {
-
-        if(fs.pathExistsSync(p)) {
-            fs.rmSync(p, { recursive: true, force: true })
-        }
-    
-        rConfig()
 
         const filesToUpdate = [
             join('qmd', 'section-m.qmd'),
@@ -60,24 +62,11 @@ export const updateRCBMS = () => {
             join('references', 'export_settings.xlsx'),
             join('references', 'HPQF2_DICT.dcf')
         ]
+        applyUpdate(filesToUpdate)
 
-        filesToUpdate.forEach(el => {
-            const from = join(app.getAppPath(), 'static', 'rcbms', el)
-            const to = join(withRCBMSFolder().path, el)
-
-            fs.copySync(from, to, { recursive: true });
-        })
-
-        
     }
 
     if(version == '1.0.2') {
-
-        if(fs.pathExistsSync(p)) {
-            fs.rmSync(p, { recursive: true, force: true })
-        }
-    
-        rConfig()
 
         const filesToUpdate = [
             join('references', 'export_settings.xlsx'),
@@ -86,13 +75,32 @@ export const updateRCBMS = () => {
             join('utils', 'exports', 'export-config.R'),
         ]
 
-        filesToUpdate.forEach(el => {
-            const from = join(app.getAppPath(), 'static', 'rcbms', el)
-            const to = join(withRCBMSFolder().path, el)
+        applyUpdate(filesToUpdate)
 
-            fs.copySync(from, to, { recursive: true });
-        })
     }
 
-    fs.writeJSONSync(path, { version: v })
+    if(version == '1.0.3') {
+
+        const filesToUpdate = [
+            join('utils', 'exports', 'export.R'),
+        ]
+
+        applyUpdate(filesToUpdate)
+
+    }
+
+    if(version == '1.0.4') {
+
+        const filesToUpdate = [
+            'scripts',
+            join('utils', 'helpers', 'select_cv.R'),
+        ]
+
+        seen = false
+
+        applyUpdate(filesToUpdate)
+
+    }
+
+    fs.writeJSONSync(path, { version: v, seen })
 }
