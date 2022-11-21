@@ -53,3 +53,10 @@ export interface UpdateConfig {
     key: keyof RConfig
     val: boolean
 }
+
+export interface SavedTables {
+    title: string
+    tableOptions: TableOptions
+    script?: string
+    dataTable: any
+}

@@ -1,6 +1,6 @@
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { join } from 'path';
-import { exec, spawn } from 'child_process'
+import { exec, spawn, execSync } from 'child_process'
 import fs from 'fs-extra'
 import yaml from 'js-yaml'
 
@@ -135,7 +135,7 @@ app.whenReady().then(() => {
   autoUpdater.checkForUpdatesAndNotify()
 
   app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
+    // On macisMac it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -177,10 +177,10 @@ const mountedPayload = () => {
     withDownloadedData: { ...withDownloadedData(), isAvailable: csdbeCheck(withDownloadedData().path).isAvailable }, 
     withJustification: withJustification(), 
     withOutputFolder: withOutputFolder(rConfig().use_pilot_data),
-    withRInstalled: os ? { isAvailable : true, path: 'Not applicable' } : withRInstalled(), 
-    withRStudioInstalled: os ? { isAvailable : true, path: 'Not applicable' } : withRStudioInstalled(), 
-    withQuartoInstalled: os ? { isAvailable : true, path: 'Not applicable' } : withQuartoInstalled(), 
-    withCSProInstalled: os ? { isAvailable : true, path: 'Not applicable' } : withCSProInstalled(),
+    withRInstalled: isMac ? { isAvailable : true, path: 'Not applicable' } : withRInstalled(), 
+    withRStudioInstalled: isMac ? { isAvailable : true, path: 'Not applicable' } : withRStudioInstalled(), 
+    withQuartoInstalled: isMac ? { isAvailable : true, path: 'Not applicable' } : withQuartoInstalled(), 
+    withCSProInstalled: isMac ? { isAvailable : true, path: 'Not applicable' } : withCSProInstalled(),
     withParquetData: withParquetData().isAvailable,
     csdbeList
   }
@@ -197,7 +197,7 @@ dataLoader()
 
 ipcMain.on('open-output-folder', (event, data) => {
   const { path } = withOutputFolder(data)
-  const output = os ? `open "/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/output"` : `start "" "${path}"`
+  const output = isMac ? `open "/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/output"` : `start "" "${path}"`
   exec(output);
 })
 
@@ -247,13 +247,26 @@ ipcMain.on('configure-path', (event, payload) => {
   })
 })
 
-
 ipcMain.on('load-dictionary', (event, req) => {
 
   const rcmbsPath = withRCBMSFolder().path
   const rPath = isMac || !withRInstalled().isAvailable ? 'Rscript' : withRInstalled().path
-  const { geoPath, dictionaryPath } = withParquetData()
+  const { geoPath, dictionaryPath, isDictionaryAvailable } = withParquetData()
 
+  if(!isDictionaryAvailable) {
+    const dPath = join('utils', 'save-parquet.R')
+    execSync(`"${rPath}" "${dPath}"`, { cwd: rcmbsPath })
+  }
+
+  const mode = rConfig().use_pilot_data ? '2021-pilot-cbms' : '2022-cbms'
+  const pathMode = join(rcmbsPath, 'scripts', mode, 'store')
+  const pathTable = join(pathMode, 'tables.json')
+  let savedTables = []
+  
+  if(fs.existsSync(pathTable)) {
+    savedTables = fs.readJSONSync(pathTable)
+  }
+  
   const script = `
     df <- list()
     df[['geo']] <- arrow::open_dataset('${geoPath}') |> dplyr::collect()
@@ -270,7 +283,7 @@ ipcMain.on('load-dictionary', (event, req) => {
     g.on('close', (code) => {
       if(code == 0) {
         const payload  = { ...JSON.parse(df) }
-        event.reply('dictionary', payload)
+        event.reply('dictionary', { ...payload, savedTables })
       }
     })
 })
@@ -400,8 +413,40 @@ autoUpdater.on('download-progress', (p) => {
   sendStatusToWindow(p, 'percent');
 })
 
-
 ipcMain.on('seen-changelog', () => {
   const v = getVersion()
   fs.writeJSONSync(v.path, { version: v.version, seen: true })
+})
+
+ipcMain.on('save-table', (event, data) => {
+  const { path } = withRCBMSFolder()
+  const mode = rConfig().use_pilot_data ? '2021-pilot-cbms' : '2022-cbms'
+  const pathMode = join(path, 'scripts', mode, 'store')
+  const pathTable = join(pathMode, 'tables.json')
+
+  let payload = [{...data}]
+  
+  if(fs.existsSync(pathTable)) {
+    const tables = fs.readJSONSync(pathTable)
+    payload = [...tables, ...payload]
+  } else {
+    if(!fs.existsSync(join(path, 'scripts', mode))) fs.mkdirSync(join(path, 'scripts', mode))
+    if(!fs.existsSync(pathMode)) fs.mkdirSync(join(pathMode))
+  }
+  
+  fs.writeJSONSync(join(pathMode, 'tables.json'), payload)
+
+})
+
+ipcMain.on('select-export-path', (event, data) => {
+
+ dialog.showOpenDialog({properties: ['openDirectory'] }).then((response : any) => {
+    if (!response.canceled) {
+      // console.log(response.filePaths[0]);
+      event.reply('selected-export-path', response.filePaths[0])
+      
+    } else {
+      console.log("no file selected");
+    }
+  })
 })

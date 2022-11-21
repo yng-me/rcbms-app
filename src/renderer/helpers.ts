@@ -1,3 +1,5 @@
+import { TableOptions } from './utils/types'
+
 export const getLogBySection = (data : any, y : string) => {
 
     let result : any = []
@@ -21,4 +23,23 @@ export const getLogBySection = (data : any, y : string) => {
             val: el.n
         }
     })
+}
+
+
+export const tableAlreadyExist = (tables: [], options: TableOptions) => {
+    let match = false
+    if(tables.length) {
+        match = Boolean(tables.find((el : any) => {
+            return el.tableOptions.col == options.col && 
+                el.tableOptions.row == options.row &&
+                el.tableOptions.rowRecord == options.rowRecord &&
+                el.tableOptions.colRecord == options.colRecord &&
+                el.tableOptions.colRecordLabel == options.colRecordLabel &&
+                el.tableOptions.groupBy.brgy == options.groupBy.brgy &&
+                el.tableOptions.groupBy.province == options.groupBy.province &&
+                el.tableOptions.groupBy.city_mun == options.groupBy.city_mun &&
+                el.tableOptions.groupBy.ean == options.groupBy.ean
+        }))
+    }
+    return match
 }

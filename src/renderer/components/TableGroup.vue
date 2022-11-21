@@ -50,7 +50,7 @@ watch(
 <template>
     <div v-show="showGroup" class="border tracking-wide rounded-xl bg-white shadow-xl space-y-4 overflow-hidden w-96">
         <div class="space-y-3">
-            <h2 class="px-5 pt-3 flex tracking-widest uppercase items-start justify-between">
+            <h2 class="pl-5 pr-4 py-2 border-b flex tracking-widest uppercase items-center justify-between">
                 <span class="text-xs">GROUPING</span>
                 <button 
                     @click.prevent="$emit('closeGroup')"
@@ -97,19 +97,24 @@ watch(
                 <span>Enumeration Area (EA)</span>
             </label>
             <div class="border-t px-5 py-2.5 flex justify-end space-x-2 bg-gray-50">
-                <button 
-                    @click.prevent="$emit('closeGroup')" 
-                    class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl bg-gray-500 text-white hover:bg-gray-600">Cancel</button>
-                <button 
-                    @click.prevent="applyGrouping"
-                    :disabled="!valueChanged" 
-                    :class="[
-                        !valueChanged? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700',
-                        pulse? 'animate-pulse' : ''
-                    ]"
-                    class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl text-white bg-gradient-to-tr">
-                    Apply Grouping
-                </button>
+                <!-- <button class="text-xs uppercase tracking-widest font-medium hover:text-teal-600">
+                    Advanced 
+                </button> -->
+                <div class="flex space-x-2 items-center">
+                    <button 
+                        @click.prevent="$emit('closeGroup')" 
+                        class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium whitespace-nowrap rounded-xl bg-gray-500 text-white hover:bg-gray-600">Cancel</button>
+                    <button 
+                        @click.prevent="applyGrouping"
+                        :disabled="!valueChanged" 
+                        :class="[
+                            !valueChanged? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700',
+                            pulse? 'animate-pulse' : ''
+                        ]"
+                        class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium whitespace-nowrap rounded-xl text-white bg-gradient-to-tr">
+                        Apply
+                    </button>
+                </div>
             </div>
         </div>
     </div>

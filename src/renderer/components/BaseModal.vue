@@ -100,7 +100,7 @@
                     multipurpose: 'md:px-3 md:pt-6 md:top-0 md:bottom-auto bottom-0 md:items-top md:justify-center fixed flex inset-x-0 w-full max-h-screen',
                     nav: 'md:top-0 md:bottom-auto bottom-0 md:items-top md:justify-center fixed flex inset-x-0 w-full max-h-screen',
                     full: 'justify-center fixed flex inset-0',
-                    dialog: 'justify-center fixed flex items-center inset-0 lg:mb-32' 
+                    dialog: 'justify-center fixed flex items-center inset-0' 
                 }[this.usage]
             },
             innerClass() {
