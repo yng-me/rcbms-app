@@ -2,7 +2,7 @@
 
 import { computed, onMounted, reactive, ref, watch } from '@vue/runtime-core'
 import { ipcRenderer } from '../electron'
-import { TableOptions, Geo, DataDictionary, TableOptionsGrouping } from '../utils/types'
+import { TableOptions, Geo, DataDictionary, SavedTables } from '../utils/types'
 import { records } from '../assets/constants' 
 // @ts-ignore
 import TableFilter from './TableFilter.vue';
@@ -20,6 +20,7 @@ const state = reactive({
     geo: [] as Geo[],
     dictionary: [] as DataDictionary[],
     data: [] as any,
+    savedTables: [] as SavedTables[],
     script: ''
 })
 
@@ -57,7 +58,8 @@ onMounted(() => {
 })
 
 ipcRenderer.on('dictionary', (event, payload) => {
-    state.dictionary = payload.dictionary 
+    state.dictionary = payload.dictionary
+    state.savedTables = payload.savedTables
     state.geo = payload.geo
     setTimeout(() => {
         loading.value = false
@@ -65,6 +67,7 @@ ipcRenderer.on('dictionary', (event, payload) => {
 })
 
 defineEmits(['back'])
+
 
 const activeDictionary = computed(() => {
 
@@ -92,8 +95,10 @@ ipcRenderer.on('return-arrow', (event, payload) => {
 })
 
 watch(() => tableOptions.row && tableOptions.col, () => {
-    loading.value = true
-    ipcRenderer.send('arrow', JSON.parse(JSON.stringify(tableOptions)))
+    if(!(tableOptions.row == '' && tableOptions.col == '')) {
+        loading.value = true
+        ipcRenderer.send('arrow', JSON.parse(JSON.stringify(tableOptions)))
+    }
 }, { deep: true })
 
 
@@ -135,6 +140,7 @@ watch(() => tableOptions.rowRecord, (newValue, oldValue) => {
     tableOptions.colRecord = newValue
     tableOptions.row = ''
     tableOptions.col = ''
+    state.data = []
     tableOptions.colRecordLabel = records.find(el => el.value === newValue)?.label
 })
 
@@ -142,7 +148,7 @@ watch(() => tableOptions.rowRecord, (newValue, oldValue) => {
 
 <template>
     <div v-if="show.geoFilter || show.groupBy" @click.prevent="[show.geoFilter = false, show.groupBy = false]" class="fixed z-10 h-screen inset-0 bg-stone-700 opacity-75"></div>
-    <div class="pr-6 pl-4 pt-6 pb-4 flex items-center relative justify-between w-full">
+    <div class="pl-4 pr-6 pt-4 pb-4 flex items-center relative justify-between w-full">
         <div class="flex sm:items-center items-start space-x-2">
             <button @click.prevent="$emit('back')" class="p-1 hover:text-teal-500">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
@@ -174,6 +180,9 @@ watch(() => tableOptions.rowRecord, (newValue, oldValue) => {
                 <svg class="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
                 <span class="uppercase tracking-widest text-xs font-semibold">Filter</span>
             </button>
+            <!-- <button class="hover:text-teal-600">
+                <svg class="w-5 h-5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+            </button> -->
             <transition name="slide-fade">
                 <div v-show="show.groupBy || show.geoFilter" class="absolute z-50 right-6 sm:top-16 top-20">
                     <TableGroup
@@ -236,6 +245,7 @@ watch(() => tableOptions.rowRecord, (newValue, oldValue) => {
             </select>
         </div>
     </div>
+    
     <div v-if="loading" class="py-12 flex items-center justify-center w-full">
         <span class="flex space-x-2 items-center">
             <span class="flex items-center justify-center">
@@ -249,12 +259,9 @@ watch(() => tableOptions.rowRecord, (newValue, oldValue) => {
             :table-options="tableOptions"
             :rowName="rowName"
             :data-table="state.data"
+            :savedTables="state.savedTables"
+            :script="state.script"
         />
-        <pre>
-            <code>
-                {{ state.script }}
-            </code>
-        </pre>
     </template>
     <BaseModal :closeable="false" :show="show.joinBy" usage="dialog" max-width="2xl">
         <DialogBox @close="show.joinBy = false" title="Joining Records">

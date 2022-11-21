@@ -9,3 +9,4 @@ hpq$section_c$c06_notcursch_fct <- factor(hpq$section_c$c06_notcursch, levels = 
 hpq$section_c$c07_gradtech_fct <- factor(hpq$section_c$c07_gradtech, levels = c(1, 2), labels = c("1 - Yes", "2 - No"))
 hpq$section_c$c08_trnskl_fct <- factor(hpq$section_c$c08_trnskl, levels = c(1, 2), labels = c("1 - Yes", "2 - No"))
 hpq$section_c$a05_sex_fct <- factor(hpq$section_c$a05_sex, levels = c(1, 2), labels = c("1 - Male", "2 - Female"))
+hpq$section_c$b06_ofi_fct <- factor(hpq$section_c$b06_ofi, levels = c(1:7), labels = c("1 - YES, OVERSEAS FILIPINO WORKER (OFW) WITH CONTRACT", "2 - YES, OTHER OFW WITH NO CONTRACT", "3 - YES, EMPLOYEES IN PHIL. EMBASSY, CONSULATES & OTHER MISSIONS", "4 - YES, STUDENT ABROAD", "5 - YES, TOURIST", "6 - YES, OTHER OVERSEAS FILIPINO NOT ELSEWHERE CLASSIFIED", "7 - NO, RESIDENT (PHILIPPINES)"))

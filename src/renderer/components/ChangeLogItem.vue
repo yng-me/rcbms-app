@@ -2,7 +2,7 @@
 import { ref } from "@vue/reactivity"
 
 const bg : any = {
-    'new feature': 'bg-teal-600',
+    'feature': 'bg-teal-600',
     'bug fix': 'bg-red-600',
     'enhancement': 'bg-orange-600'
 }

@@ -43,11 +43,9 @@ export const updateRCBMS = () => {
             join('qmd', 'section-m.qmd'),
             join('qmd', 'section-l.qmd'),
             join('qmd', 'cross-section.qmd'),
-            join('utils', 'exports', 'export-summary.R'),
             join('references', 'export_settings.xlsx'),
-            join('utils', 'exports', 'export-config.R'),
             join('references', 'HPQF2_DICT.dcf'),
-            join('utils', 'helpers', 'select_cv.R'),
+            'utils',
             'scripts',
         ]
 
@@ -80,27 +78,24 @@ export const updateRCBMS = () => {
     }
 
     if(version == '1.0.3') {
-
-        const filesToUpdate = [
-            join('utils', 'exports', 'export.R'),
-        ]
-
-        applyUpdate(filesToUpdate)
-
+        applyUpdate([join('utils', 'exports', 'export.R')])
     }
 
     if(version == '1.0.4') {
 
-        const filesToUpdate = [
+        applyUpdate([
             'scripts',
-            join('utils', 'helpers', 'select_cv.R'),
-        ]
-
-        seen = false
-
-        applyUpdate(filesToUpdate)
+            join('utils', 'helpers', 'select_cv.R')
+        ])
 
     }
+
+    // if(version == '1.0.5') {
+    //     seen = false
+    //     applyUpdate([
+    //         'utils'    
+    //     ])
+    // }
 
     fs.writeJSONSync(path, { version: v, seen })
 }

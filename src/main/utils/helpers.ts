@@ -134,15 +134,16 @@ export const withPilotDataDict = () => {
 // Reference
 export const withParquetData = () => {
 
-    const pathToGeo = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/geo.parquet' : join(base, 'data\\parquet\\geo.parquet')
-    const pathtoDict = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/parquet_dictionary.parquet' : join(base, 'data\\parquet\\parquet_dictionary.parquet')
-    const directory = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet' : join(base, 'data\\parquet')
+    const pathToGeo = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/geo.parquet' : join(base, 'data', 'parquet', 'geo.parquet')
+    const pathtoDict = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/parquet_dictionary.parquet' : join(base, 'data', 'parquet', 'parquet_dictionary.parquet')
+    const directory = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet' : join(base, 'data', 'parquet')
     const fileDirectory = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet' : './data/parquet'
     const geoPath = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/geo.parquet' : './data/parquet/geo.parquet'
     const dictionaryPath = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/parquet_dictionary.parquet' : './data/parquet/parquet_dictionary.parquet'
 
     return { 
-        isAvailable: fs.pathExistsSync(pathToGeo) && fs.pathExistsSync(pathtoDict), 
+        isAvailable: fs.pathExistsSync(pathToGeo),
+        isDictionaryAvailable: fs.pathExistsSync(pathtoDict),
         path: pathToGeo, 
         directory, 
         fileDirectory,
