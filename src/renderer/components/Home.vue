@@ -23,7 +23,6 @@ import AboutUs from './AboutUs.vue'
 
 const g = 'b13c4cbb792ef13d5a60a916'
 
-defineEmits(['tabulate'])
 
 // BEFORE MOUNT
 const doneCopyingResources = ref(false)
@@ -262,6 +261,7 @@ const hr = computed(() => {
   return _hr.value.toString().length == 1 ? `0${_hr.value}` : _hr.value
 })
 
+defineEmits(['tableShown'])
 
 const stopProcessing = () => {
   _sec.value = 0
@@ -327,8 +327,6 @@ const loadDataDialog = () => {
   }
 }
 
-const selectedCSDBE = ref([])
-const selectAllCSDBE = ref(true)
 
 const showLoadData = () => {
   show.loadDataConfirm = false
@@ -336,6 +334,9 @@ const showLoadData = () => {
     show.loadData = true
   }, 1000);
 }
+
+const selectedCSDBE = ref([])
+const selectAllCSDBE = ref(true)
 
 watch(selectAllCSDBE, (newValue) => {
   if(newValue === true) {
@@ -348,8 +349,8 @@ watch(selectAllCSDBE, (newValue) => {
 })
 
 watch(selectedCSDBE, (newValue) => {
-  if(selectedCSDBE.value.length === data.csdbeList.length) selectAllCSDBE.value = true
   if(selectedCSDBE.value.length < data.csdbeList.length) selectAllCSDBE.value = false
+  if(selectedCSDBE.value.length === data.csdbeList.length) selectAllCSDBE.value = true
 })
 
 </script>
@@ -368,7 +369,7 @@ watch(selectedCSDBE, (newValue) => {
             <button 
             title="Tabulation" 
             :disabled="!withParquetData"
-            @click.prevent="$emit('tabulate')" 
+            @click.prevent="$emit('tableShown')" 
             :class="!withParquetData ? 'text-gray-300' : 'hover:text-teal-600 transform hover:rotate-12'">
             <svg class="w-5 h-5 text-current" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
             </button>

@@ -4,12 +4,38 @@ import { exec, spawn } from 'child_process'
 import fs from 'fs-extra'
 import yaml from 'js-yaml'
 
+export interface Geo {
+  region?: string
+  province: string
+  city_mun: string
+  brgy: string
+  reg_psgc?: number
+  prov_psgc?: number
+  city_mun_psgc?: number
+  brgy_psgc?: number
+}
+
+export interface TableOptions {
+  rowRecord: string
+  colRecord: string
+  colRecordLabel?: string
+  joinType?: string
+  joinVariables: string[]
+  joinAll?: boolean,
+  row: string
+  col: string
+  geoFilter: Geo,
+  groupBy: TableOptionsGrouping
+}
+
+export interface TableOptionsGrouping {
+  province: boolean
+  city_mun: boolean
+  brgy: boolean
+  ean: boolean
+}
+
 import { autoUpdater } from 'electron-updater'
-// import log from 'electron-log'
-// log.transports.console.format = '{h}:{i}:{s} {text}'
-// log.transports.file.resolvePath = () => join('C:\\Users\\Bhas\\Desktop\\app\\rcbms\\src', 'logs/main.log')
-// log.info('Hello')
-// log.warn('Problem')
 
 // before-mount
 import { rcbmsCheck } from './modules/checker/with-rcmbs'
@@ -19,7 +45,6 @@ import { exportLogCheck } from './modules/checker/with-export-log'
 import { csdbeCheck } from './modules/checker/with-csdbe'
 import { textDataCheck } from './modules/checker/with-text-data'
 import { rConfig, withYamlConfig } from './modules/checker/with-rconfig';
-import { referenceDictionaryCheck } from './modules/checker/with-reference';
 
 import { 
   withCSProInstalled,
@@ -32,7 +57,6 @@ import {
   withEditedData,
   withDownloadedData,
   withParquetData,
-  toParquet,
   withRCBMSFolder,
   getFileLabel,
   withPilotData,
@@ -47,7 +71,7 @@ import { base } from './utils/constants';
 import { pilotDataLoader } from './modules/loader-pilot';
 import { piloExecuter } from './modules/executer-pilot';
 
-const os = process.platform === 'darwin'
+const isMac = process.platform === 'darwin'
 const dev = process.env.NODE_ENV === 'development'
 
 let mainWindow : BrowserWindow
@@ -83,7 +107,7 @@ function createWindow () {
       ? 'index.html'
       : `qmd\\section-${section.slice(-1).toLowerCase()}.html`
 
-    const htmlPath = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/_book/' + htmlFile : join(base, '_book', htmlFile)
+    const htmlPath = isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/_book/' + htmlFile : join(base, '_book', htmlFile)
 
     childWindow.loadFile(htmlPath)
     childWindow.show()
@@ -223,129 +247,125 @@ ipcMain.on('configure-path', (event, payload) => {
   })
 })
 
+
 ipcMain.on('load-dictionary', (event, req) => {
-  
 
   const rcmbsPath = withRCBMSFolder().path
+  const rPath = isMac || !withRInstalled().isAvailable ? 'Rscript' : withRInstalled().path
+  const { geoPath, dictionaryPath } = withParquetData()
 
-  const { filePath, fileDirectory } = withParquetData()
-
-  const parquet = os ? join(fileDirectory, `${req.record}.parquet`) : `${fileDirectory}/${req.record}.parquet`
-
-  const rPath = os || !withRInstalled().isAvailable ? 'Rscript' : withRInstalled().path;
+  const script = `
+    df <- list()
+    df[['geo']] <- arrow::open_dataset('${geoPath}') |> dplyr::collect()
+    df[['dictionary']] <- arrow::open_dataset('${dictionaryPath}') |> dplyr::collect()
+    jsonlite::toJSON(df, pretty = T)
+  `
+  const g = spawn(rPath, ['-e', script], { cwd: rcmbsPath })
   
-  const pq = `${toParquet(parquet)} \nprint(jsonlite::toJSON(names(df)))`
-
-  let pqText = ''
-  const v = spawn(rPath, ['-e', pq], { cwd: rcmbsPath })
-  v.stdout.on('data', (data) => pqText += data.toString())
-  v.stderr.on('data', (err) => console.log(err.toString()))
-
-  v.on('close', (code) => {
-    if(code == 0) {
-      event.reply('variables', JSON.parse(pqText))
-    }
-  })
-
-  if(req.include) {
-    
-    const dictionary = referenceDictionaryCheck().data
+    let df = ''
   
-    const geoRun = `df <- arrow::open_dataset('${filePath}') |> \ndplyr::collect() \nprint(jsonlite::toJSON(df))`
-  
-    const g = spawn(rPath, ['-e', geoRun], { cwd: rcmbsPath })
-  
-    let geoText = ''
-  
-    g.stdout.on('data', (data) => geoText += data.toString())
+    g.stdout.on('data', (data) => df += data.toString())
     g.stderr.on('data', (err) => console.log(err.toString()))
   
     g.on('close', (code) => {
       if(code == 0) {
-        const payload  = { 
-          dictionary,
-          geo: JSON.parse(geoText)
-        }
+        const payload  = { ...JSON.parse(df) }
         event.reply('dictionary', payload)
       }
     })
-  }
-
 })
 
-ipcMain.on('arrow', (event, req) => {
-    
-  const a = Object.values(req.group)
-  const b = Object.keys(req.group)
-  let g : string[] = []
+ipcMain.on('arrow', (event, request) => {
 
-  a.forEach((el, key) => {
-    if(el) {
-      g.push(b[key])
-    }
-  })
-
+  const req : TableOptions = request
 
   const rcmbsPath = withRCBMSFolder().path
   const { fileDirectory } = withParquetData()
-  const parquet = os ? join(fileDirectory, `${req.record}.parquet`) : `${fileDirectory}/${req.record}.parquet`
-  const rPath = os || !withRInstalled().isAvailable ? 'Rscript' : withRInstalled().path;
+  const parquetPath = isMac ? join(fileDirectory, `${req.rowRecord}.parquet`) : `${fileDirectory}/${req.rowRecord}.parquet`
+  const rPath = isMac || !withRInstalled().isAvailable ? 'Rscript' : withRInstalled().path;
 
   const adorn = req.col !== '' ? "c('row', 'col')" : ''
-  let filter = ''
-    
-  if (req.prov != '' && req.cityMun != '' && req.brgy != '') {
-    filter = `\ndplyr::filter(province == '${req.prov}', city_mun == '${req.cityMun}', brgy == '${req.brgy}') |>`
-  } else if (req.prov != '' && req.cityMun != '') {
-    filter = `\ndplyr::filter(province == '${req.prov}', city_mun == '${req.cityMun}') |>`
-  } else if (req.prov != '') {
-    filter = `\ndplyr::filter(province == '${req.prov}') |>`
+  const filter = Object.entries({...req.geoFilter})
+    .filter(item => item[1] != '') 
+    .map(el => `${el[0]} == '${el[1]}'`)
+
+  const filterScript = filter.length ?  `dplyr::filter(${filter.join(', ')}) |>` : ''
+
+  const group_by = Object.entries({...req.groupBy})
+    .filter(item => item[1] === true) 
+    .map(el => el[0])
+
+  const select = [...group_by, req.row, req.col].filter(el => el !== '')
+
+  let joinBy = ''
+  let dfJoin = ''
+  if(req.rowRecord !== req.colRecord) {
+    const joinType = req.joinType?.split(' ').join('_').toLowerCase()
+    const joinParquet = isMac ? join(fileDirectory, `${req.colRecord}.parquet`) : `${fileDirectory}/${req.colRecord}.parquet`
+    const cVariables = req.joinVariables.map(el => `'${el}'`).join(', ')
+    const joinVariables = [...req.joinVariables, req.col].join(', ')
+    dfJoin = `df_join <- arrow::open_dataset('${joinParquet}') |> dplyr::select(${joinVariables}) \n`
+    joinBy = `dplyr::${joinType}(df_join, by = c(${cVariables})) |>`
   }
-
-  let select = ''
-
-  if(g.length) {
-    const gFlat = g.join(', ')
-    select = `${gFlat}, `
-  }
-
+  
   let tabulate = ''
 
   if(req.col !== '') {
-    select += `${req.row}, ${req.col}`
-    tabulate = `dplyr::group_by(${select}) |>
-    dplyr::count() |>
-    tidyr::pivot_wider(names_from = ${req.col}, values_from = n, values_fill = 0) |>
-    dplyr::rename_at(dplyr::vars(dplyr::matches('^NA$')), ~ stringr::str_replace(., '^NA$', 'Missing / NA'))`
-  } else {
-    tabulate = `dplyr::count(${req.row}) |> \ndplyr::rename(Frequency = n)`
-    select += req.row
-  }
-
-  const runR = `
-    ts <- list()
-    ${toParquet(parquet)}
-    ts$data <- df |> ${filter}
-      dplyr::select(${select}) |>
+    tabulate = `dplyr::group_by(${select.join(', ')}) |>
+      dplyr::count() |>
       dplyr::collect() |>
-      ${tabulate} |>
-      janitor::adorn_totals(${adorn}) 
-    ts$name <- names(df)
-    print(jsonlite::toJSON(ts))
-  `
-  
-   const sp = spawn(rPath, ['-e', runR], { cwd: rcmbsPath }) 
+      tidyr::pivot_wider(names_from = ${req.col}, values_from = n, values_fill = 0) |>
+      dplyr::rename_at(dplyr::vars(dplyr::matches('^NA$')), ~ stringr::str_replace(., '^NA$', 'Missing / NA'))`
+  } else {
+    tabulate = `dplyr::group_by(${select.join(', ')}) |> dplyr::count() |> \ndplyr::rename(Frequency = n) |> \ndplyr::collect()`
+  }  
 
-   let s = ''
-   sp.stdout.on('data', (data) => s += data.toString())
+  const script = `
+    convert_fct_cv <- function(data) {
+          
+      names <- tibble::as_tibble(names(data)) 
+      
+      fct_replace <- names |>
+        dplyr::filter(grepl('_fct$', value)) |>
+        dplyr::mutate(value = stringr::str_remove(value, '_fct$')) |>
+        dplyr::filter(value %in% names$value) |>
+        dplyr::mutate(value = paste0('^', value, '$')) |>
+        dplyr::pull(value) 
+      
+      df <- data |>
+        dplyr::select(-dplyr::matches(fct_replace)) |>
+        dplyr::rename_at(dplyr::vars(dplyr::matches('_fct$')), ~ stringr::str_remove(., '_fct$'))
+      
+      return(df)
+    }
+
+    ${dfJoin} \n
+
+    df <- arrow::open_dataset('${parquetPath}') |> ${joinBy} ${filterScript}
+      convert_fct_cv() |>
+      dplyr::select(${select.join(', ')}) |>
+      ${tabulate} |>
+      janitor::adorn_totals(${adorn})
+
+      print(jsonlite::toJSON(df))
+  `
+
+  console.log(script);
+  
+  
+   const sp = spawn(rPath, ['-e', script], { cwd: rcmbsPath }) 
+
+   let df = ''
+   sp.stdout.on('data', (data) => df += data.toString())
    sp.stderr.on('data', (err) => console.log(err.toString()))
 
    sp.on('close', (code) => {
     if(code == 0) {
-      const df = JSON.parse(s)
-      const payload  = { variables: df.name, data: df.data }
-       
-      event.reply('return-arrow', payload)
+      const payload = JSON.parse(df)
+      event.reply('return-arrow', {
+        data: payload,
+        script
+      })
     }
    })
 })

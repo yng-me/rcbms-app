@@ -6,10 +6,11 @@ import Footer from './components/Footer.vue';
 // @ts-ignore
 import Home from './components/Home.vue';
 // @ts-ignore
-import Arrow from './components/Arrow.vue';
+import TableMain from './components/TableMain.vue';
+// import Arrow from './components/Arrow.vue';
 import { ipcRenderer } from './electron';
 
-const tabulate = ref(false)
+const showTable = ref(false)
 const show = ref(true)
 const progress = ref('')
 
@@ -61,13 +62,13 @@ ipcRenderer.on('percent', (event, data) => {
     </div>
   </transition>
   <transition>
-  <div v-if="!tabulate">
-      <Home @tabulate="tabulate = !tabulate" />
+  <div v-if="!showTable">
+      <Home @table-shown="showTable = !showTable" />
     </div>
   </transition>
   <transition name="arrow">
-    <div v-if="tabulate" class="w-full h-full">
-        <Arrow @back="tabulate = false" />
+    <div v-if="showTable" class="w-full h-full">
+        <TableMain @back="showTable = false" />
     </div>
   </transition>
   <Footer></Footer>

@@ -134,12 +134,21 @@ export const withPilotDataDict = () => {
 // Reference
 export const withParquetData = () => {
 
-    const path = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/geo.parquet' : join(base, 'data\\parquet\\geo.parquet')
+    const pathToGeo = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/geo.parquet' : join(base, 'data\\parquet\\geo.parquet')
+    const pathtoDict = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/parquet_dictionary.parquet' : join(base, 'data\\parquet\\parquet_dictionary.parquet')
     const directory = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet' : join(base, 'data\\parquet')
-    const filePath = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/geo.parquet' : './data/parquet/geo.parquet'
     const fileDirectory = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet' : './data/parquet'
+    const geoPath = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/geo.parquet' : './data/parquet/geo.parquet'
+    const dictionaryPath = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/parquet_dictionary.parquet' : './data/parquet/parquet_dictionary.parquet'
 
-    return { isAvailable: fs.pathExistsSync(path), path, directory, filePath, fileDirectory } 
+    return { 
+        isAvailable: fs.pathExistsSync(pathToGeo) && fs.pathExistsSync(pathtoDict), 
+        path: pathToGeo, 
+        directory, 
+        fileDirectory,
+        geoPath, 
+        dictionaryPath
+    }
 }
 
 
@@ -164,38 +173,7 @@ export const toParquet = (path: string) => {
         }
         
         df <- arrow::open_dataset('${path}') |>
-            dplyr::select(
-                -dplyr::starts_with('a06'),
-                -dplyr::matches('^a13_pcn2$'),
-                -dplyr::ends_with('psgc'), 
-                -dplyr::contains('line_number_id'), 
-                -dplyr::starts_with('a01'), 
-                -dplyr::matches('^geo$'),
-                -dplyr::matches('^start$'),
-                -dplyr::matches('^end$'),
-                -dplyr::matches('^duration_hr$'),
-                -dplyr::matches('^duration_min$'),
-                -dplyr::matches('^a07_age'),
-                -dplyr::matches('^ts$'),
-                -dplyr::matches('^te$'),
-                -dplyr::matches('_lnoctr$'),
-                -dplyr::matches('^g51_fishops$'),
-                -dplyr::matches('^g53a[ab]_oth$'),
-                -dplyr::matches('^g53a[ab]_oth$'),
-                -dplyr::matches('^g22a_agrimach_'),
-                -dplyr::matches('^g29a_lvstckpltrymach_'),
-                -dplyr::matches('^g42[abz]_aqufarmmach_'),
-                -dplyr::matches('^g54a_oth_'),
-                -dplyr::matches('^h[45][a-c]_total$'),
-                -dplyr::matches('^h2$'),
-                -dplyr::matches('^l27_raredisn1$'),
-                -dplyr::matches('^o05[h-k]_lno$'),
-                -dplyr::matches('^p0[56]k_comm$'),
-                -dplyr::matches('^mode_data$'),
-                -dplyr::matches('^(time|date)uploaded$'),
-                -dplyr::matches('^finalresultvisit$')
-            ) |>
-            convert_fct_cv()
+            convert_fct_cv() 
     `
 }
 
