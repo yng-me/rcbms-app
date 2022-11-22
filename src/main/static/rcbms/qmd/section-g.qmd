@@ -152,6 +152,7 @@ If the answer in G01 = 1 then G02 and G03 should not be blank.
 (
   cv_g03_prclloc_blank <- section_g01_10 %>% 
     filter(g01_agriact == 1, g02_numprcl > 0, !(g03_prclloc %in% c(1:3))) %>% 
+    distinct() %>%
     select_cv(g01_agriact_fct, g02_numprcl, g03_prclloc_fct, h = 'g03_prclloc_fct')
 )[[1]]
 ```
@@ -164,6 +165,7 @@ If the answer in G01 = 1, G02 is in the valueset (G02 = 1:99), and G03 = 1:3, th
 (
   cv_g03_1_prclactivity_blank <- section_g01_10 %>% 
     filter(g01_agriact == 1, g02_numprcl %in% c(1:99), !(g03_1_prclactivity %in% c(1:3))) %>% 
+    distinct() %>%
     select_cv(g01_agriact_fct, g02_numprcl, g03_1_prclactivity_fct)
 )[[1]]
 ```
@@ -188,6 +190,7 @@ If G04 = 99 (Others), Others Specify field must not be blank. Others specify fie
 (
   cv_g04_prcltenure_oblank <- section_g01_10 %>% 
     filter(g01_agriact == 1, g02_numprcl %in% c(1:99), g04_prcltenure == 99, is.na(g4a_prcltenureoth)) %>% 
+    distinct() %>%
     select_cv(g01_agriact_fct, g02_numprcl, g04_prcltenure_fct, g4a_prcltenureoth, h = 'g4a_prcltenureoth')
 )[[1]]
 ```
@@ -278,6 +281,7 @@ If the answer in G01 = 01 (agricultural land) then g08 should not be blank or in
       g8_prclarea > 100 | g8_prclarea2 < 0 | 
       (is.na(g8_prclarea) & is.na(g8_prclarea2))
     ) %>% 
+    distinct() %>%
    select_cv(g01_agriact_fct, g8_prclarea1_fct, g8_prclarea, g8_prclarea2)
 )[[1]]
 ```
@@ -291,6 +295,7 @@ If the answer in G01 = 1 (agricultural land) then there should be HH members sel
   cv_g9_comanaged_blank <- section_g01_10 %>%
     left_join(ref_hh_count, by = 'case_id') %>% 
     filter(g01_agriact == 1, !grepl('\\d', g9_comanaged) | as.integer(g9_comanaged) < 1 | as.integer(g9_comanaged) > n) %>%
+    distinct() %>%
     select_cv(g01_agriact_fct, g03_1_prclactivity_fct, g9_comanaged, h = 'g9_comanaged')
 )[[1]]
 ```
@@ -503,6 +508,7 @@ G13 should be blank since answers in G13C to G13Z are all 'No'.
   cv_g14_prodact_na <- section_g11_19 %>% 
     filter_at(vars(matches('^g12[c-fz]_.*'), -matches('_fct$')), all_vars(. == 2)) %>% 
     filter(!is.na(g13_typengage_grownlvstck)) %>% 
+    distinct() %>%
     select_cv(
       matches('^g12[c-fz]_.*_fct$'),
       g13_typengage_grownlvstck_fct

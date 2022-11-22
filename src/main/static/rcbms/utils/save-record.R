@@ -14,7 +14,7 @@ if_else(!dir.exists('./data/parquet'), dir.create('./data/parquet', showWarnings
 parquet_names <- names(hpq)
 
 for(pq in seq_along(parquet_names)) {
-  df <- hpq[[parquet_names[pq]]] %>% convert_fct_cv()
+  df <- hpq[[parquet_names[pq]]] #%>% convert_fct_cv()
   arrow::write_parquet(df, paste0('./data/parquet/', parquet_names[pq], '.parquet'))
 }
 
