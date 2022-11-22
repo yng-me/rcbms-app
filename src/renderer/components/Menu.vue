@@ -2,7 +2,7 @@
 
 import { computed, reactive, ref } from 'vue';
 import { ipcRenderer } from '../electron'
-import { RConfig, UpdateConfig } from '../utils/types'
+import { RConfig } from '../utils/types'
 
 // @ts-ignore
 import Configuration from './Configuration.vue';
@@ -104,7 +104,7 @@ const loadingConfig = ref(false)
 ipcRenderer.on('saved-path-config', (event, name) => {
     setTimeout(() => {
       loadingConfig.value = false
-    }, 1000);
+    }, 100);
 })
 
 </script>

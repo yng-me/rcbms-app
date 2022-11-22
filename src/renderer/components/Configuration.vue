@@ -35,7 +35,7 @@ watch(() => props.loadingConfig, (newValue) => {
         doneLoading.value = true
         setTimeout(() => {
             doneLoading.value = false
-        }, 2000);
+        }, 1000);
     }
 })
 

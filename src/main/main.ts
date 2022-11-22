@@ -188,6 +188,7 @@ const mountedPayload = () => {
 
 ipcMain.on('mounted', (event, data) => {
   event.reply('mounted', mountedPayload())
+  event.reply('define-mode', rConfig().use_pilot_data)
 })
 
 executer()
@@ -206,10 +207,9 @@ ipcMain.on('update-r-config', (event, data) => {
   const payload = { ...rConfig(), ...data }
 
   fs.writeFile(withYamlConfig().path, yaml.dump(payload), () => {
-    setTimeout(() => {
-      event.reply('yaml-config-saved')
-      event.reply('mounted', { ...mountedPayload(), rConfig: payload })
-    }, 750);
+    event.reply('yaml-config-saved')
+    event.reply('mounted', { ...mountedPayload(), rConfig: payload })
+    event.reply('define-mode', rConfig().use_pilot_data)
   })
 })
 

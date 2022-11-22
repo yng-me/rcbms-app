@@ -160,7 +160,7 @@ ipcRenderer.on('saved-table', (event, data) => {
             type="text" v-model="tableTitle" 
             placeholder="Table Title"
             class="border-transparent tracking-wide bg-transparent sm:w-3/5 w-full font-semibold px-0 py-1 text-sm focus:border-b focus:border-t-transparent focus:border-l-transparent focus:border-r-transparent focus:border-teal-500 focus:border-opacity-50 focus:ring-0" > -->
-        <!-- <div class="px-6 pt-4 pb-3 sm:flex items-end justify-end w-full space-y-3">
+        <div class="px-6 pt-4 pb-3 sm:flex items-end justify-end w-full space-y-3">
             <div class="flex items-center space-x-3 justify-end">
                 <button 
                     @click="show.exportTable = true"
@@ -183,7 +183,7 @@ ipcRenderer.on('saved-table', (event, data) => {
                 </button>
                
             </div>
-        </div> -->
+        </div>
         <!-- <button class="hover:text-teal-600">
             <svg class="w-5 h-5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
         </button> -->
