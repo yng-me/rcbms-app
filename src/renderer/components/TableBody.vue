@@ -155,12 +155,12 @@ ipcRenderer.on('saved-table', (event, data) => {
 </script>
 
 <template>
-    <div v-if="dfNoTotal.length" class="pb-16 bg-gradient-to-t from-white to-gray-100">
-        <div class="px-6 pt-4 pb-3 sm:flex items-end justify-end w-full space-y-3">
-            <!-- <input 
-                type="text" v-model="tableTitle" 
-                placeholder="Table Title"
-                class="border-transparent tracking-wide bg-transparent sm:w-3/5 w-full font-semibold px-0 py-1 text-sm focus:border-b focus:border-t-transparent focus:border-l-transparent focus:border-r-transparent focus:border-teal-500 focus:border-opacity-50 focus:ring-0" > -->
+    <div v-if="dfNoTotal.length" class="pb-16 pt-6 bg-gradient-to-t from-white to-gray-100">
+        <!-- <input 
+            type="text" v-model="tableTitle" 
+            placeholder="Table Title"
+            class="border-transparent tracking-wide bg-transparent sm:w-3/5 w-full font-semibold px-0 py-1 text-sm focus:border-b focus:border-t-transparent focus:border-l-transparent focus:border-r-transparent focus:border-teal-500 focus:border-opacity-50 focus:ring-0" > -->
+        <!-- <div class="px-6 pt-4 pb-3 sm:flex items-end justify-end w-full space-y-3">
             <div class="flex items-center space-x-3 justify-end">
                 <button 
                     @click="show.exportTable = true"
@@ -182,11 +182,11 @@ ipcRenderer.on('saved-table', (event, data) => {
                     </span>
                 </button>
                
-                <!-- <button class="hover:text-teal-600">
-                    <svg class="w-5 h-5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
-                </button> -->
             </div>
-        </div>
+        </div> -->
+        <!-- <button class="hover:text-teal-600">
+            <svg class="w-5 h-5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+        </button> -->
         
         <div class="overflow-auto w-full px-6 pb-24">
             <div class="rounded-xl border overflow-auto w-full">
@@ -194,19 +194,19 @@ ipcRenderer.on('saved-table', (event, data) => {
                     <thead class="text-xs bg-gray-50 text-teal-700 border-b border-teal-700 uppercase tracking-widest">
                     <!-- <thead class="text-xs bg-teal-700 text-white border-b border-teal-700 uppercase tracking-widest"> -->
                         <th class="px-3.5 pt-2.5 pb-2 border-r font-semibold text-left items-start" v-if="tableOptions.groupBy.province">
-                            <TableSort @sort-table="sortTable('province')" label="Province" />
+                            <!-- <TableSort @sort-table="sortTable('province')" label="Province" /> -->Province
                         </th>
                         <th class="px-3.5 pt-2.5 pb-2 border-r font-semibold text-left items-start" v-if="tableOptions.groupBy.city_mun">
-                            <TableSort @sort-table="sortTable('city_mun')" label="City/Municipality" />
+                            <!-- <TableSort @sort-table="sortTable('city_mun')" label="City/Municipality" /> -->City/Municipality
                         </th>
                         <th class="px-3.5 pt-2.5 pb-2 border-r font-semibold text-left items-start" v-if="tableOptions.groupBy.brgy">
-                            <TableSort @sort-table="sortTable('brgy')" label="Barangay" />
+                            <!-- <TableSort @sort-table="sortTable('brgy')" label="Barangay" /> -->Barangay
                         </th>
                         <th class="px-3.5 pt-2.5 pb-2 border-r font-semibold text-left items-start" v-if="tableOptions.groupBy.ean">
-                            <TableSort @sort-table="sortTable('ean')" label="EA" />
+                            <!-- <TableSort @sort-table="sortTable('ean')" label="EA" /> -->EA
                         </th>
                         <th class="px-3.5 pt-2.5 pb-2 border-r font-semibold text-left items-start whitespace-nowrap">
-                            <TableSort @sort-table="sortTable(tableOptions.row)" :label="rowName !== '' ? rowName : tableOptions.row" />
+                            <!-- <TableSort @sort-table="sortTable(tableOptions.row)" :label="rowName !== '' ? rowName : tableOptions.row" /> -->{{ rowName !== '' ? rowName : tableOptions.row }}
                         </th>
                         <th class="px-3.5 pt-2.5 pb-2 border-l font-semibold !w-32 whitespace-nowrap" v-for="i in heading" :key="i">
                             <!-- <TableSort @sort-table="sortTable(i)" :label="i" /> -->

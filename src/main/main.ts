@@ -363,24 +363,26 @@ ipcMain.on('arrow', (event, request) => {
       print(jsonlite::toJSON(df))
   `
 
-  console.log(script);
+  try {
+    const sp = spawn(rPath, ['-e', script], { cwd: rcmbsPath }) 
   
+    let df = ''
+    sp.stdout.on('data', (data) => df += data.toString())
+    sp.stderr.on('data', (err) => console.log(err.toString()))
   
-   const sp = spawn(rPath, ['-e', script], { cwd: rcmbsPath }) 
-
-   let df = ''
-   sp.stdout.on('data', (data) => df += data.toString())
-   sp.stderr.on('data', (err) => console.log(err.toString()))
-
-   sp.on('close', (code) => {
-    if(code == 0) {
-      const payload = JSON.parse(df)
-      event.reply('return-arrow', {
-        data: payload,
-        script
-      })
-    }
-   })
+    sp.on('close', (code) => {
+     if(code == 0) {
+       const payload = JSON.parse(df)
+       event.reply('return-arrow', {
+         data: payload,
+         script
+       })
+     }
+    })
+  } catch {
+    dialog.showErrorBox('Data Tabulation', 'Sorry, there was an error encoutered for tabulating the selected variables.')
+  }
+   
 })
 
 const sendStatusToWindow = (text: string | {}, event: string = 'on-update') => { 
