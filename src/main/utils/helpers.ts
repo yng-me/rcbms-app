@@ -110,7 +110,10 @@ export const withExportLog = () => {
 export const withJustification = () => {
     const { paths } = rConfig()
 
-    return { isAvailable: fs.pathExistsSync(paths.justification_path), path: paths.justification_path, key: 'justification_path' } 
+    const ext = extname(paths.rdata_path)
+    const validExt = ext === '.xlsx' || ext === '.XLSX'
+
+    return { isAvailable: fs.pathExistsSync(paths.justification_path) && validExt, path: paths.justification_path, key: 'justification_path' } 
 }
 
 // Reference

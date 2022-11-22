@@ -104,7 +104,7 @@ const openOutputFile = () => ipcRenderer.send('open-output-folder', props.isPilo
                 <svg v-if="rStatus.error" class="w-4 h-4 text-red-600 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 <span v-if="rStatus.message" :class="rStatus.error? 'text-red-700' : 'text-gray-600'" class="text-sm ">{{ rStatus.message }}</span>
             </div>
-            <button v-if="showOutputFolder && !rStatus.error" @click.prevent="openOutputFile" 
+            <button v-if="showOutputFolder && !rStatus.error && rStatus.message == 'Done processing'" @click.prevent="openOutputFile" 
                 class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl text-white bg-teal-600 hover:bg-teal-700">
                 Open Output Folder
             </button>

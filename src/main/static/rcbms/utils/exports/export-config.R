@@ -97,6 +97,7 @@ exp_case_wise <- do.call('rbind', validation_data) %>%
   ) %>% 
   # mutate(lno = if_else(grepl('\\d{2}', lno), '', lno)) %>% 
   na_if('') %>% 
+  mutate(ean = if_else(is.na(ean) & !is.na(case_id), str_sub(case_id, 10, 15), ean)) %>%
   select(
     'Case ID' = case_id,
     'Region' = region,

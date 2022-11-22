@@ -90,12 +90,13 @@ export const updateRCBMS = () => {
 
     }
 
-    // if(version == '1.0.5') {
-    //     seen = false
-    //     applyUpdate([
-    //         'utils'    
-    //     ])
-    // }
+    if(version == '1.0.5') {
+        seen = false
+        applyUpdate([
+            'utils',
+            join('qmd', 'section-g.qmd'),
+        ])
+    }
 
     fs.writeJSONSync(path, { version: v, seen })
 }
