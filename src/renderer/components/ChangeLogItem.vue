@@ -33,8 +33,8 @@ const show = ref(false)
                 </span>
                 <span class="">{{ j.feature }}</span>
             </span>
-            <ul v-for="k in j.info" :key="k" class="space-y-1 list-disc px-6 ">
-                <li v-html="k" class="py-1 text-sm"></li>
+            <ul v-for="k in j.info" :key="k" class="space-y-1 list-disc px-6 pt-1">
+                <li v-html="k" class="pt-1 text-sm"></li>
             </ul>
         </li>
     </ul>

@@ -7,6 +7,27 @@ import ChangeLogItem from './ChangeLogItem.vue';
 
 const changeLogs = reactive([
     {
+        version: 'RCBMS v1.0.6',
+        releaseDate: '22 November 2022',
+        logs: [ 
+            {
+                feature: 'Cross tabulation of distinct record types',
+                type: 'enhancement',
+                info: [
+                    'You can now cross tabulate two distinct record types or sections. Just join them by defining common variables present in these records, like <span class="font-semibold">Case ID</span> or <span class="font-semibold">Line Number</span>.'
+                ]
+            },
+            {
+                feature: 'Justification file not detected',
+                type: 'bug fix',
+                info: [
+                    'Fixed error when generating inconsistencies with Excel justification file.',
+                    'Make sure also to retain the original tab/sheet name, which is <span class="font-semibold">Cases with Inconsistencies</span>.'
+                ]
+            },
+        ]  
+    },
+    {
         version: 'RCBMS v1.0.5',
         releaseDate: '21 November 2022',
         logs: [ 
@@ -15,7 +36,8 @@ const changeLogs = reactive([
                 type: 'feature',
                 info: [
                     '2021 Pilot CBMS data can now be loaded to RCBMS to generate list of cases with inconsistencies',
-                    'To enable the feature, go to Settings > Options > toggle ON the <span class="font-semibold">Use 2021 Pilot CBMS data<span>.'
+                    'To enable the feature, go to Settings > Options > toggle ON the <span class="font-semibold">Use 2021 Pilot CBMS data<span>.',
+                    'You will be prompted to load the data file. Go to Settings > Configuration > define the <span class="font-semibold">2021 Pilot CBMS data folder</span>.'
                 ]
             },
             {
@@ -76,7 +98,7 @@ const changeLogs = reactive([
         logs: [ 
             {
                 feature: 'Select csdbe files to extract',
-                type: 'new feature',
+                type: 'feature',
                 info: [
                     'Before extracting the csdbe files, you can now pick specific file/s you want to include in the generation of list of cases with inconsistencies.',
                     'If these files were downloaded directly from the tablet, however, a minimum of 10 csdbe files is still required.'
