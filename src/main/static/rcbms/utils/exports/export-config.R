@@ -167,7 +167,6 @@ if(config$include_justifiction & file.exists(justification_path)) {
         # filter(!grepl('JUSTIFIED', Status, ignore.case = T)) %>% 
   }
   
-  
 } else {
   
   exp_case_wise <- exp_case_wise %>% 

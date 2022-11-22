@@ -6,16 +6,19 @@ import TableItem from './TableItem.vue';
 import BaseModal from './BaseModal.vue';
 // @ts-ignore
 import Dialog from './Dialog.vue';
-import { TableOptions } from '../utils/types'
+import { SavedTables, TableOptions } from '../utils/types'
 // @ts-ignore
 import TableSort from './TableSort.vue';
 import { ipcRenderer } from '../electron';
 
 import { tableAlreadyExist } from '../helpers'
 
-const tableTitle = ref('Table 1')
+const tableTitle = ref('')
+const tableDesc = ref('')
 const destination = ref('')
 const filename = ref('')
+const progress = ref('')
+const selectedTablesToExport = ref([])
 
 const props = defineProps({
     tableOptions: {
@@ -31,8 +34,12 @@ const props = defineProps({
     script: {
         type: String
     },
-    savedTables: Array as any
+    savedTables: {
+        type: Array as PropType<SavedTables[]>,
+        required: true
+    }
 })
+const emits = defineEmits(['saved-table'])
 
 const show = reactive({
     saveTable: false,
@@ -79,7 +86,11 @@ const dfTotal = computed(() => {
 })
 
 const tableExist = computed(() => {
-    return tableAlreadyExist(props.savedTables, props.tableOptions)
+    return tableAlreadyExist(props.savedTables || [], props.tableOptions)
+})
+
+const tableNameExist = computed(() => {
+    return Boolean(props.savedTables.find(el => el.title == tableTitle.value))
 })
 
 const heading = computed(() => {
@@ -91,7 +102,6 @@ const heading = computed(() => {
     return Object.keys(props.dataTable[0]).filter(el => el !== props.tableOptions.row && !g.includes(el))
 })
 
-
 const sorted = reactive({
     variable: '',
     desc: true
@@ -102,16 +112,21 @@ const sortTable = (variable: string) => {
     sorted.desc = !sorted.desc
 }
 
-
 const saveSelectedTable = () => {
-    ipcRenderer.send('save-table', {
-        title: tableTitle.value,
-        dataTable: JSON.parse(JSON.stringify(props.dataTable)) ,
-        tableOptions: JSON.parse(JSON.stringify(props.tableOptions)),
-        // script: JSON.parse(JSON.stringify(props.script)),
-    })
+    
+    progress.value = 'Saving...'
 
-    show.saveTable = false
+    const payload = {
+        title: tableTitle.value,
+        description: tableDesc.value,
+        dataTable: JSON.parse(JSON.stringify(props.dataTable)) ,
+        tableOptions: JSON.parse(JSON.stringify(props.tableOptions))
+    }
+
+    setTimeout(() => {        
+        ipcRenderer.send('save-table', payload)
+    }, 500);
+
 }
 
 const exportTable = () => {
@@ -126,6 +141,17 @@ ipcRenderer.on('selected-export-path', (event, data) => {
     destination.value = data
 })
 
+ipcRenderer.on('saved-table', (event, data) => {
+    progress.value = 'Saved'
+    tableTitle.value = ''
+    tableDesc.value = ''
+    setTimeout(() => {
+        progress.value = ''
+        show.saveTable = false
+        emits('saved-table', data)
+    }, 1000);
+})
+
 </script>
 
 <template>
@@ -138,15 +164,17 @@ ipcRenderer.on('selected-export-path', (event, data) => {
             <div class="flex items-center space-x-3 justify-end">
                 <button 
                     @click="show.exportTable = true"
-                    class="pl-3 pr-3.5 py-1.5 flex hover:text-teal-600 bg-white hover:bg-gray-50 items-center space-x-1 text-xs tracking-widest text-gray-600 border rounded-xl uppercase font-semibold">
+                    :disabled="savedTables?.length === 0"
+                    :class="savedTables?.length === 0 ? 'bg-gray-50 text-gray-400' : 'hover:text-teal-600 text-gray-600  bg-white hover:bg-gray-50'"
+                    class="pl-3 pr-3.5 py-1.5 flex items-center space-x-1 text-xs tracking-widest border rounded-xl uppercase font-semibold">
                     <svg class="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
                     <span>Export</span>
                 </button>
                 <button 
                     :disabled="tableExist"
                     @click="show.saveTable = true" 
-                    :class="tableExist ? 'text-teal-600 bg-teal-50 border-teal-600 border-opacity-25' : 'text-gray-600 bg-white hover:text-teal-600 hover:bg-gray-50 '"
-                    class="pl-3 pr-3.5 py-1.5 flex items-center space-x-1 text-xs tracking-widest border rounded-xl uppercase font-semibold">
+                    :class="tableExist ? 'text-white bg-teal-600 ' : 'border text-gray-600 bg-white hover:text-teal-600 hover:bg-gray-50 '"
+                    class="pl-3 pr-3.5 py-1.5 flex items-center space-x-1 text-xs tracking-widest rounded-xl uppercase font-semibold">
                     <svg class="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
                     <span>Save{{ tableExist ? 'D' : '' }}</span>
                     <span v-if="tableExist" class="pl-1">
@@ -218,22 +246,35 @@ ipcRenderer.on('selected-export-path', (event, data) => {
                         <input 
                             type="text" v-model="tableTitle" 
                             placeholder="Table Title"
-                            class="px-3.5 py-1.5 rounded-xl text-sm focus:border-teal-600 w-full border-gray-300" />
+                            class="px-3.5 py-1.5 rounded-xl text-sm focus:border-teal-600 w-full border-gray-300" 
+                        />
+                        <span v-if="tableNameExist" class="text-red-600 text-xs tracking-wide">Table name already exists.</span>
                     </div>
                     <div class="px-5 flex flex-col space-y-1.5">
                        <label for="" class="text-xs tracking-widest text-gray-500 uppercase font-semibold">Table Description (Optional)</label>    
-                        <textarea class="px-3.5 py-1.5 rounded-xl text-sm focus:border-teal-600 w-full border-gray-300" placeholder="Table Description" />
+                        <textarea 
+                            v-model="tableDesc" 
+                            class="px-3.5 py-1.5 rounded-xl text-sm focus:border-teal-600 w-full border-gray-300" 
+                            placeholder="Table Description" />
                     </div>
                 </div>
-                <div class="border-t px-5 py-2.5 flex justify-end space-x-2 bg-gray-50">
+                <div :class="progress ? 'justify-between' : 'justify-end'"
+                    class="border-t px-5 py-2.5 flex space-x-2 bg-gray-50">
+                    <div class="flex items-center space-x-2">
+                        <div v-if="progress == 'Saving...'" class="flex items-center justify-center">
+                            <div class="w-5 h-5 border-l border-teal-600 rounded-full animate-spin"></div>
+                        </div>
+                        <svg v-else-if="progress == 'Saved'" class="w-5 h-5 opacity-50 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span>{{ progress }}</span>
+                    </div>
                     <div class="flex space-x-2 items-center">            
                         <button 
                             @click.prevent="show.saveTable = false" 
                             class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl bg-gray-500 text-white hover:bg-gray-600">Cancel</button>
                         <button 
-                            :disabled="!tableTitle"
+                            :disabled="!tableTitle || tableNameExist || progress != ''"
                             @click.prevent="saveSelectedTable"
-                            :class="!tableTitle? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'"
+                            :class="!tableTitle || tableNameExist || progress != ''? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'"
                             class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl text-white bg-gradient-to-tr">
                             Save
                         </button>
@@ -266,7 +307,7 @@ ipcRenderer.on('selected-export-path', (event, data) => {
                             <svg class="w-5 h-5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path></svg>
                         </button>
                     </div>
-                    <div class="px-5 flex flex-col space-y-1.5">
+                    <!-- <div class="px-5 flex flex-col space-y-1.5">
                         <label for="" class="text-xs tracking-widest text-gray-500 uppercase font-semibold">File type</label>
                         <div class="grid sm:grid-cols-4 grid-cols-2 gap-3.5">
                             <div v-for="i in ['Excel', 'CSV']" :key="i" class="w-full">
@@ -277,10 +318,22 @@ ipcRenderer.on('selected-export-path', (event, data) => {
                                 </button>
                             </div>
                         </div>
-                    </div>
-                    <div class="px-5 py-4">
-                        <div v-for="i in 10" :key="i" class="">{{ i }}</div>
-
+                    </div> -->
+                    <div class="px-5">
+                        <div class="px-5 py-4 space-y-4 rounded-xl border h-64 overflow-auto">
+                            <div v-for="(i, index) in savedTables" :key="index" class="flex items-start space-x-2">
+                                <input 
+                                    type="checkbox" 
+                                    v-model="selectedTablesToExport" 
+                                    :value="i.title" :name="i.title" :id="i.title" 
+                                    class="text-teal-600 rounded mt-1" 
+                                />
+                                <label :for="i.title" class="flex flex-col">
+                                    <span>{{ i.title }}</span>
+                                    <!-- <span class="text-xs text-gray-500 tracking-wide">{{ i.description }}</span> -->
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="border-t px-5 py-2.5 flex justify-end space-x-2 bg-gray-50">

@@ -357,7 +357,7 @@ watch(selectedCSDBE, (newValue) => {
 
 
 <template>
-    <div class=" y-scroll-bar">
+    <div class="y-scroll-bar relative">
         <NavMenu @updateConfig="updateConfig($event)" :checks="checks">
         <button 
             title="Refresh the app"
