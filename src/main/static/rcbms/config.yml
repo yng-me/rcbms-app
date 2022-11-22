@@ -1,25 +1,31 @@
 run_after_edit: false
-use_rdata: true
+use_rdata: false
 include_justifiction: false
 clear: false
 save_by_area: false
 convert_to_rdata: false
 append_new_record: false
-use_pilot_data: true
+use_pilot_data: false
 use_raw_data_from_tablet: false
 paths:
-  r_path: C:\Program Files\R\R-4.2.1\bin\x64\Rscript.exe
+  r_path: ''
   rstudio_path: C:\Program Files\RStudio\bin\rstudio.exe
   quarto_path: C:\Program Files\RStudio\bin\quarto\bin\quarto.exe
-  rdata_path: C:\Users\Bhas\Desktop\hpq.Rdata
+  rdata_path: >-
+    /Users/bhasabdulsamad/Desktop/Apps/rcbms-app/src/main/static/rcbms/data/hpq.Rdata
   before_edit_path: C:\PSA SYSTEMS FOLDER\CBMS-ROLLOUT\HPQ\DOWNLOADED
   after_edit_path: C:\PSA SYSTEMS FOLDER\CBMS-ROLLOUT\HPQ\EDITED
-  justification_path: C:\rcbms\references\justifications.xlsx
-  output_path: C:\rcbms\output
-  pilot_output_path: C:\rcbms\scripts\2021-pilot-cbms\output\Inconsistencies
-  reference_path: C:\rcbms\references\dictionary.xlsx
-  cspro_path: C:\Program Files (x86)\CSPro 7.7\CSPro.exe
-  csconcat_path: C:\Program Files (x86)\CSPro 7.7\CSConcat.exe
-  csexport_path: C:\Program Files (x86)\CSPro 7.7\CSExport.exe
-  pilot_data_path: C:\Users\Bhas\Desktop\pilot-data
-  pilot_data_dict_path: C:\rcbms\scripts\2021-pilot-cbms\references\HPQF2_PILOT_DICT.dcf
+  justification_path: >-
+    /Users/bhasabdulsamad/Desktop/Apps/rcbms-app/src/main/static/rcbms/references/justifications.xlsx
+  output_path: /Users/bhasabdulsamad/Desktop/Apps/rcbms-app/src/main/static/rcbms/output
+  pilot_output_path: >-
+    /Users/bhasabdulsamad/Desktop/Apps/rcbms-app/src/main/static/rcbms/scripts/2021-pilot-cbms/output/Inconsistencies
+  reference_path: >-
+    /Users/bhasabdulsamad/Desktop/Apps/rcbms-app/src/main/static/rcbms/references/dictionary.xlsx
+  cspro_path: ''
+  csconcat_path: ''
+  csexport_path: ''
+  pilot_data_path: >-
+    /Users/bhasabdulsamad/Desktop/Apps/rcbms-app/src/main/static/rcbms/data/pilot
+  pilot_data_dict_path: >-
+    /Users/bhasabdulsamad/Desktop/Apps/rcbms-app/src/main/static/rcbms/scripts/2021-pilot-cbms/references/HPQF2_PILOT_DICT.dcf

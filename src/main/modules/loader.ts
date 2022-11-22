@@ -11,11 +11,19 @@ const dev = process.env.NODE_ENV === 'development'
 
 import { vb } from './checker/somewhere'
 import { lv, all_that_can_be_expressed } from './checker/junk'
-
+import { rConfig } from './checker/with-rconfig'
 import { csdbeCheck } from './checker/with-csdbe'
 
-import { clearData, withDataDict, foryourconsideration, withDownloadedData, withEditedData, withCSProInstalled } from '../utils/helpers'
-import { rConfig } from './checker/with-rconfig'
+import { 
+  clearData, 
+  withDataDict, 
+  foryourconsideration,
+  withDownloadedData, 
+  withEditedData, 
+  withCSProInstalled 
+} from '../utils/helpers'
+
+
 
 const noDataError = {
   error: true,

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, PropType } from "vue";
-import { TableOptions, SavedTables } from "../utils/types";
+import { SavedTables } from "../utils/types";
 
 const viewStatus = ref(true)
 
@@ -10,7 +10,7 @@ const props = defineProps({
         required: true
     }
 })
-const emits = defineEmits(['selected-table', 'close'])
+const emits = defineEmits(['selected-table'])
 
 const selectedTable = (title: string) => {
     const payload = props.savedTables.find(el => el.title == title)?.tableOptions
@@ -60,18 +60,7 @@ const selectedTable = (title: string) => {
                         </li>
                     </ul>
                     <div class="border-t px-5 py-2.5 flex justify-end space-x-2 bg-gray-50 w-full">
-                        <button 
-                            @click.prevent="$emit('close')" 
-                            class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl bg-gray-500 text-white hover:bg-gray-600">Cancel</button>
-                            <!-- @click.prevent="filterApplied" -->
-                        <button 
-                            :disabled="!savedTables.length"
-                            :class="[
-                                !savedTables.length? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'
-                            ]"
-                            class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl text-white bg-gradient-to-tr">
-                            Export Table
-                        </button>
+                        <slot></slot>
                     </div>
                 </template>
             </div>

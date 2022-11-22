@@ -1,10 +1,12 @@
 import fs from 'fs-extra'
 import { join } from 'path'
-import os from 'os'
+import { app } from 'electron'
+// import os from 'os'
 
 const isMac = process.platform === 'darwin'
-export const base = isMac ? join(os.homedir(), 'Desktop', 'R Codes', '2022-cbms') : 'C:\\rcbms'
-export const pilotDirectory = isMac ? join(os.homedir(), 'Desktop', 'R Codes', '2021-pilot-cbms') : join('C:', 'rcbms', 'scripts', '2021-pilot-cbms')
+// export const base = isMac ? join(os.homedir(), 'Desktop', 'Apps', 'rcbms-app', 'src', 'main', 'static', 'rcbms') : join('C:', 'rcbms')
+export const base = isMac ? join(app.getAppPath(), 'static', 'rcbms') : join('C:', 'rcbms')
+export const pilotDirectory =  isMac ? join(app.getAppPath(), 'scripts', '2021-pilot-cbms') : join(base, 'scripts', '2021-pilot-cbms')
 
 export interface Paths {
     r_path: string

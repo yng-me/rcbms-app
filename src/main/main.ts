@@ -67,7 +67,7 @@ import {
 import { executer } from './modules/executer'
 import { dataLoader } from './modules/loader'
 import { updateRCBMS } from './modules/updater';
-import { base } from './utils/constants';
+import { base, pilotDirectory } from './utils/constants';
 import { pilotDataLoader } from './modules/loader-pilot';
 import { piloExecuter } from './modules/executer-pilot';
 
@@ -107,7 +107,7 @@ function createWindow () {
       ? 'index.html'
       : `qmd\\section-${section.slice(-1).toLowerCase()}.html`
 
-    const htmlPath = isMac ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/_book/' + htmlFile : join(base, '_book', htmlFile)
+    const htmlPath = join(base, '_book', htmlFile)
 
     childWindow.loadFile(htmlPath)
     childWindow.show()
@@ -181,7 +181,7 @@ const mountedPayload = () => {
     withRStudioInstalled: isMac ? { isAvailable : true, path: 'Not applicable' } : withRStudioInstalled(), 
     withQuartoInstalled: isMac ? { isAvailable : true, path: 'Not applicable' } : withQuartoInstalled(), 
     withCSProInstalled: isMac ? { isAvailable : true, path: 'Not applicable' } : withCSProInstalled(),
-    withParquetData: withParquetData().isAvailable,
+    withParquetData: withParquetData(rConfig().use_pilot_data).isAvailable,
     csdbeList
   }
 }
@@ -198,7 +198,7 @@ dataLoader()
 
 ipcMain.on('open-output-folder', (event, data) => {
   const { path } = withOutputFolder(data)
-  const output = isMac ? `open "/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/output"` : `start "" "${path}"`
+  const output = isMac ? `open "${path}"` : `start "" "${path}"`
   exec(output);
 })
 
@@ -249,17 +249,19 @@ ipcMain.on('configure-path', (event, payload) => {
 
 ipcMain.on('load-dictionary', (event, req) => {
 
-  const rcmbsPath = withRCBMSFolder().path
+  // const rcmbsPath = withRCBMSFolder().path
+  const basePath = req ?  pilotDirectory : base
   const rPath = isMac || !withRInstalled().isAvailable ? 'Rscript' : withRInstalled().path
-  const { geoPath, dictionaryPath, isDictionaryAvailable } = withParquetData()
+  const { geoPath, dictionaryPath, isDictionaryAvailable } = withParquetData(rConfig().use_pilot_data)
 
   if(!isDictionaryAvailable) {
     const dPath = join('utils', 'save-parquet.R')
-    execSync(`"${rPath}" "${dPath}"`, { cwd: rcmbsPath })
+    execSync(`"${rPath}" "${dPath}"`, { cwd: basePath })
   }
 
-  const mode = rConfig().use_pilot_data ? '2021-pilot-cbms' : '2022-cbms'
-  const pathMode = join(rcmbsPath, 'scripts', mode, 'store')
+  const mode = req ? '2021-pilot-cbms' : '2022-cbms'
+  const pathMode = join(basePath, 'scripts', mode, 'store')
+  const tableOutputFolder = join(pathMode, 'output', 'Tables')
   const pathTable = join(pathMode, 'tables.json')
   let savedTables = []
   
@@ -273,7 +275,7 @@ ipcMain.on('load-dictionary', (event, req) => {
     df[['dictionary']] <- arrow::open_dataset('${dictionaryPath}') |> dplyr::collect()
     jsonlite::toJSON(df, pretty = T)
   `
-  const g = spawn(rPath, ['-e', script], { cwd: rcmbsPath })
+  const g = spawn(rPath, ['-e', script], { cwd: basePath })
   
     let df = ''
   
@@ -283,7 +285,7 @@ ipcMain.on('load-dictionary', (event, req) => {
     g.on('close', (code) => {
       if(code == 0) {
         const payload  = { ...JSON.parse(df) }
-        event.reply('dictionary', { ...payload, savedTables })
+        event.reply('dictionary', { ...payload, savedTables, tableOutputFolder })
       }
     })
 })
@@ -293,7 +295,7 @@ ipcMain.on('arrow', (event, request) => {
   const req : TableOptions = request
 
   const rcmbsPath = withRCBMSFolder().path
-  const { fileDirectory } = withParquetData()
+  const { fileDirectory } = withParquetData(rConfig().use_pilot_data)
   const parquetPath = isMac ? join(fileDirectory, `${req.rowRecord}.parquet`) : `${fileDirectory}/${req.rowRecord}.parquet`
   const rPath = isMac || !withRInstalled().isAvailable ? 'Rscript' : withRInstalled().path;
 
@@ -386,7 +388,6 @@ ipcMain.on('arrow', (event, request) => {
 })
 
 const sendStatusToWindow = (text: string | {}, event: string = 'on-update') => { 
-  // log.info(text)
   mainWindow.webContents.send(event, text);
 }
 
@@ -434,6 +435,8 @@ ipcMain.on('save-table', (event, data) => {
     payload = [...tables, ...payload]
   } else {
     if(!fs.existsSync(join(base, 'scripts', mode))) fs.mkdirSync(join(base, 'scripts', mode))
+    if(!fs.existsSync(join(base, 'scripts', mode, 'output'))) fs.mkdirSync(join(base, 'scripts', mode, 'output'))
+    if(!fs.existsSync(join(base, 'scripts', mode, 'output', 'Tables'))) fs.mkdirSync(join(base, 'scripts', mode, 'output', 'Tables'))
     if(!fs.existsSync(pathMode)) fs.mkdirSync(join(pathMode))
   }
   

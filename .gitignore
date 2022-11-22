@@ -31,4 +31,5 @@ src/main/static/rcbms/*.js
 src/main/static/rcbms/**/*.js
 src/main/static/rcbms/**/*.html
 src/main/static/rcbms/output/*
+src/main/static/rcbms/output/utils/version.json
 src/main/static/rcbms/_book/*

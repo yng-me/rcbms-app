@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import { computed, PropType, reactive, ref } from 'vue';
+import { computed, PropType, reactive, watch, ref } from 'vue';
 // @ts-ignore
 import TableItem from './TableItem.vue';
 import BaseModal from './BaseModal.vue';
@@ -15,10 +15,7 @@ import { tableAlreadyExist } from '../helpers'
 
 const tableTitle = ref('')
 const tableDesc = ref('')
-const destination = ref('')
-const filename = ref('')
 const progress = ref('')
-const selectedTablesToExport = ref([])
 
 const props = defineProps({
     tableOptions: {
@@ -37,14 +34,18 @@ const props = defineProps({
     savedTables: {
         type: Array as PropType<SavedTables[]>,
         required: true
+    },
+    tableOutputFolder: {
+        type: String,
+        required: true
     }
 })
-const emits = defineEmits(['saved-table'])
 
 const show = reactive({
     saveTable: false,
-    exportTable: false
 })
+
+const emits = defineEmits(['saved-table', 'show-export'])
 
 const df = computed(() => {
 
@@ -133,13 +134,9 @@ const exportTable = () => {
     alert('Exported')
 }
 
-const chooseOutputDest = () => {
-    ipcRenderer.send('select-export-path')
-}
-
-ipcRenderer.on('selected-export-path', (event, data) => {
-    destination.value = data
-})
+// ipcRenderer.on('selected-export-path', (event, data) => {
+//     destination.value = data
+// })
 
 ipcRenderer.on('saved-table', (event, data) => {
     progress.value = 'Saved'
@@ -155,7 +152,7 @@ ipcRenderer.on('saved-table', (event, data) => {
 </script>
 
 <template>
-    <div v-if="dfNoTotal.length" class="pb-16 pt-6 bg-gradient-to-t from-white to-gray-100">
+    <div v-if="dfNoTotal.length" class="pb-16 bg-gradient-to-t from-white to-gray-100">
         <!-- <input 
             type="text" v-model="tableTitle" 
             placeholder="Table Title"
@@ -163,7 +160,7 @@ ipcRenderer.on('saved-table', (event, data) => {
         <div class="px-6 pt-4 pb-3 sm:flex items-end justify-end w-full space-y-3">
             <div class="flex items-center space-x-3 justify-end">
                 <button 
-                    @click="show.exportTable = true"
+                    @click="$emit('show-export')"
                     :disabled="savedTables?.length === 0"
                     :class="savedTables?.length === 0 ? 'bg-gray-50 text-gray-400' : 'hover:text-teal-600 text-gray-600  bg-white hover:bg-gray-50'"
                     class="pl-3 pr-3.5 py-1.5 flex items-center space-x-1 text-xs tracking-widest border rounded-xl uppercase font-semibold">
@@ -277,76 +274,6 @@ ipcRenderer.on('saved-table', (event, data) => {
                             :class="!tableTitle || tableNameExist || progress != ''? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'"
                             class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl text-white bg-gradient-to-tr">
                             Save
-                        </button>
-                    </div>
-                </div>
-            </Dialog>
-        </BaseModal>
-        <BaseModal @close="show.exportTable = false" :show="show.exportTable" usage="dialog" max-width="xl">
-            <Dialog @close="show.exportTable = false" title="Export Table">
-                <div class="pt-4 pb-5 space-y-5">
-                    <div class="px-5 flex flex-col space-y-1.5">
-                        <label for="" class="text-xs tracking-widest text-gray-500 uppercase font-semibold">File Name</label>
-                        <input 
-                            type="text" v-model="filename" 
-                            placeholder="Table Title"
-                            class="px-3.5 py-1.5 rounded-xl text-sm focus:border-teal-60 focus:border-teal-600 font-semibold w-full border-gray-300" 
-                        />
-                    </div>
-                    <div class="px-5 flex flex-col space-y-1.5 relative">
-                        <label for="" class="text-xs tracking-widest text-gray-500 uppercase font-semibold">Output Destination</label>
-                        <input 
-                            type="text" v-model="destination" 
-                            placeholder=""
-                            disabled
-                            class="px-3.5 py-1.5 rounded-xl text-sm focus:border-teal-600 w-full font-semibold border-gray-300" 
-                        />
-                        <button 
-                            @click.prevent="chooseOutputDest"
-                            class="absolute right-8 bottom-2 hover:text-teal-600">
-                            <svg class="w-5 h-5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path></svg>
-                        </button>
-                    </div>
-                    <!-- <div class="px-5 flex flex-col space-y-1.5">
-                        <label for="" class="text-xs tracking-widest text-gray-500 uppercase font-semibold">File type</label>
-                        <div class="grid sm:grid-cols-4 grid-cols-2 gap-3.5">
-                            <div v-for="i in ['Excel', 'CSV']" :key="i" class="w-full">
-                                <button @click.prevent="tableOptions.joinType = i" :class="{ 'text-teal-600 bg-gray-50 border-teal-500 font-bold' : i === tableOptions.joinType }"
-                                    class="hover:bg-teal-100 px-3.5 py-2 border hover:border-teal-400 rounded-xl w-full flex items-center justify-between">
-                                    <span class=" tracking-wider text-xs">{{ i }}</span>
-                                    <svg v-if="i === tableOptions.joinType" class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div> -->
-                    <div class="px-5">
-                        <div class="px-5 py-4 space-y-4 rounded-xl border h-64 overflow-auto">
-                            <div v-for="(i, index) in savedTables" :key="index" class="flex items-start space-x-2">
-                                <input 
-                                    type="checkbox" 
-                                    v-model="selectedTablesToExport" 
-                                    :value="i.title" :name="i.title" :id="i.title" 
-                                    class="text-teal-600 rounded mt-1" 
-                                />
-                                <label :for="i.title" class="flex flex-col">
-                                    <span>{{ i.title }}</span>
-                                    <!-- <span class="text-xs text-gray-500 tracking-wide">{{ i.description }}</span> -->
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="border-t px-5 py-2.5 flex justify-end space-x-2 bg-gray-50">
-                    <div class="flex space-x-2 items-center">            
-                        <button 
-                            @click.prevent="show.exportTable = false" 
-                            class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl bg-gray-500 text-white hover:bg-gray-600">Cancel</button>
-                        <button 
-                            :disabled="!filename || !destination"
-                            @click.prevent="exportTable"
-                            :class="!filename || !destination? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'"
-                            class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl text-white bg-gradient-to-tr">
-                            Export
                         </button>
                     </div>
                 </div>
