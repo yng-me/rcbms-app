@@ -56,6 +56,7 @@ export interface UpdateConfig {
 
 export interface SavedTables {
     title: string
+    description?: string
     tableOptions: TableOptions
     script?: string
     dataTable: any

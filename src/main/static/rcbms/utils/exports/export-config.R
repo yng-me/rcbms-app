@@ -132,7 +132,7 @@ if(config$include_justifiction & file.exists(justification_path)) {
   exp_case_wise <- exp_case_wise %>% 
     left_join(
       justification, 
-      by = c('Case ID', 'Region', 'Province', 'City/Mun', 'Barangay', 'EA', 'Priority', 'Section', 'Title', 'Description')
+      by = c('Case ID', 'Section', 'Title', 'Description')
     )
   
 } else {

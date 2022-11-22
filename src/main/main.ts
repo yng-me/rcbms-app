@@ -419,9 +419,10 @@ ipcMain.on('seen-changelog', () => {
 })
 
 ipcMain.on('save-table', (event, data) => {
-  const { path } = withRCBMSFolder()
+  // const { path } = withRCBMSFolder()
+  
   const mode = rConfig().use_pilot_data ? '2021-pilot-cbms' : '2022-cbms'
-  const pathMode = join(path, 'scripts', mode, 'store')
+  const pathMode = join(base, 'scripts', mode, 'store')
   const pathTable = join(pathMode, 'tables.json')
 
   let payload = [{...data}]
@@ -430,11 +431,13 @@ ipcMain.on('save-table', (event, data) => {
     const tables = fs.readJSONSync(pathTable)
     payload = [...tables, ...payload]
   } else {
-    if(!fs.existsSync(join(path, 'scripts', mode))) fs.mkdirSync(join(path, 'scripts', mode))
+    if(!fs.existsSync(join(base, 'scripts', mode))) fs.mkdirSync(join(base, 'scripts', mode))
     if(!fs.existsSync(pathMode)) fs.mkdirSync(join(pathMode))
   }
   
   fs.writeJSONSync(join(pathMode, 'tables.json'), payload)
+
+  event.reply('saved-table', payload)
 
 })
 

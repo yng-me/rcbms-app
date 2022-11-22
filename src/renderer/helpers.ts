@@ -1,4 +1,4 @@
-import { TableOptions } from './utils/types'
+import { TableOptions, SavedTables } from './utils/types'
 
 export const getLogBySection = (data : any, y : string) => {
 
@@ -26,7 +26,7 @@ export const getLogBySection = (data : any, y : string) => {
 }
 
 
-export const tableAlreadyExist = (tables: [], options: TableOptions) => {
+export const tableAlreadyExist = (tables: SavedTables[], options: TableOptions) => {
     let match = false
     if(tables.length) {
         match = Boolean(tables.find((el : any) => {
