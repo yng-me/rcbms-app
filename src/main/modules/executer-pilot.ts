@@ -1,7 +1,5 @@
 import { ipcMain } from "electron";
 import { spawn } from 'child_process' 
-import { clearData } from "../utils/helpers";
-import { rConfig } from "./checker/with-rconfig";
 import { join } from 'path'
 
 import { withRInstalled } from "../utils/helpers";

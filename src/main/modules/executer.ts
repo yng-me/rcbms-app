@@ -7,8 +7,7 @@ import { join } from 'path'
 import { withRInstalled, withQuartoInstalled } from "../utils/helpers";
 import { base } from "../utils/constants";
 
-const os = process.platform == 'darwin'
-const cwd = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms' : base
+const isMac = process.platform == 'darwin'
 
 const replacer = (str : string) => {
   return str != undefined ? str.replace(/(\r\n|\n|\r|\r\n)*/gm, '') : ''
@@ -17,13 +16,14 @@ const replacer = (str : string) => {
 export const executer = () => {
   
   ipcMain.on('run-script', (event, data) => {
-      let rComm = os || !withRInstalled().isAvailable ? 'Rscript' : withRInstalled().path;
+    
+      let rComm = isMac || !withRInstalled().isAvailable ? 'Rscript' : withRInstalled().path;
       
       // checking for R packages
 
-      const filePath = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/utils/library.R' : 'utils\\library.R'
+      const filePath = join('utils', 'library.R')
 
-      const rSpawn = spawn(rComm, [filePath], { cwd });
+      const rSpawn = spawn(rComm, [filePath], { cwd: base });
 
       
       rSpawn.stdout.on('data', (data) => {
@@ -92,8 +92,8 @@ export const executer = () => {
 
           if(code === 0 || code === 3221225477) {
 
-            const qComm = os ? 'quarto' : withQuartoInstalled().path
-            const qSpawn = spawn(qComm, ['render'], { cwd })
+            const qComm = isMac ? 'quarto' : withQuartoInstalled().path
+            const qSpawn = spawn(qComm, ['render'], { cwd: base })
           
             // console.log(qSpawn);
             

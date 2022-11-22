@@ -1,12 +1,10 @@
 import { join, extname } from 'path'
 import fs from 'fs-extra'
 import { rConfig } from '../modules/checker/with-rconfig'
-import { base } from './constants'
+import { base, pilotDirectory } from './constants'
 import XLSX from 'xlsx'
 
 export const foryourconsideration = '100ad4ecac23db231981211bb1cc142e3453d96'
-
-const os = process.platform == 'darwin'
 
 export const clearData = (path : string) : void => {
     if(fs.pathExistsSync(path)) {
@@ -42,20 +40,18 @@ export const withRStudioInstalled = () => {
 // Quarto
 export const withQuartoInstalled = () => {
     const { paths } = rConfig()
-    
     return { isAvailable: fs.pathExistsSync(paths.quarto_path), path: paths.quarto_path, key: 'quarto_path' } 
 }
 
 // RCBMS folder
 export const withRCBMSFolder = () => {
-    const path = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms' : base 
-    return { isAvailable: fs.existsSync(path), path }  
+    return { isAvailable: fs.existsSync(base), path: base }  
 }
 
 // text data
 export const withTextData = () => {
-    const path = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/text' : join(base, 'data', 'text')
-    return { isAvailable: fs.pathExistsSync(path), path } 
+    const path = join(base, 'data', 'text')
+    return { isAvailable: fs.pathExistsSync(path), path }
 }
 
 // RData
@@ -94,7 +90,7 @@ export const withOutputFolder = (use_pilot_data: boolean = false) => {
 
 // Data dictionary
 export const withDataDict = () => {
-    const path = join(base, 'references\\HPQF2_DICT.dcf')
+    const path = join(base, 'references', 'HPQF2_DICT.dcf')
     return { isAvailable: fs.pathExistsSync(path), path } 
 }
 
@@ -109,7 +105,6 @@ export const withExportLog = () => {
 // Justification
 export const withJustification = () => {
     const { paths } = rConfig()
-
     const ext = extname(paths.justification_path)
     const validExt = ext === '.xlsx' || ext === '.XLSX'
 
@@ -135,14 +130,16 @@ export const withPilotDataDict = () => {
 
 
 // Reference
-export const withParquetData = () => {
+export const withParquetData = (isPilotMode = false) => {
 
-    const pathToGeo = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/geo.parquet' : join(base, 'data', 'parquet', 'geo.parquet')
-    const pathtoDict = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/parquet_dictionary.parquet' : join(base, 'data', 'parquet', 'parquet_dictionary.parquet')
-    const directory = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet' : join(base, 'data', 'parquet')
-    const fileDirectory = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet' : './data/parquet'
-    const geoPath = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/geo.parquet' : './data/parquet/geo.parquet'
-    const dictionaryPath = os ? '/Users/bhasabdulsamad/Desktop/R Codes/2022-cbms/data/parquet/parquet_dictionary.parquet' : './data/parquet/parquet_dictionary.parquet'
+    const basePath = isPilotMode ? pilotDirectory : base
+    const directory = join(basePath, 'data', 'parquet')
+    const pathToGeo = join(directory, 'geo.parquet')
+    const pathtoDict = join(directory, 'parquet_dictionary.parquet')
+    
+    const fileDirectory = './data/parquet'
+    const geoPath = './data/parquet/geo.parquet'
+    const dictionaryPath = './data/parquet/parquet_dictionary.parquet'
 
     return { 
         isAvailable: fs.pathExistsSync(pathToGeo),
@@ -214,7 +211,6 @@ export const getVersion = () => {
 
 }
 
-
 export const getFileLabel = (files : string[]) => {
     try {         
 
@@ -246,7 +242,6 @@ export const getFileLabel = (files : string[]) => {
     }
 
 }
-
 
 export const getPilotFileLabel = (files : string[]) => {
     try {         

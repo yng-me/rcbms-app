@@ -19,13 +19,16 @@ import DialogBox from './Dialog.vue'
 const props = defineProps(['isPilotMode'])
 
 const loading = ref(false)
+const filename = ref('')
+const selectedTablesToExport = ref([])
 
 const state = reactive({
     geo: [] as Geo[],
     dictionary: [] as DataDictionary[],
     data: [] as any,
     savedTables: [] as SavedTables[],
-    script: ''
+    script: '',
+    tableOutputFolder: ''
 })
 
 const show = reactive({
@@ -33,6 +36,7 @@ const show = reactive({
     geoFilter: false,
     joinBy: false,
     advancedOption: false,
+    exportTable: false
 })
 
 const tableOptions = reactive<TableOptions>({
@@ -59,10 +63,13 @@ const tableOptions = reactive<TableOptions>({
 
 onMounted(() => {
     loading.value = true
-    ipcRenderer.send('load-dictionary')
+    ipcRenderer.send('load-dictionary', JSON.parse(JSON.stringify(props.isPilotMode)))
 })
 
 ipcRenderer.on('dictionary', (event, payload) => {
+
+    state.tableOutputFolder = payload.tableOutputFolder
+
     state.dictionary = payload.dictionary
     state.savedTables = payload.savedTables
     state.geo = payload.geo
@@ -74,6 +81,18 @@ ipcRenderer.on('dictionary', (event, payload) => {
 defineEmits(['back'])
 
 
+const destination = computed(() => {
+
+let path = state.tableOutputFolder
+
+if (path.length > 55) {
+    path = path.substr(0, 35) + '...' + path.substr(path.length - 20, path.length);
+}
+
+return path
+
+})
+
 const activeDictionary = computed(() => {
 
     const group = Object.entries({...tableOptions.groupBy}).filter(item => item[1] === true).map(el => el[0])
@@ -83,6 +102,10 @@ const activeDictionary = computed(() => {
     const col = state.dictionary.filter(el => el.record === tableOptions.colRecord && el.variable !== tableOptions.row && !g.includes(el.variable))
     return { row, col }
 })
+
+const chooseOutputDest = () => {
+    ipcRenderer.send('select-export-path')
+}
 
 const applyFilter = (evt : any, type : 'groupBy' | 'geoFilter') => {
 
@@ -94,7 +117,6 @@ const applyFilter = (evt : any, type : 'groupBy' | 'geoFilter') => {
 }
 
 ipcRenderer.on('return-arrow', (event, payload) => {
-    show.advancedOption = false
     loading.value = false
     state.script = payload.script
     state.data = payload.data
@@ -122,6 +144,8 @@ const updateSavedTables = (evt : SavedTables[]) => {
 }
 
 const selectTableFromSaved = (t: TableOptions) => {
+
+    show.advancedOption = false
 
     tableOptions.col = t.col
     tableOptions.rowRecord = t.rowRecord
@@ -293,11 +317,13 @@ watch(() => tableOptions.rowRecord, (newValue, oldValue) => {
     <template v-else>
         <TableBody 
             @saved-table="updateSavedTables($event)"
+            @show-export="show.exportTable = true"
             :table-options="tableOptions"
             :rowName="rowName"
             :data-table="state.data"
             :savedTables="state.savedTables"
             :script="state.script"
+            :tableOutputFolder="state.tableOutputFolder"
         />
     </template>
     <BaseModal :closeable="false" :show="show.joinBy" usage="dialog" max-width="2xl">
@@ -358,12 +384,98 @@ watch(() => tableOptions.rowRecord, (newValue, oldValue) => {
             </div>
         </DialogBox>
     </BaseModal>
+    
     <div v-show="show.advancedOption" class="z-50">
         <TableOptionsComp 
             :savedTables="state.savedTables" 
             @close="show.advancedOption = false"
             @selected-table="selectTableFromSaved($event)"
-        />
+        >
+            <button 
+                @click.prevent="show.advancedOption = false" 
+                class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl bg-gray-500 text-white hover:bg-gray-600">
+                Cancel
+            </button>
+            <button 
+                @click.prevent="[show.advancedOption = false, show.exportTable = true]"
+                :disabled="!state.savedTables.length"
+                :class="[
+                    !state.savedTables.length? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'
+                ]"
+                class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl text-white bg-gradient-to-tr">
+                Export Table
+            </button>
+        </TableOptionsComp>
         <div @click.prevent="show.advancedOption = false" class="z-20 absolute h-full w-full inset-0 bg-stone-700 opacity-75"></div>
     </div>
+    <BaseModal @close="show.exportTable = false" :show="show.exportTable" usage="dialog" max-width="xl">
+        <DialogBox @close="show.exportTable = false" title="Export Table">
+            <div class="pt-4 pb-5 space-y-5">
+                <div class="px-5 flex flex-col space-y-1.5">
+                    <label for="" class="text-xs tracking-widest text-gray-500 uppercase font-semibold">File Name</label>
+                    <input 
+                        type="text" v-model="filename" 
+                        placeholder="Table Title"
+                        class="px-3.5 py-1.5 rounded-xl text-sm tracking-wide focus:border-teal-60 focus:border-teal-600 font-semibold w-full border-gray-300" 
+                    />
+                </div>
+                <div class="px-5 flex flex-col space-y-1.5 relative">
+                    <label for="" class="text-xs tracking-widest text-gray-500 uppercase font-semibold">Output Destination</label>
+                    <input 
+                        type="text" :value="destination" 
+                        placeholder=""
+                        disabled
+                        class="px-3.5 py-1.5 rounded-xl text-sm focus:border-teal-600 w-full tracking-wide text-gray-500 border-gray-300" 
+                    />
+                    <button 
+                        @click.prevent="chooseOutputDest"
+                        class="absolute right-8 bottom-2 hover:text-teal-600">
+                        <svg class="w-5 h-5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path></svg>
+                    </button>
+                </div>
+                <!-- <div class="px-5 flex flex-col space-y-1.5">
+                    <label for="" class="text-xs tracking-widest text-gray-500 uppercase font-semibold">File type</label>
+                    <div class="grid sm:grid-cols-4 grid-cols-2 gap-3.5">
+                        <div v-for="i in ['Excel', 'CSV']" :key="i" class="w-full">
+                            <button @click.prevent="tableOptions.joinType = i" :class="{ 'text-teal-600 bg-gray-50 border-teal-500 font-bold' : i === tableOptions.joinType }"
+                                class="hover:bg-teal-100 px-3.5 py-2 border hover:border-teal-400 rounded-xl w-full flex items-center justify-between">
+                                <span class=" tracking-wider text-xs">{{ i }}</span>
+                                <svg v-if="i === tableOptions.joinType" class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div> -->
+                <div class="px-5">
+                    <div class="px-5 py-4 space-y-4 rounded-xl border max-h-64 overflow-auto">
+                        <div v-for="(i, index) in state.savedTables" :key="index" class="flex items-start space-x-2">
+                            <input 
+                                type="checkbox" 
+                                v-model="selectedTablesToExport" 
+                                :value="i.title" :name="i.title" :id="i.title" 
+                                class="text-teal-600 rounded mt-1" 
+                            />
+                            <label :for="i.title" class="flex flex-col">
+                                <span>{{ i.title }}</span>
+                                <!-- <span class="text-xs text-gray-500 tracking-wide">{{ i.description }}</span> -->
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t px-5 py-2.5 flex justify-end space-x-2 bg-gray-50">
+                <div class="flex space-x-2 items-center">            
+                    <button 
+                        @click.prevent="show.exportTable = false" 
+                        class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl bg-gray-500 text-white hover:bg-gray-600">Cancel</button>
+                        <!-- @click.prevent="show.exportTable" -->
+                    <button 
+                        :disabled="!filename || selectedTablesToExport.length == 0"
+                        :class="!filename || selectedTablesToExport.length == 0? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'"
+                        class="px-4 py-1.5 text-xs uppercase tracking-widest font-medium rounded-xl text-white bg-gradient-to-tr">
+                        Export
+                    </button>
+                </div>
+            </div>
+        </DialogBox>
+    </BaseModal>
 </template>
