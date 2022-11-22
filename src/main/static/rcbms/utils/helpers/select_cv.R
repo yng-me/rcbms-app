@@ -40,7 +40,9 @@ select_cv <- function(data, ..., h = NULL, condition = NULL) {
       brgy,
       ean,
       lno
-    )
+    ) %>% 
+    na_if('') %>% 
+    mutate(ean = if_else(is.na(ean) & !is.na(case_id), str_sub(case_id, 10, 15), ean)) 
   
   df_name <- as_tibble(names(df)) %>% 
     left_join(refs$dictionary, by = 'value') %>% 

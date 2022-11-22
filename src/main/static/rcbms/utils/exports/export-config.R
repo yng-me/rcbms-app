@@ -121,19 +121,52 @@ if(Sys.info()[1] == 'Darwin' || Sys.info()[1] == 'darwin') {
 }
 
 if(config$include_justifiction & file.exists(justification_path)) {
-  justification <- read.xlsx(justification_path, 'Cases with Inconsistencies', startRow = 3) %>% 
-    rename(
-      'Case ID' = Case.ID,
-      'Line Number' = Line.Number,
-      'Remarks / Justification' = `Remarks./.Justification`
-    ) %>% 
-    filter(!is.na(Status) | !is.na(`Remarks / Justification`)) 
   
-  exp_case_wise <- exp_case_wise %>% 
-    left_join(
-      justification, 
-      by = c('Case ID', 'Region', 'Province', 'City/Mun', 'Barangay', 'EA', 'Priority', 'Section', 'Title', 'Description')
-    )
+  justifications <- read.xlsx(justification_path, 'Cases with Inconsistencies', startRow = 4)
+  
+  if('tab' %in% names(justifications)) {
+    justification <- justifications %>% 
+      select(
+        'Case ID' = Case.ID,
+        'Line Number' = Line.Number,
+        Section,
+        tab,
+        Status,
+        'Remarks / Justification' = `Remarks./.Justification`
+      ) %>% 
+      filter(!is.na(Status) | !is.na(`Remarks / Justification`)) 
+    
+      exp_case_wise <- exp_case_wise %>% 
+        left_join(
+          justification, 
+          by = c('Case ID', 'Line Number', 'Section', 'tab') 
+        ) %>% 
+        distinct()
+        # filter(!grepl('JUSTIFIED', Status, ignore.case = T))  %>% 
+      
+  } else {
+    
+    justification <- justifications %>%
+      select(
+        'Case ID' = Case.ID,
+        'Line Number' = Line.Number,
+        Section,
+        Title,
+        Description,
+        Status,
+        'Remarks / Justification' = `Remarks./.Justification`
+      ) %>% 
+      filter(!is.na(Status) | !is.na(`Remarks / Justification`)) 
+    
+      exp_case_wise <- exp_case_wise %>% 
+        left_join(
+          justification, 
+          by = c('Case ID', 'Line Number', 'Section', 'Title', 'Description')
+        ) %>% 
+        distinct()
+        # filter(!grepl('JUSTIFIED', Status, ignore.case = T)) %>% 
+  }
+  
   
 } else {
   
