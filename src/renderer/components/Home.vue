@@ -198,7 +198,7 @@ ipcRenderer.on('data-loaded', (event, payload) => {
       data.errors.push({
         message: payload.message
       })
-    }, 1000);
+    }, 500);
   }
 })
 

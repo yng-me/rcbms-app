@@ -29,11 +29,17 @@ ipcRenderer.on('on-update', (event, payload) => {
   if(payload === 'Update downloaded successfully! Please restart RCBMS to apply the changes.') {
     setTimeout(() => {
       newUpdateAvailable.value = true
-    }, 1500);
+    }, 200);
   }
 })
 ipcRenderer.on('percent', (event, data) => {
   d.percent = parseFloat(data.percent)
+})
+
+const isPilotMode = ref(false)
+
+ipcRenderer.on('define-mode', (event, data) => {
+  isPilotMode.value = data
 })
 
 </script>
@@ -59,26 +65,28 @@ ipcRenderer.on('percent', (event, data) => {
             </span>
         </div>
       </div>
+      
     </div>
   </transition>
   <transition>
-  <div v-if="!showTable">
+    <div v-if="!showTable">
       <Home @table-shown="showTable = !showTable" />
     </div>
   </transition>
   <transition name="arrow">
     <div v-if="showTable" class="w-full h-full">
-        <TableMain @back="showTable = false" />
+        <TableMain @back="showTable = false" :isPilotMode="isPilotMode" />
     </div>
   </transition>
   <Footer></Footer>
+  
 </template>
 
 
 <style scoped>
   .v-enter-active,
   .v-leave-active {
-    transition: opacity 0.5s ease;
+    transition: opacity 0.3s ease;
   }
 
   .v-enter-from,
@@ -87,7 +95,7 @@ ipcRenderer.on('percent', (event, data) => {
   }
 
   .v-enter-active {
-    transition: all 0.5s ease-out;
+    transition: all 0.3s ease-out;
   }
 
   .v-leave-active {
