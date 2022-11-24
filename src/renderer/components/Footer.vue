@@ -41,7 +41,7 @@ const hideChangelog = () => {
             <div class="flex items-center space-x-1">
               <h1 class="">&copy; RCBMS 2022</h1>
               <span class="text-gray-400">&bull;</span>
-              <button @click.prevent="showChangelog = true" class="hover:text-teal-600 ">v{{ version }}</button>
+              <button @click.prevent="showChangelog = true" class="hover:text-teal-500 text-teal-600 font-semibold">v{{ version }}</button>
             </div>
             <button @click.prevent="showAbout = true" class="flex items-center space-x-0.5 hover:text-teal-600 ">
               <svg class="w-3 h-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>

@@ -124,6 +124,7 @@ if(Sys.info()[1] == 'Darwin' || Sys.info()[1] == 'darwin') {
 if(config$include_justifiction & file.exists(justification_path)) {
   
   justifications <- read.xlsx(justification_path, 'Cases with Inconsistencies', startRow = 4)
+
   
   if('tab' %in% names(justifications)) {
     justification <- justifications %>% 
@@ -135,7 +136,9 @@ if(config$include_justifiction & file.exists(justification_path)) {
         Status,
         'Remarks / Justification' = `Remarks./.Justification`
       ) %>% 
-      filter(!is.na(Status) | !is.na(`Remarks / Justification`)) 
+      filter(!is.na(Status) | !is.na(`Remarks / Justification`)) %>% 
+      mutate('Line Number' = if_else(is.na(`Line Number`), '', sprintf('%02d', as.integer(`Line Number`)))) %>% 
+      na_if('')
     
       exp_case_wise <- exp_case_wise %>% 
         left_join(
@@ -157,7 +160,9 @@ if(config$include_justifiction & file.exists(justification_path)) {
         Status,
         'Remarks / Justification' = `Remarks./.Justification`
       ) %>% 
-      filter(!is.na(Status) | !is.na(`Remarks / Justification`)) 
+      filter(!is.na(Status) | !is.na(`Remarks / Justification`)) %>% 
+      mutate('Line Number' = if_else(is.na(`Line Number`), '', sprintf('%02d', as.integer(`Line Number`)))) %>% 
+      na_if('')
     
       exp_case_wise <- exp_case_wise %>% 
         left_join(
