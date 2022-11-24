@@ -18,7 +18,8 @@ const pilotAreas : string[] = [
     '074609 Dauin, Negros Oriental',
     '083708 City of Baybay, Leyte',
     '141102 City of Baguio',
-    '160301 City of Bayugan, Agusan del Sur'
+    '160301 City of Bayugan, Agusan del Sur',
+    '2021 Pilot CBMS (All Pilot Areas)'
 ]
 
 const pilotGeo: string [] = pilotAreas.map(el => el.substring(1, 6))

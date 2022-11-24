@@ -7,6 +7,19 @@ import ChangeLogItem from './ChangeLogItem.vue';
 
 const changeLogs = reactive([
     {
+        version: 'RCBMS v1.0.7',
+        releaseDate: '23 November 2022',
+        logs: [ 
+            {
+                feature: 'Mismatch data type in justification reference file',
+                type: 'bug fix',
+                info: [
+                    // 'Fixed error when generating inconsistencies with Excel justification file.',
+                ]
+            },
+        ]  
+    },
+    {
         version: 'RCBMS v1.0.6',
         releaseDate: '22 November 2022',
         logs: [ 

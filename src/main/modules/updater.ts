@@ -98,5 +98,12 @@ export const updateRCBMS = () => {
         ])
     }
 
+    if(version == '1.0.6') {
+        seen = false
+        applyUpdate([
+            join('utils', 'exports', 'export-config.R'),
+        ])
+    }
+
     fs.writeJSONSync(path, { version: v, seen })
 }

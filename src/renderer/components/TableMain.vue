@@ -216,9 +216,9 @@ watch(() => tableOptions.rowRecord, (newValue, oldValue) => {
                 <svg class="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
                 <span class="uppercase tracking-widest text-xs font-semibold">Filter</span>
             </button>
-            <button @click.prevent="show.advancedOption = true" class="hover:text-teal-600">
+            <!-- <button @click.prevent="show.advancedOption = true" class="hover:text-teal-600">
                 <svg class="w-5 h-5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
-            </button>
+            </button> -->
             <transition name="slide-fade">
                 <div v-show="show.groupBy || show.geoFilter" class="absolute z-50 right-6 sm:top-16 top-20">
                     <TableGroup

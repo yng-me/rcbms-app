@@ -24,7 +24,7 @@ export const textDataCheck = (source = '2022-cbms') : TXT => {
 
 
     let path = withTextData().path
-    let count = 29
+    let count = 28
 
     if(source == '2021-pilot-cbms') {
         path = join('C:', 'rcbms', 'scripts', '2021-pilot-cbms', 'data', 'text')

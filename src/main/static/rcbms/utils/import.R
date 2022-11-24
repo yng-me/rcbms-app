@@ -27,7 +27,7 @@ source('./utils/references.R')
 ref_files <- as_tibble(
   str_subset(list.files(wd_data_path), '\\.(txt|TXT)$')
 ) %>% 
-  filter(!grepl('NOTE|INTERVIEW_RECORD|SUMMARY_OF_VISIT|SECTION_A', value)) %>% 
+  filter(!grepl('NOTE|INTERVIEW_RECORD|CERTIFICATION|SUMMARY_OF_VISIT|SECTION_A', value)) %>% 
   pull(value)
 
 ref_filename <- tolower(str_sub(ref_files, 1, -5))

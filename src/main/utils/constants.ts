@@ -112,7 +112,7 @@ export const config : RConfig = {
 
 export const expectedTextFiles = {
     '2022-cbms': [
-        'CERTIFICATION.TXT',    
+        // 'CERTIFICATION.TXT',    
         'GEO_ID.TXT',
         'INTERVIEW_RECORD.TXT', 
         'SECTION_A.TXT',
