@@ -109,8 +109,8 @@ cv_dws_c3_b <- section_q %>%
 
 #DWS conditional (d: Q6 v Q8), must not be blank
 cv_dws_c4_b <- section_q %>% 
-  select(case_id, pilot_area, Q6, Q8) %>% 
-  filter(Q6 != 000 & !is.na(Q6), is.na(Q8))
+  select(case_id, pilot_area, Q6, Q8, Q8TLNO) %>% 
+  filter(Q6 != 000 & !is.na(Q6), is.na(Q8), is.na(Q8TLNO))
 
 #DWS conditional (e: Q6 v Q9), must not be blank
 cv_dws_c5_b <- section_q %>% 

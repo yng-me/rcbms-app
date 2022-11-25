@@ -20,7 +20,11 @@ if_else(!dir.exists('./data/validation'), dir.create('./data/validation', showWa
 # References -------------------------------------------------------------------
 
 wd_ref_path <- '.'
-wd_data_path <- paste0(wd_ref_path, '/data/text/')
+execMode <- 'before'
+if(config$run_after_edit) {
+  execMode <- 'after'
+}
+wd_data_path <- paste0(wd_ref_path, '/data/text/', execMode, '/')
 
 source('./utils/references.R')
 

@@ -73,31 +73,19 @@ export const pilotDataLoader = () : void => {
                 
                 const csdbeConcat = csdbe.filter(el => /\.csdb$/g.test(el) && pilotGeo.includes(el.substring(1, 6)))
                     .map(item => join(path, item));
-                
-                let csdbeAll = '';
-                csdbeConcat.forEach(text => csdbeAll += `InputData=${text}\n`)
-                    
-                // Read concat text and insert the encrypted files with password
-                const pffStartConcat = '[Run Information]\nVersion=CSPro 7.7\nAppType=Concatenate\nShowInApplicationListing=Never\n\n[Files]'
-                const pffEnd = '[Parameters]\nLanguage=EN\nViewListing=Never\nViewResults=No\nInputOrder=Sequential'
-                const outputCSDBE = join(pilotDirectory, 'data', 'csdbe', 'concatenated-pilot.csdbe|password=293fnj<>aser@&e')
-                    
-                const concatPffTxt = `${pffStartConcat}\n${csdbeAll}OutputData=${outputCSDBE}\nInputDict=${inputDict}\nListing=${logList}\n\n${pffEnd}`;
-                const concatPffTemp = temp.openSync({ suffix: '.pff' });
-                    
-                fs.writeSync(concatPffTemp.fd, concatPffTxt);
-                fs.closeSync(concatPffTemp.fd);
-                    
-                exec(`"${csconcat_path}" "${concatPffTemp.path}"`, (con) => {
 
-                    temp.cleanupSync()
-                    if(!fs.existsSync(join('C:', dataDir, 'text'))) fs.mkdirSync(join('C:', dataDir, 'text'))
 
+                const extractTextFile = (input: string) => {
                     const { csexport_path } = withCSProInstalled();
                     const pffPath = join(app.getAppPath(), 'static', 'pff', 'pilot');
 
-                    ['all', 'exported'].forEach(el => {
+                    if(!fs.existsSync(join('C:', dataDir, 'text'))) fs.mkdirSync(join('C:', dataDir, 'text'))
 
+                    console.log(input);
+                    
+
+                    ['all', 'exported'].forEach(el => {
+    
                         // EXF
                         const exf = fs.readFileSync(join(pffPath, `${el}_exf.txt`));
                         const exfPathTemp = temp.openSync({ suffix: '.exf' });
@@ -113,7 +101,7 @@ export const pilotDataLoader = () : void => {
 
 
                         const pff = fs.readFileSync(join(pffPath, `${el}_pff.txt`));
-                        const pffFIle = `[Run Information]\nVersion=CSPro 7.7\nAppType=Export\n\n[Files]\n${exfApplication}\n${pff.toString()}`
+                        const pffFIle = `[Run Information]\nVersion=CSPro 7.7\nAppType=Export\n\n[Files]\n${exfApplication}\n${input}\n${pff.toString()}`
 
                         fs.writeSync(exfPffPathTemp.fd, pffFIle);
                         fs.close(exfPffPathTemp.fd);
@@ -122,14 +110,59 @@ export const pilotDataLoader = () : void => {
 
                         temp.cleanupSync()
                     })
+                }
+                
+
+                if(csdbeConcat.length == 0) return
+
+                if(csdbeConcat.length == 1) {
+
+                    console.log('here');
+
+                    if(!fs.existsSync(join('C:', dataDir))) fs.mkdirSync(join('C:', dataDir))
+
+
+                    extractTextFile(`InputData=${csdbeConcat[0]}`)
 
                     event.reply('data-loaded', {
                         error: false,
                         message: 'Data loaded successfully'
                     })
 
-                })
+                } else {
 
+                    console.log('there');
+                    
+
+                    let csdbeAll = '';
+                    csdbeConcat.forEach(text => csdbeAll += `InputData=${text}\n`)
+                        
+                    // Read concat text and insert the encrypted files with password
+                    const pffStartConcat = '[Run Information]\nVersion=CSPro 7.7\nAppType=Concatenate\nShowInApplicationListing=Never\n\n[Files]'
+                    const pffEnd = '[Parameters]\nLanguage=EN\nViewListing=Never\nViewResults=No\nInputOrder=Sequential'
+                    const outputCSDBE = join(pilotDirectory, 'data', 'csdbe', 'concatenated-pilot.csdbe|password=293fnj<>aser@&e')
+                        
+                    const concatPffTxt = `${pffStartConcat}\n${csdbeAll}OutputData=${outputCSDBE}\nInputDict=${inputDict}\nListing=${logList}\n\n${pffEnd}`;
+                    const concatPffTemp = temp.openSync({ suffix: '.pff' });
+                        
+                    fs.writeSync(concatPffTemp.fd, concatPffTxt);
+                    fs.closeSync(concatPffTemp.fd);
+                        
+                    exec(`"${csconcat_path}" "${concatPffTemp.path}"`, () => {
+    
+                        temp.cleanupSync()
+                        
+
+                        extractTextFile('InputData=C:\\rcbms\\scripts\\2021-pilot-cbms\\data\\csdbe\\concatenated-pilot.csdbe|password=293fnj<>aser@&e')
+    
+                        event.reply('data-loaded', {
+                            error: false,
+                            message: 'Data loaded successfully'
+                        })
+    
+                    })
+    
+                }
             })
 
         } catch {

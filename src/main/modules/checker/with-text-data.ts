@@ -20,20 +20,21 @@ let payload : TXT = {
     count: 0
 }
 
-export const textDataCheck = (source = '2022-cbms') : TXT => {
+export const textDataCheck = (source = '2022-cbms', run_after_edit = false) : TXT => {
+    
+    const mode = run_after_edit ? 'after' : 'before'
 
-
-    let path = withTextData().path
+    let path = join(withTextData().path, mode)
     let count = 29
 
-    if(source == '2021-pilot-cbms') {
+    if(source === '2021-pilot-cbms') {
         path = join('C:', 'rcbms', 'scripts', '2021-pilot-cbms', 'data', 'text')
         count = 120
     }
 
     const sourceDir = {
         '2021-pilot-cbms': fs.existsSync(path),
-        '2022-cbms': withTextData().isAvailable
+        '2022-cbms': withTextData().isAvailable && fs.existsSync(path)
     }[source] 
 
     if(sourceDir) {
@@ -50,6 +51,9 @@ export const textDataCheck = (source = '2022-cbms') : TXT => {
             const validTextFiles = textFiles
                 .filter(el => extname(el) === '.txt' || extname(el) === '.TXT')
                 .sort((a, b) => a.localeCompare(b))
+
+                // console.log(validTextFiles);
+                
         
             if(validTextFiles.length === count && JSON.stringify(validTextFiles) == JSON.stringify(expectedTextFiles[source])) {
         
@@ -59,6 +63,7 @@ export const textDataCheck = (source = '2022-cbms') : TXT => {
                     isAvailable: true,
                     count: validTextFiles.length
                 }
+                
             
             } else {
         
@@ -71,7 +76,7 @@ export const textDataCheck = (source = '2022-cbms') : TXT => {
 
             }
 
-        } catch {
+        } catch {            
             
             dialog.showErrorBox('Loading Data', 'There was an error loading the data files.')
             return {
