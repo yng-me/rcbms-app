@@ -401,11 +401,11 @@ cv_l26_invalid <- section_l %>%
 
 cv_l27_invalid <- section_l %>% 
   gather_parcel %>% 
-  get_occ('L27', c(1, 2, 8))
+  get_occ('L27', c(1, 2, 3))
 
 cv_l28_invalid <- section_l %>% 
   gather_parcel %>% 
-  get_occ('L28', c(1, 2, 8))
+  get_occ('L28', c(1, 2, 3))
 
 cv_l29_invalid <- section_l %>% 
   gather_parcel %>% 
@@ -413,15 +413,15 @@ cv_l29_invalid <- section_l %>%
 
 cv_l30_invalid <- section_l %>% 
   gather_parcel %>% 
-  get_occ('L30', c(1, 2, 8))
+  get_occ('L30', c(1, 2, 3))
 
 cv_l31_invalid <- section_l %>% 
   gather_parcel %>% 
-  get_occ('L31', c(1, 2, 8))
+  get_occ('L31', c(1, 2, 3))
 
 cv_l32_invalid <- section_l %>% 
   gather_parcel %>% 
-  get_occ('L32', c(1, 2, 8))
+  get_occ('L32', c(1, 2, 3))
 
 cv_l33_invalid <- section_l %>% 
   gather_parcel %>% 

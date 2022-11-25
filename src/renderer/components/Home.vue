@@ -191,7 +191,10 @@ const loadData = () => {
 ipcRenderer.on('data-loaded', (event, payload) => { 
   if(!payload.error) {
     const source = rConfig.use_pilot_data ? '2021-pilot-cbms' : '2022-cbms'
-    ipcRenderer.send('check-text-data', source)
+    ipcRenderer.send('check-text-data', {
+      source,
+      mode: rConfig.run_after_edit
+    })
   } else {
     setTimeout(() => {
       loading.value = false

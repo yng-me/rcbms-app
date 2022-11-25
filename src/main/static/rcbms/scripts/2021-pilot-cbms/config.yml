@@ -7,7 +7,7 @@
 ## - pilot_area
 ## - brgy_name
 
-disaggregation: pilot_area
+disaggregation: brgy_name
 
 
 # =============================================================================
@@ -37,7 +37,7 @@ pilot_area: all
 ## - generate_inconsistencies
 ## - generate_inconsistencies_with_output
 
-mode: generate_inconsistencies
+mode: generate_inconsistencies_with_output
 
 # =============================================================================
 # Generate Multidimensional Poverty Index (MPI)
@@ -70,6 +70,6 @@ generate_bpq: false
 ## - true
 ## - false
 
-covert_to_parquet_first: false
+covert_to_parquet_first: true
 
 

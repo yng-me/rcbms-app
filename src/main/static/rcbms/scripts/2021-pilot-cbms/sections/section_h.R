@@ -9,7 +9,8 @@ section_h_hh <- hpq_data$SECTION_H %>%
   mutate_at(
     vars(matches(c('^H4_MAJOR_', '^H4_CODE_', '^H4_NAME_', '^H2_SUSTENANCE'), '^H9_MONTH_')), 
     ~ as.character(str_trim(as.character(.)))
-  )
+  ) %>% 
+  na_if('')
 
 # ===========================================================================
 # Regular household with no response in H01
@@ -31,7 +32,7 @@ cv_h02_blank <- section_h_hh %>%
 # ===========================================================================
 # H02 not in the value set
 cv_h02_not_in_vs <- section_h_hh %>% 
-  filter(H1_GOODS == 1, !grepl('([A-E]){1,5}', H2_SUSTENANCE) & H2_SUSTENANCE != '') %>% 
+  filter(H1_GOODS == 1, !grepl('([A-E]){1,5}', H2_SUSTENANCE) & !is.na(H2_SUSTENANCE)) %>% 
   select(case_id, pilot_area, H1_GOODS, H2_SUSTENANCE)
 
 # ===========================================================================
@@ -73,13 +74,15 @@ for(i in 1:3) {
   h4_data <- section_h_hh %>% 
     filter(
       rowSums(select(., matches('H3_ENTRE_\\d{2}')), na.rm = T) < 44,
-      !!as.name(paste0('H4_CODE_', i)) != '' | !!as.name(paste0('H4_NAME_', i)) != ''
+      !is.na(!!as.name(paste0('H4_CODE_', i))) | !is.na(!!as.name(paste0('H4_NAME_', i)))
     )
   
   h4_list[[paste0('cv_h05_psic_', i)]] <- h4_data %>%
-    filter(!!as.name(paste0('H4_CODE_', i)) == '' && 
-             !!as.name(paste0('NAME_', i)) == '' &&
-             !!as.name(paste0('PSIC_', i)) == '') %>% 
+    filter(
+      is.na(!!as.name(paste0('H4_CODE_', i))), 
+      is.na(!!as.name(paste0('H4_NAME_', i))), 
+      is.na(!!as.name(paste0('H5_PSIC_', i)))
+    ) %>% 
     select(case_id, pilot_area, matches(paste0('H[45]_(CODE|NAME|PSIC)_', i)))
   
   # H06 - Ecommerce
@@ -92,7 +95,6 @@ for(i in 1:3) {
     filter(!(!!as.name(paste0('H7_SOCIAL_MEDIA_', i)) %in% c(1, 2))) %>% 
     select(case_id, pilot_area, matches(paste0('H[47]_(CODE|NAME|SOCIAL_MEDIA)_', i)))
   
-  # H08 - Year
   h4_list[[paste0('cv_h08_year_', i, '_missing')]] <- h4_data %>% 
     filter(!(!!as.name(paste0('H8_YEAR_STARTED_', i)) %in% c(1:2021))) %>% 
     select(case_id, pilot_area, matches(paste0('H[48]_(CODE|NAME|YEAR_STARTED)_', i)))

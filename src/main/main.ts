@@ -168,12 +168,16 @@ const mountedPayload = () => {
 
   const source = rConfig().use_pilot_data ? '2021-pilot-cbms' : '2022-cbms'
 
+  console.log(textDataCheck(source, rConfig().run_after_edit));
+  
+
   return {
     rConfig: rConfig(), 
     exportLog: exportLogCheck().data,
     withRData: withRData(), 
     withPilotData: { ...withPilotData(), isAvailable: csdbeCheck(withPilotData().path, '.csdb').isAvailable },
-    textDataCheck: textDataCheck(source), 
+    withTextPilotData: { ...textDataCheck('2021-pilot-cbms') },
+    textDataCheck: textDataCheck(source, rConfig().run_after_edit), 
     withEditedData: { ...withEditedData(), isAvailable: csdbeCheck(withEditedData().path).isAvailable }, 
     withDownloadedData: { ...withDownloadedData(), isAvailable: csdbeCheck(withDownloadedData().path).isAvailable }, 
     withJustification: withJustification(), 
@@ -215,7 +219,9 @@ ipcMain.on('update-r-config', (event, data) => {
 })
 
 ipcMain.on('check-text-data', (event, data) => {
-  event.reply('check-text-data', textDataCheck(data))
+  console.log(data);
+  
+  event.reply('check-text-data', textDataCheck(data.source, data.mode))
 })
 
 ipcMain.on('configure-path', (event, payload) => {

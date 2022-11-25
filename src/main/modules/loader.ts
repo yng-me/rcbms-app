@@ -114,8 +114,11 @@ export const dataLoader = () : void => {
           
                 exec(`"${csconcat_path}" "${concatPffTemp.path}"`, (con) => {
                   temp.cleanupSync()
-          
+
+                  const source = rConfig().run_after_edit ? 'after' : 'before'
+           
                   if(!fs.existsSync('C:\\rcbms\\data\\text')) fs.mkdirSync('C:\\rcbms\\data\\text');
+                  if(!fs.existsSync(`C:\\rcbms\\data\\text\\${source}`)) fs.mkdirSync(`C:\\rcbms\\data\\text\\${source}`);
                   const exfStart = '[CSExport]\nVersion=CSPro 7.7\n\n[Dictionaries]';
                   const pffStartExport = '[Run Information]\nVersion=CSPro 7.7\nAppType=Export\nShowInApplicationListing=Never\n\n[Files]';
           
@@ -141,9 +144,9 @@ export const dataLoader = () : void => {
                     let exfConfig = ''
           
                     if(item === 'all') {
-                      exfConfig = fs.readFileSync(join(app.getAppPath(), 'static', 'pff', `${item}_pff.txt`)).toString();
+                      exfConfig = fs.readFileSync(join(app.getAppPath(), 'static', 'pff', `${item}_${source}_pff.txt`)).toString();
                     } else {
-                      exfConfig = `ExportedData=C:\\rcbms\\data\\text\\SECTION_${item.toUpperCase()}.txt\nListing=${logList}`
+                      exfConfig = `ExportedData=C:\\rcbms\\data\\text\\${source}\\SECTION_${item.toUpperCase()}.txt\nListing=${logList}`
                     }
           
                     const pffExfTempData = `${pffStartExport}\n${exfApplication}\n${inputData}\n${exfConfig}\n\n${pffEnd}`
