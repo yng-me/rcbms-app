@@ -21,7 +21,6 @@ section_j_hh <- suppressWarnings(
   select(case_id, HSN, pilot_area, starts_with('J'), -contains('SPECIFY'))
 )
 
-
 with_female <- hpq_individual %>%
   mutate(with_female = if_else(A05SEX == 2, 1L, 0L)) %>% 
   group_by(case_id) %>% 
@@ -31,6 +30,10 @@ with_female <- hpq_individual %>%
 d_j_sex <- section_j_hh %>% 
   left_join(with_female, by = 'case_id') %>% 
   select(case_id, pilot_area, with_female, J1:J14)
+
+d_individual_ref <- hpq_individual %>% 
+  filter(HSN < 7777) %>% 
+  select(case_id_m, LINENO, A05SEX, age_computed) 
 
 # ===============================================================================
 # All male members but with answer in J01
@@ -79,15 +82,12 @@ for(i in 1:length(d_j1)) {
 cv_j02_with_ans <- do.call('rbind', j2_list) %>% tibble()
 
 # ===============================================================================
-d_j2 <- section_j_hh %>% 
-  select(case_id, J1, J02, J02LNO_01:J02LNO_30) %>% 
-  filter(J1 == 1, str_trim(J02) != '', rowSums(select(., J02LNO_01:J02LNO_30), na.rm = T) > 0) %>% 
-  pivot_longer(cols = J02LNO_01:J02LNO_30) %>% 
-  filter(!is.na(value)) %>% 
-  mutate(case_id_m = paste0(case_id, sprintf('%02d', value))) %>% 
-  select(case_id_m, j02_lineno = value) %>% 
-  left_join(hpq_individual, by = 'case_id_m') %>% 
-  select(case_id, pilot_area, LINENO, A01HHMEM, A05SEX, age_computed)
+d_j2 <- hpq_data$SECTION_J2 %>% 
+  collect() %>% 
+  filter(pilot_area == eval_area, HSN < 7777) %>% 
+  mutate(case_id_m = paste0(case_id, sprintf('%02d', as.integer(J02LNO)))) %>% 
+  filter(!is.na(J02LNO)) %>% 
+  left_join(d_individual_ref, by = 'case_id_m')
 
 # male who gave birth
 cv_j02_male_gave_birth <- d_j2 %>% 
@@ -182,27 +182,23 @@ cv_j06_lineno_na <- section_j_hh %>%
  filter(J5 == 1, s == 0 & str_trim(J6TLNO) == '') %>% 
  select(case_id, pilot_area, J5, J6TLNO, J06_LNO_01:J06_LNO_30) 
 
-d_j6 <- section_j_hh %>% 
-  select(case_id, J5, J06_LNO_01:J06_LNO_30) %>% 
-  filter(J5 == 1, rowSums(select(., J06_LNO_01:J06_LNO_30), na.rm = T) > 0) %>% 
-  pivot_longer(cols = J06_LNO_01:J06_LNO_30) %>% 
-  filter(!is.na(value)) %>% 
-  select(case_id, value) %>% 
-  mutate(case_id_m = paste0(case_id, sprintf('%02d', value))) %>% 
-  select(case_id_m) %>% 
-  left_join(hpq_individual, by = 'case_id_m') %>% 
-  select(case_id, pilot_area, LINENO, A01HHMEM, A05SEX, age_computed)
+d_pregnant <- hpq_data$SECTION_J6 %>%
+  collect() %>% 
+  filter(pilot_area == eval_area, HSN < 7777) %>% 
+  mutate(case_id_m = paste0(case_id, sprintf('%02d', as.integer(J06_LNO)))) %>% 
+  filter(!is.na(J06_LNO)) %>% 
+  left_join(d_individual_ref, by = 'case_id_m')
 
 # Male breastfeeding
-cv_j06_pregnant_male <- d_j6 %>% 
+cv_j06_pregnant_male <- d_pregnant %>% 
   filter(A05SEX == 1)
 
 # Breastfeeding below 10
-cv_j06_pregnant_below_10 <- d_j6 %>% 
+cv_j06_pregnant_below_10 <- d_pregnant %>% 
   filter(age_computed < 10)
 
 # Breastfeeding 50 and above
-cv_j06_pregnant_50_above <- d_j6 %>% 
+cv_j06_pregnant_50_above <- d_pregnant %>% 
   filter(age_computed > 49)
 
 # ===============================================================================
@@ -231,16 +227,12 @@ cv_j08_lineno_na <- section_j_hh %>%
   filter(J7 == 1, str_trim(J8TLNO) == '' & rowSums(select(., J08_LNO_01:J08_LNO_30), na.rm = T) == 0) %>% 
   select(case_id, pilot_area, J7, J8TLNO, J08_LNO_01:J08_LNO_30)
 
-d_j8 <- section_j_hh %>% 
-  select(case_id, J7, J08_LNO_01:J08_LNO_30) %>% 
-  filter(J7 == 1, rowSums(select(., J08_LNO_01:J08_LNO_30), na.rm = T) > 0) %>% 
-  pivot_longer(cols = J08_LNO_01:J08_LNO_30) %>% 
-  filter(!is.na(value)) %>% 
-  select(case_id, value) %>% 
-  mutate(case_id_m = paste0(case_id, sprintf('%02d', value))) %>% 
-  select(case_id_m) %>% 
-  left_join(hpq_individual, by = 'case_id_m') %>% 
-  select(case_id, pilot_area, LINENO, A01HHMEM, A05SEX, age_computed)
+d_j8 <- hpq_data$SECTION_J8 %>% 
+  collect() %>% 
+  filter(pilot_area == eval_area, HSN < 7777) %>% 
+  mutate(case_id_m = paste0(case_id, sprintf('%02d', as.integer(J08_LNO)))) %>% 
+  filter(!is.na(J08_LNO)) %>% 
+  left_join(d_individual_ref, by = 'case_id_m')
 
 # Male breastfeeding
 cv_j08_breastfeeding_male <- d_j8 %>% 
@@ -603,7 +595,7 @@ section_a_reg <- hpq_individual %>%
 
 
 ref_pwd <- hpq_data$SECTION_J15 %>% 
-  filter(HSN < 7777, !is.na(J15)) %>% 
+  filter(HSN < 7777, !is.na(J15), pilot_area == eval_area) %>% 
   collect() %>% 
   mutate(case_id_m = paste0(case_id, sprintf('%02d', J15))) %>% 
   select(case_id_m, J15) %>% 
@@ -622,7 +614,12 @@ cv_a17_pwd_functional <- section_a_reg %>%
   inner_join(ref_pwd, by = 'case_id_m') %>% 
   select(case_id, pwd_line_number, matches('^A17[A-F]*')) 
 
+cv_rare_disease <- hpq_data$SECTION_J23 %>% 
+  filter(J25 == 99, HSN < 7777, !is.na(J25_SPECIFY), pilot_area == eval_area) %>% 
+  select(case_id, J25, J25_SPECIFY) %>% 
+  collect() 
 
 # ---------------------------------------------------------
 
 
+# print('Section J complete!')

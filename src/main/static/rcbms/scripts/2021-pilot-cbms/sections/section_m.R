@@ -1,6 +1,6 @@
 # Section M ==  == =
-print('Processing Section M...')
 
+print('Processing Section M...')
 
 section_m <- hpq_data$SECTION_M %>%  
   left_join(rov, by = 'case_id') %>% 
@@ -855,3 +855,4 @@ cv_m23 <- section_m %>%
 
 rm(section_m)
 
+# print('Section M complete!')

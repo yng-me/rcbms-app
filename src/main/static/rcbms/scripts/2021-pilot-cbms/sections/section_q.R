@@ -429,8 +429,34 @@ cv_hwa_c2_b <- section_q %>%
   select(case_id, pilot_area, Q29, Q30) %>% 
   filter(Q29 == 1, is.na(Q30) | Q30 == "")
 
+cv_q01_other <- hpq_data$SECTION_Q %>% 
+  filter(Q1 == 99, !is.na(Q1_SPECIFY), HSN < 7777, pilot_area == eval_area) %>% 
+  select(case_id, Q1, Q1_SPECIFY) %>% 
+  collect() 
+
+cv_q03_other <- hpq_data$SECTION_Q %>% 
+  filter(Q3 == 99, !is.na(Q3_SPECIFY), HSN < 7777, pilot_area == eval_area) %>% 
+  select(case_id, Q3, Q3_SPECIFY) %>% 
+  collect() 
+
+cv_q04_other <-  hpq_data$SECTION_Q %>% 
+  filter(Q4 == 99, !is.na(Q4_SPECIFY), HSN < 7777, pilot_area == eval_area) %>% 
+  select(case_id, Q4, Q4_SPECIFY) %>% 
+  collect() 
+
+cv_q13_other <- hpq_data$SECTION_Q %>% 
+  filter(grepl('B', Q13), HSN < 7777, pilot_area == eval_area) %>% 
+  select(case_id, Q13) %>% 
+  collect() 
+
+cv_q14_other <-  hpq_data$SECTION_Q %>% 
+  filter(Q14 == 99, !is.na(Q14_SPECIFY), HSN < 7777, pilot_area == eval_area) %>% 
+  select(case_id, Q14, Q14_SPECIFY) %>% 
+  collect() 
+
 #=================================================================  
 #End code for HPQ section Q
 #=================================================================
 rm(section_q)
 
+# print('Section Q complete!')

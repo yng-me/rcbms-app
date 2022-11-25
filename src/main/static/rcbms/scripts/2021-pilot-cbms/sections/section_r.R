@@ -307,7 +307,84 @@ cv_r01vsr03vsr04  <- section_r %>%
   select(case_id, pilot_area, R1, R3,R4) %>% 
   filter((R1 %in% c(4:5)),(R3 %in% c(3:9)),(R4 %in% c(2:99)))
 
+# ====
+cv_r01_other <- hpq_data$SECTION_R %>% 
+  filter(R1 == 9, !is.na(R1_SPECIFY), HSN < 7777, pilot_area == eval_area) %>%
+  select(case_id, R1, R1_SPECIFY) %>% 
+  collect()
+# 
+# cv_r02_more_than_5 <- hpq_data$SECTION_R %>% 
+#   filter(R2 >= 5, HSN < 7777, pilot_area == eval_area) %>% 
+#   select(case_id, R2) %>% 
+#   collect()
+
+cv_r03_other <- hpq_data$SECTION_R %>% 
+  filter(R3 == 9, !is.na(R3_SPECIFY), HSN < 7777, pilot_area == eval_area) %>%
+  select(case_id, R3, R3_SPECIFY) %>% 
+  collect()
+
+cv_r03_1_other <- hpq_data$SECTION_R %>% 
+  filter(R3_1 == 9, !is.na(R3_1_SPECIFY), HSN < 7777, pilot_area == eval_area) %>%
+  select(case_id, R3_1, R3_1_SPECIFY) %>% 
+  collect()
+
+cv_r04_other <- hpq_data$SECTION_R %>% 
+  filter(R4 == 99, !is.na(R4_SPECIFY), HSN < 7777, pilot_area == eval_area) %>%
+  select(case_id, R4, R4_SPECIFY) %>% 
+  collect()
+
+cv_r05_other <- hpq_data$SECTION_R %>% 
+  filter(R5 == 9, !is.na(R5_SPECIFY), HSN < 7777, pilot_area == eval_area) %>%
+  select(case_id, R5, R5_SPECIFY) %>% 
+  collect()
+
+cv_r06_other <- hpq_data$SECTION_R %>% 
+  filter(R6 == 9, !is.na(R6_SPECIFY), HSN < 7777, pilot_area == eval_area) %>%
+  select(case_id, R6, R6_SPECIFY) %>% 
+  collect()
+
+cv_r08_other <- hpq_data$SECTION_R %>% 
+  filter(R8 == 99, !is.na(R8_SPECIFY), HSN < 7777, pilot_area == eval_area) %>%
+  select(case_id, R8, R8_SPECIFY) %>% 
+  collect()
+
+cv_r15_other <- hpq_data$SECTION_R %>% 
+  filter(R15 == 9, !is.na(R15_SPECIFY), HSN < 7777, pilot_area == eval_area) %>%
+  select(case_id, R15, R15_SPECIFY) %>% 
+  collect()
+
+#R02 - < 1 or >= 4 number of floors
+cv_r02_number_of_floors  <- section_r %>% 
+  select(case_id, pilot_area, R2) %>% 
+  filter(R2 < 1, R2 >= 4)
+
+#R07 - too small floor area
+cv_r07_too_small_floor_area  <- section_r %>% 
+  select(case_id, pilot_area, R7) %>% 
+  filter(R7 <= 10)
+
+#R07 - too big floor area
+cv_r07_too_big_floor_area  <- section_r %>% 
+  select(case_id, pilot_area, R7) %>% 
+  filter(R7 >= 300)
+
+#R09 - number of bedrooms >= 7
+cv_r09_no_of_bedrooms  <- section_r %>% 
+  select(case_id, pilot_area, R9) %>% 
+  filter(R9 >= 7)
+
+#R10.1 - construction year built 1945 or older
+cv_r10_1_construction_year  <- section_r %>% 
+  select(case_id, pilot_area, R10_1) %>% 
+  filter(pilot_area == "City of Baguio", R10_1 <= 1945)
+
+#R16 - HHs with motorized banca in Baguio City
+cv_r16_motorized_banca  <- section_r %>% 
+  select(case_id, pilot_area, R16_R) %>% 
+  filter(pilot_area == "City of Baguio", R16_R > 0)
+
 #If same BSN should be same type of building=====
 rm(section_r)
 
-
+# 
+# print('Section R complete!')
