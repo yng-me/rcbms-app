@@ -116,14 +116,20 @@ exp_case_wise <- do.call('rbind', validation_data) %>%
 
 # Justifications ----------------------------------------------------------------
 if(Sys.info()[1] == 'Darwin' || Sys.info()[1] == 'darwin') {
-  justification_path <- './references/justification.xlsx'
+  justification_path <- './references/justifications/'
 } else {
-  justification_path <- config$paths$justification_path
+  justification_path <- config$paths$justifications
 }
 
-if(config$include_justifiction & file.exists(justification_path)) {
+j_files <- paste0(justification_path, '\\', list.files(justification_path))
+
+if(config$include_justifiction & dir.exists(justification_path) & length(j_files) > 0) {
   
-  justifications <- read.xlsx(justification_path, 'Cases with Inconsistencies', startRow = 4)
+  j_df <- lapply(j_files, function(x) {
+    read.xlsx(x, 'Cases with Inconsistencies', startRow = 4)
+  })
+  
+  justifications <- do.call('rbind', j_df)
 
   
   if('tab' %in% names(justifications)) {

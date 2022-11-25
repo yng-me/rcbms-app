@@ -79,10 +79,7 @@ export const pilotDataLoader = () : void => {
                     const { csexport_path } = withCSProInstalled();
                     const pffPath = join(app.getAppPath(), 'static', 'pff', 'pilot');
 
-                    if(!fs.existsSync(join('C:', dataDir, 'text'))) fs.mkdirSync(join('C:', dataDir, 'text'))
-
-                    console.log(input);
-                    
+                    if(!fs.existsSync(join('C:', dataDir, 'text'))) fs.mkdirSync(join('C:', dataDir, 'text'));
 
                     ['all', 'exported'].forEach(el => {
     
@@ -113,14 +110,13 @@ export const pilotDataLoader = () : void => {
                 }
                 
 
-                if(csdbeConcat.length == 0) return
+                if(csdbeConcat.length === 0) return
 
-                if(csdbeConcat.length == 1) {
+                if(csdbeConcat.length === 1) {
 
                     console.log('here');
 
                     if(!fs.existsSync(join('C:', dataDir))) fs.mkdirSync(join('C:', dataDir))
-
 
                     extractTextFile(`InputData=${csdbeConcat[0]}`)
 
@@ -130,9 +126,6 @@ export const pilotDataLoader = () : void => {
                     })
 
                 } else {
-
-                    console.log('there');
-                    
 
                     let csdbeAll = '';
                     csdbeConcat.forEach(text => csdbeAll += `InputData=${text}\n`)

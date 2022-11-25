@@ -1,5 +1,4 @@
 ﻿
-InputData=C:\rcbms\scripts\2021-pilot-cbms\data\csdbe\concatenated-pilot.csdbe|password=293fnj<>aser@&e
 ExportedData=C:\rcbms\scripts\2021-pilot-cbms\data\text\Exported.txt
 Listing=C:\rcbms\scripts\2021-pilot-cbms\references\log.lst
 
