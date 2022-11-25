@@ -17,7 +17,7 @@ ref_sections_reviewed <- as_tibble(list.files('./references/sections')) %>%
   pull(value) %>% 
   str_sub(1, -6)
 
-ref_sections <- paste0('./scripts/inconsistencies/', list.files('./scripts/inconsistencies'))
+ref_sections <- paste0('./sections/', list.files('./sections'))
 
 ref_export_settings <- paste0('./references/sections/', list.files('./references/sections')) %>% 
   tibble() %>% 
@@ -64,6 +64,7 @@ for(i in 1:nrow(ref_areas_available)) {
     
     # ============================================================ #
     
+    print('Preparing to save the output...')
     ref_consistencies <- as_tibble(ls(pattern = '^cv_'))
     ref_inconsistencies_list <- lapply(ref_consistencies$value, filterInconsistencies)
     ref_with_inconsistencies <- do.call("rbind", ref_inconsistencies_list) %>% 
@@ -110,6 +111,7 @@ for(i in 1:nrow(ref_areas_available)) {
   # Export
     source('./utils/inconsistencies/config.R')
     source('./utils/inconsistencies/summary.R')
+    print('Saving Excel file...')
     source('./utils/inconsistencies/export.R')
   }
 }

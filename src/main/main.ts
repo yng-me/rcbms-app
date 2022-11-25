@@ -70,6 +70,7 @@ import { updateRCBMS } from './modules/updater';
 import { base, pilotDirectory } from './utils/constants';
 import { pilotDataLoader } from './modules/loader-pilot';
 import { piloExecuter } from './modules/executer-pilot';
+import { justificationCheck } from './modules/checker/with-justification';
 
 const isMac = process.platform === 'darwin'
 const dev = process.env.NODE_ENV === 'development'
@@ -180,14 +181,14 @@ const mountedPayload = () => {
     textDataCheck: textDataCheck(source, rConfig().run_after_edit), 
     withEditedData: { ...withEditedData(), isAvailable: csdbeCheck(withEditedData().path).isAvailable }, 
     withDownloadedData: { ...withDownloadedData(), isAvailable: csdbeCheck(withDownloadedData().path).isAvailable }, 
-    withJustification: withJustification(), 
+    withJustification: { ...withJustification(), isAvailable: withJustification().isAvailable && justificationCheck() }, 
     withOutputFolder: withOutputFolder(rConfig().use_pilot_data),
     withRInstalled: isMac ? { isAvailable : true, path: 'Not applicable' } : withRInstalled(), 
     withRStudioInstalled: isMac ? { isAvailable : true, path: 'Not applicable' } : withRStudioInstalled(), 
     withQuartoInstalled: isMac ? { isAvailable : true, path: 'Not applicable' } : withQuartoInstalled(), 
     withCSProInstalled: isMac ? { isAvailable : true, path: 'Not applicable' } : withCSProInstalled(),
     withParquetData: withParquetData(rConfig().use_pilot_data).isAvailable,
-    csdbeList
+    csdbeList,
   }
 }
 
