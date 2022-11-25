@@ -1,8 +1,9 @@
+
 print('Processing Section E...')
 
 section_e <- hpq_individual %>%
   filter(HSN < 7777, RESULT_OF_VISIT == 1, B06OFW %in% c(4, 5, 7)) %>%
-  select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, starts_with('E'), B06OFW)
+  select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, starts_with('E'), B06OFW, C02, C02HGC)
 
 
 # B06 %in% c(1)
@@ -230,8 +231,18 @@ cv_ofw <- section_e %>%
   filter(!(B06OFW %in% c(4, 5, 7)), E01WORK == 1) %>% 
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, B06OFW, E01WORK)
 
+#E08 - Occupation inconsistent with highest grade completed (Error)
+profession <- c(2111, 2112, 2113, 2114, 2119, 2121, 2122, 2131, 2132, 2133, 2141, 2142, 2143, 2144, 2145, 2146, 2149, 2151, 2152, 2153, 2161, 2162, 2163, 2164, 2165, 2166, 2211, 2212, 2221, 2222, 2230, 2240, 2250, 2261, 2262, 2263, 2264, 2265, 2266, 2267, 2269, 2310, 2320, 2330, 2341, 2342, 2351, 2352, 2353, 2354, 2355, 2356, 2359, 2411, 2412, 2413, 2421, 2422, 2423, 2424, 2431, 2432, 2433, 2434, 2511, 2512, 2513, 2514, 2519, 2521, 2522, 2523, 2529, 2611, 2612, 2619, 2621, 2622, 2631, 2632, 2633, 2634, 2635, 2636, 2641, 2642, 2643, 2651, 2655, 2656, 2659)
+cv_psoc_hgc_inconsistent <- section_e %>%
+  filter(age_computed >=5, C02HGC <= 60006, E08PSOC %in% profession) %>% 
+  select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C02, C02HGC, E08PSOC)
+
+#E08 - Occupation inconsistent with highest grade completed (Warning). Verify!
+cv_psoc_hgc_inconsistent_2 <- section_e %>%
+  filter(age_computed >=5, C02HGC < 40000, E08PSOC %in% c(2652,2653,2654)) %>% 
+  select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C02, C02HGC, E08PSOC)
+
+
 
 rm(section_e)
-
-
 

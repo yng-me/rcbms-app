@@ -150,7 +150,8 @@ app.on('window-all-closed', function () {
 
 ipcMain.on('before-mount', (event, data) => {
   const r = rcbmsCheck()
-  updateRCBMS()
+  
+  if(!isMac) updateRCBMS()
 
   const { seen } = getVersion()
   if(seen == undefined || seen == false) {
@@ -254,40 +255,44 @@ ipcMain.on('load-dictionary', (event, req) => {
   const rPath = isMac || !withRInstalled().isAvailable ? 'Rscript' : withRInstalled().path
   const { geoPath, dictionaryPath, isDictionaryAvailable } = withParquetData(rConfig().use_pilot_data)
 
-  if(!isDictionaryAvailable) {
-    const dPath = join('utils', 'save-parquet.R')
-    execSync(`"${rPath}" "${dPath}"`, { cwd: basePath })
+  try {
+    if(!isDictionaryAvailable) {
+      const dPath = join('utils', 'save-parquet.R')
+      execSync(`"${rPath}" "${dPath}"`, { cwd: basePath })
+    }
+  
+    const mode = req ? '2021-pilot-cbms' : '2022-cbms'
+    const pathMode = join(basePath, 'scripts', mode, 'store')
+    const tableOutputFolder = join(pathMode, 'output', 'Tables')
+    const pathTable = join(pathMode, 'tables.json')
+    let savedTables = []
+    
+    if(fs.existsSync(pathTable)) {
+      savedTables = fs.readJSONSync(pathTable)
+    }
+    
+    const script = `
+      df <- list()
+      df[['geo']] <- arrow::open_dataset('${geoPath}') |> dplyr::collect()
+      df[['dictionary']] <- arrow::open_dataset('${dictionaryPath}') |> dplyr::collect()
+      jsonlite::toJSON(df, pretty = T)
+    `
+    const g = spawn(rPath, ['-e', script], { cwd: basePath })
+    
+      let df = ''
+    
+      g.stdout.on('data', (data) => df += data.toString())
+      g.stderr.on('data', (err) => console.log(err.toString()))
+    
+      g.on('close', (code) => {
+        if(code == 0) {
+          const payload  = { ...JSON.parse(df) }
+          event.reply('dictionary', { ...payload, savedTables, tableOutputFolder })
+        }
+      })
+  } catch {
+    dialog.showErrorBox('Data Dictionary', 'There was an error loading the data dictionary for tabulation. Please restart the RCBMS app.')
   }
-
-  const mode = req ? '2021-pilot-cbms' : '2022-cbms'
-  const pathMode = join(basePath, 'scripts', mode, 'store')
-  const tableOutputFolder = join(pathMode, 'output', 'Tables')
-  const pathTable = join(pathMode, 'tables.json')
-  let savedTables = []
-  
-  if(fs.existsSync(pathTable)) {
-    savedTables = fs.readJSONSync(pathTable)
-  }
-  
-  const script = `
-    df <- list()
-    df[['geo']] <- arrow::open_dataset('${geoPath}') |> dplyr::collect()
-    df[['dictionary']] <- arrow::open_dataset('${dictionaryPath}') |> dplyr::collect()
-    jsonlite::toJSON(df, pretty = T)
-  `
-  const g = spawn(rPath, ['-e', script], { cwd: basePath })
-  
-    let df = ''
-  
-    g.stdout.on('data', (data) => df += data.toString())
-    g.stderr.on('data', (err) => console.log(err.toString()))
-  
-    g.on('close', (code) => {
-      if(code == 0) {
-        const payload  = { ...JSON.parse(df) }
-        event.reply('dictionary', { ...payload, savedTables, tableOutputFolder })
-      }
-    })
 })
 
 ipcMain.on('arrow', (event, request) => {
@@ -382,7 +387,7 @@ ipcMain.on('arrow', (event, request) => {
      }
     })
   } catch {
-    dialog.showErrorBox('Data Tabulation', 'Sorry, there was an error encoutered for tabulating the selected variables.')
+    dialog.showErrorBox('Data Tabulation', 'Sorry, there was an error encoutered for tabulating the selected variables. Please restart the RCBMS app.')
   }
    
 })

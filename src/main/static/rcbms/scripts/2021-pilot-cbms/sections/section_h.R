@@ -5,8 +5,11 @@ section_h_hh <- hpq_data$SECTION_H %>%
   left_join(rov, by = 'case_id') %>% 
   filter(HSN < 7777, RESULT_OF_VISIT == 1, pilot_area == eval_area) %>% 
   select(case_id, pilot_area, starts_with('H')) %>% 
-  mutate_at(vars(matches(c('^H4_MAJOR_', '^H4_CODE_', '^H4_NAME_', '^H2_SUSTENANCE'))), ~ str_trim(as.character(.))) %>%
-  collect() 
+  collect()  %>% 
+  mutate_at(
+    vars(matches(c('^H4_MAJOR_', '^H4_CODE_', '^H4_NAME_', '^H2_SUSTENANCE'), '^H9_MONTH_')), 
+    ~ as.character(str_trim(as.character(.)))
+  )
 
 # ===========================================================================
 # Regular household with no response in H01
@@ -72,7 +75,7 @@ for(i in 1:3) {
       rowSums(select(., matches('H3_ENTRE_\\d{2}')), na.rm = T) < 44,
       !!as.name(paste0('H4_CODE_', i)) != '' | !!as.name(paste0('H4_NAME_', i)) != ''
     )
-
+  
   h4_list[[paste0('cv_h05_psic_', i)]] <- h4_data %>%
     filter(!!as.name(paste0('H4_CODE_', i)) == '' && 
              !!as.name(paste0('NAME_', i)) == '' &&
@@ -94,16 +97,16 @@ for(i in 1:3) {
     filter(!(!!as.name(paste0('H8_YEAR_STARTED_', i)) %in% c(1:2021))) %>% 
     select(case_id, pilot_area, matches(paste0('H[48]_(CODE|NAME|YEAR_STARTED)_', i)))
   
-  # H09 - Months
-  h4_list[[paste0('cv_h09_month_', i, '_missing')]] <- h4_data %>% 
-    filter(!(grepl('[A-L]+', !!as.name(paste0('H9_MONTH_', i))) | !!as.name(paste0('H9_MONTH_', i))) == 'M') %>% 
-    select(case_id, pilot_area, matches(paste0('H[49]_(CODE|NAME|MONTH)_', i)))
+  # # H09 - Months
+  # h4_list[[paste0('cv_h09_month_', i, '_missing')]] <- h4_data %>% 
+  #   filter(!(grepl('[A-L]+', eval(!!as.name(paste0('H9_MONTH_', i)))) | !!as.name(paste0('H9_MONTH_', i))) == 'M') %>% 
+  #   select(case_id, pilot_area, matches(paste0('H[49]_(CODE|NAME|MONTH)_', i)))
   
   # H10 - Workers
   h4_list[[paste0('cv_h10_workers_', i, '_missing')]] <- h4_data %>% 
     filter(
       !(!!as.name(paste0('H10A_', i)) >= 0 & !!as.name(paste0('H10B_', i)) >= 0 & !!as.name(paste0('H10C_', i)) >= 0) |
-      is.na(rowSums(select(., matches(paste0('H10[A-C]_', i)))))
+        is.na(rowSums(select(., matches(paste0('H10[A-C]_', i)))))
     ) %>% 
     select(case_id, pilot_area, matches(paste0('H(4_|10)(CODE|NAME|[A-C])_', i)))
   

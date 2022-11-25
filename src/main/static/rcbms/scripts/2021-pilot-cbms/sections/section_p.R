@@ -112,6 +112,13 @@ for (i in 1:10) {
       !!as.name(p_var) == 1, 
       !!as.name(paste0('P7_', sprintf('%02d', i))) < 1 | is.na(!!as.name(paste0('P7_', sprintf('%02d', i))))
     )
+  
+  p_list[[paste0('cv_p07_', letters[i], '_more_than_12')]] <- section_p %>% 
+    select(case_id, pilot_area, contains(c(p_var, paste0('P7_', sprintf('%02d', i))))) %>% 
+    filter(
+      !!as.name(p_var) == 1, 
+      !!as.name(paste0('P7_', sprintf('%02d', i))) >= 12
+    )
 }
 
 
@@ -164,6 +171,13 @@ for (i in 1:6) {
       !!as.name(paste0('P11_', i)) == 1, 
       !!as.name(paste0('P13_', i)) < 1 | is.na(!!as.name(paste0('P13_', i)))
     )
+  
+  p_list[[paste0('cv_p13_', letters[i], '_more_than_12')]] <- section_p %>% 
+    select(case_id, pilot_area, contains(c(paste0('P11_', i), paste0('P13_', i)))) %>% 
+    filter(
+      !!as.name(paste0('P11_', i)) == 1, 
+      !!as.name(paste0('P13_', i)) >= 12
+    )
 }
 
 # AGRICULTURE AND FISHERIES
@@ -197,6 +211,13 @@ for (i in 1:10) {
       !!as.name(p_var) == 1, 
       !!as.name(paste0('P16_', sprintf('%02d', i))) < 1 | 
         is.na(!!as.name(paste0('P16_', sprintf('%02d', i))))
+    )
+  
+  p_list[[paste0('cv_p16_', letters[i], '_more_than_12')]] <- section_p %>% 
+    select(case_id, pilot_area, contains(c(p_var, paste0('P16_', sprintf('%02d', i))))) %>% 
+    filter(
+      !!as.name(p_var) == 1, 
+      !!as.name(paste0('P16_', sprintf('%02d', i))) >= 12
     )
 }
 
@@ -239,8 +260,17 @@ for (i in 1:13) {
       !!as.name(paste0('P19_', sprintf('%02d', i))) < 1 | 
         is.na(!!as.name(paste0('P19_', sprintf('%02d', i))))
     )
+  
+  p_list[[paste0('cv_p19_', letters[i], '_more_than_12')]] <- section_p %>% 
+    select(case_id, pilot_area, contains(c(p_var, paste0('P19_', sprintf('%02d', i))))) %>% 
+    filter(
+      !!as.name(p_var) == 1, 
+      !!as.name(paste0('P19_', sprintf('%02d', i))) >= 12
+    )
 }
 
 list2env(p_list, section_p, envir = .GlobalEnv)
 rm(p_list)
 
+
+# print('Section P complete!')

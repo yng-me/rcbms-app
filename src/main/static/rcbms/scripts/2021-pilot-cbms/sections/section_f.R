@@ -1,3 +1,4 @@
+
 print('Processing Section F...')
 
 hpq_section_g <- hpq_data$SECTION_G %>% 
@@ -61,9 +62,13 @@ for(i in seq_along(f2_letters)) {
     select(case_id, pilot_area, !!as.name(paste(f2_letters[i])))
 }
 
+cv_high_income <- section_f_ang_g %>% 
+  filter(F1A > 10000000, pilot_area == eval_area) %>% 
+  select(case_id, F1A)
+
 # 35. ==============================================================================
 # other source of income but not specified
-cv_no_income_source<- section_f_ang_g %>% 
+cv_no_income_source <- section_f_ang_g %>% 
   filter(F1A > 0 | F1B > 1, rowSums(select(., matches('^F2_[A-NZ]$')), na.rm = T) == 30) %>% 
   select(case_id, pilot_area, F1A, matches('^F2_[A-NZ]$'))
 
@@ -85,3 +90,5 @@ cv_food_total_not_same <- section_f_ang_g %>%
 
 
 list2env(f2_list, envir = .GlobalEnv)
+
+# print('Section F complete!')

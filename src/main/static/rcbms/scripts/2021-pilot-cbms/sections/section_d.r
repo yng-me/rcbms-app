@@ -1,3 +1,4 @@
+
 print('Processing Section D...')
 
 section_d <- hpq_individual %>%

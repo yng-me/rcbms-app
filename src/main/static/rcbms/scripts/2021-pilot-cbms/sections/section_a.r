@@ -409,3 +409,5 @@ cv_a16 <- section_a_reg %>%
 
 # =========================================================
 rm(section_a_reg)
+
+# print('Section A complete!')

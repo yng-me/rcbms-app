@@ -1,7 +1,7 @@
 pilot_area,date,data_source,stage,cleaned,ea_count,brgy_count
 "City of Bayugan, Agusan del Sur",17-Apr-22,DPS2,Post-evaluation edit,70%,136,43
 "Samal, Bataan",06-Apr-22,DPS2,Post-evaluation edit,88%,47,14
-"City of Baguio, Benguet",11-Apr-22,DPS1,Pre-evaluation edit,,596,129
+"City of Baguio",11-Apr-22,DPS1,Pre-evaluation edit,,596,129
 "Santa Maria, Isabela",17-Apr-22,DPS2,Post-evaluation edit,81%,27,20
 "San Gabriel, La Union",13-Apr-22,DPS2,Post-evaluation edit,93%,28,15
 "City of Baybay, Leyte",26-Apr-22,DPS2,Pre-evaluation edit,,163,92

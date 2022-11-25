@@ -1,3 +1,4 @@
+
 print('Processing Section N...')
 
 section_n <- hpq_data$SECTION_N %>%
@@ -106,6 +107,7 @@ cv_n10_1 <- section_n %>%
   filter(N1 == 1, N9 == 1, rowSums(select(., matches('^N10_[A-C]$')), na.rm = T) == 0) %>%
   select(case_id, pilot_area, N1, N9, N10_A:N10_C)
 
+#
 cv_n10z <- section_n %>%
   filter(
     N1 == 1, N9 == 1, 
@@ -115,6 +117,22 @@ cv_n10z <- section_n %>%
   ) %>% 
   select(case_id, pilot_area, N1, N9, N10_A, N10_B, N10_C, N10_C_SPECIFY)
 
+# Others specify for HH's location of access to internet
+cv_n02_others_specify_location <- section_n %>% 
+  filter(N1 == 1, N2_Z == 1) %>% 
+  select(case_id, pilot_area, N1, N2_Z, N2_Z_SPECIFY) 
 
+# Others specify for e-commerce used by HH
+cv_n07_others_specify_ecommerce <- section_n %>% 
+  filter(N6_C == 1, N7_Z == 1) %>% 
+  select(case_id, pilot_area, N6_C, N7_Z, N7_Z_SPECIFY) 
+
+# Others specify for online work thru online platform
+cv_n10_others_specify_online_work <- section_n %>% 
+  filter(N10_C == 1) %>% 
+  select(case_id, pilot_area, N10_C, N10_C_SPECIFY)
+  
+  
 rm(section_n)
 
+# print('Section N complete!')

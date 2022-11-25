@@ -1,4 +1,5 @@
 # ====================================================================
+
 print('Processing Section C...')
 
 section_c <- hpq_individual %>%
@@ -6,19 +7,19 @@ section_c <- hpq_individual %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, A07AGE, starts_with('C'), -case_id_m)
 
 # 1. =================================================================
-# age is less than 5 but with response in literacy
-cv_literacy_age <- section_c %>% 
+# age_computed is less than 5 but with response in literacy
+cv_literacy_age_computed <- section_c %>% 
   filter(!is.na(C01READ), age_computed < 5 & age_computed >= 0) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C01READ)
 
 # 2. =================================================================
-# age is greater than 5 but without response in literacy
+# age_computed is greater than 5 but without response in literacy
 cv_literacy_age_na <- section_c %>% 
   filter(is.na(C01READ), age_computed >= 5) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C01READ, C02HGC, C05SPECIFY)
 
 # 3. =================================================================
-# age is greater than 5 but response in literacy is not in the valueset
+# age_computed is greater than 5 but response in literacy is not in the valueset
 cv_literacy_age_valueset <- section_c %>% 
   filter(!(C01READ %in% c(1, 2, NA)), age_computed >= 5) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C01READ)
@@ -47,19 +48,19 @@ cv_hgc_c02hgcblankC02 <- section_c %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C02, C02HGC)
 
 # 7. =================================================================
-# age is less than 5 but with response in HGC
-cv_hgc_age <- section_c %>% 
+# age_computed is less than 5 but with response in HGC
+cv_hgc_age_computed <- section_c %>% 
   filter(!is.na(C02), age_computed < 5 & age_computed >= 0) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C02, C02HGC)
 
 # 8. =================================================================
-## age is greater than 5 but without response in HGC
+## age_computed is greater than 5 but without response in HGC
 cv_hgc_age_na <- section_c %>% 
   filter(is.na(C02), age_computed >= 5) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C02, C02HGC)
 
 # 9. =================================================================
-# age is greater than 5 but response in HGC is not in the valueset
+# age_computed is greater than 5 but response in HGC is not in the valueset
 cv_hgc_age_valueset <- section_c %>% 
   filter(C02 < 0 & C02 > 8, age_computed >= 5) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C02, C02HGC)
@@ -71,7 +72,7 @@ cv_hgc_literacy <- section_c %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C01READ, C02HGC)
 
 # 11. ================================================================
-# hgc vs age cross (young achievers?)
+# hgc vs age_computed cross (young achievers?)
 cv_hgc_age_cross <- section_c %>% 
   filter(
     (age_computed <= 9 & age_computed >= 5 & C02HGC >= 10018) | 
@@ -82,43 +83,43 @@ cv_hgc_age_cross <- section_c %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C02, C02HGC)
 
 # 12. ================================================================
-# age is not between 3 to 24 but with response in school attendance
-cv_schoolattendance_age <- section_c %>% 
+# age_computed is not between 3 to 24 but with response in school attendance
+cv_schoolattendance_age_computed <- section_c %>% 
   filter(!is.na(C03ATTEND), age_computed > 24 | age_computed < 3) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C03ATTEND)
 
 # 13. ================================================================
-# age is between 3 to 24 but without response in school attendance  
+# age_computed is between 3 to 24 but without response in school attendance  
 cv_schoolattendance_age_na <- section_c %>% 
   filter(is.na(C03ATTEND), age_computed >= 3 & age_computed <= 24) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C03ATTEND)
 
 # 14. ================================================================
-# age is is between 3 to 24 but response in school attendance is not in the valueset
+# age_computed is is between 3 to 24 but response in school attendance is not in the valueset
 cv_schoolattendance_valueset <- section_c %>% 
   filter(!(C03ATTEND %in% c(1, 2, NA)), age_computed >= 3 & age_computed <= 24) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C03ATTEND)
 
 # 15. ================================================================
-# age is not between 3 to 24 but with response in school type
-cv_school_age <- section_c %>% 
+# age_computed is not between 3 to 24 but with response in school type
+cv_school_age_computed <- section_c %>% 
   filter(!is.na(C04SCHOOL), age_computed > 24 | age_computed < 3) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C04SCHOOL)
 
 # 16. ================================================================
-# age is between 3 to 24 and currently attending school but without response in school type  
+# age_computed is between 3 to 24 and currently attending school but without response in school type  
 cv_school_age_na <- section_c %>% 
   filter(is.na(C04SCHOOL), C03ATTEND == 1, age_computed >= 3 & age_computed <= 24) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C03ATTEND, C04SCHOOL)
 
 # 17. ================================================================
-# age is between 3 to 24 and not currently attending school but with response in school type  
+# age_computed is between 3 to 24 and not currently attending school but with response in school type  
 cv_school_age_notna <- section_c %>% 
   filter(!is.na(C04SCHOOL), C03ATTEND == 2, age_computed >= 3 & age_computed <= 24) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C03ATTEND, C04SCHOOL)
 
 # 18. ================================================================
-# age is between 3 to 24 but response in school type is not in the valueset
+# age_computed is between 3 to 24 but response in school type is not in the valueset
 cv_school_valueset <- section_c %>% 
   filter(!(C04SCHOOL %in% c(1, 2, 3, NA)), age_computed >= 3 & age_computed <= 24) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C04SCHOOL)
@@ -144,31 +145,31 @@ cv_curgrade_c05specblankC05cg <- section_c %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C03ATTEND, C05CURGRADE, C05SPECIFY)
 
 # 22. ================================================================
-# age is not between 3 to 24 but with response in curgrade
-cv_curgrade_age <- section_c %>% 
+# age_computed is not between 3 to 24 but with response in curgrade
+cv_curgrade_age_computed <- section_c %>% 
   filter(!is.na(C05CURGRADE), age_computed > 24 | age_computed < 3) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C05CURGRADE)
 
 # 23. ================================================================
-# age is between 3 to 24 and currently attending school but without response in curgrade  
+# age_computed is between 3 to 24 and currently attending school but without response in curgrade  
 cv_curgrade_age_na <- section_c %>% 
   filter(is.na(C05CURGRADE), C03ATTEND == 1, age_computed >= 3 & age_computed <= 24) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C03ATTEND, C05CURGRADE)
 
 # 24. ================================================================
-# age is between 3 to 24 and not currently attending school but with response in curgrade   
+# age_computed is between 3 to 24 and not currently attending school but with response in curgrade   
 cv_curgrade_age_notna <- section_c %>% 
   filter(!is.na(C05CURGRADE), C03ATTEND == 2, age_computed >= 3 & age_computed <= 24) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C03ATTEND, C05CURGRADE)
 
 # 25. ================================================================
-# age is between 3 to 24 but response in school type is not in the valueset
+# age_computed is between 3 to 24 but response in school type is not in the valueset
 cv_curgrade_valueset <- section_c %>% 
   filter(!(C05CURGRADE %in% c(0:8, NA)), age_computed >= 3 & age_computed <= 24) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C05CURGRADE)
 
 # 26. ================================================================
-# curgrade vs age cross
+# curgrade vs age_computed cross
 cv_curgrade_age_cross <- section_c %>% 
   filter(
     (age_computed < 5 & C05SPECIFY > 10012) | 
@@ -187,25 +188,25 @@ cv_curgrade_hgc_equal <- section_c %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C05SPECIFY, C02HGC) 
 
 # 28. ================================================================
-# age is not between 3 to 24 but with response in reason for not attending school
-cv_reasonnoschool_age <- section_c %>% 
+# age_computed is not between 3 to 24 but with response in reason for not attending school
+cv_reasonnoschool_age_computed <- section_c %>% 
   filter(!is.na(C06NOTATTEND), age_computed > 24 | age_computed < 3) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C06NOTATTEND)
 
 # 29. ================================================================
-# age is between 3 to 24 and not currently attending school but without response in reason for not attending school  
+# age_computed is between 3 to 24 and not currently attending school but without response in reason for not attending school  
 cv_reasonnoschool_age_na <- section_c %>% 
   filter(is.na(C06NOTATTEND), C03ATTEND == 2, age_computed >= 3 & age_computed <= 24) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C03ATTEND, C06NOTATTEND)
 
 # 30. ================================================================
-# age is between 3 to 24 and currently attending school but with response in reason for not attending school 
+# age_computed is between 3 to 24 and currently attending school but with response in reason for not attending school 
 cv_reasonnosch_attend_notna <- section_c %>% 
   filter(!is.na(C06NOTATTEND), C03ATTEND == 1, age_computed >= 3 & age_computed <= 24) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C03ATTEND, C06NOTATTEND)
 
 # 31. ================================================================
-# age is between 3 to 24 but response in reason for not attending school is not in the valueset
+# age_computed is between 3 to 24 but response in reason for not attending school is not in the valueset
 cv_reasonnosch_valueset <- section_c %>% 
   filter(!(C06NOTATTEND %in% c(0:13, 99, NA)), C03ATTEND == 2, age_computed >= 3 & age_computed <= 24) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C03ATTEND, C06NOTATTEND)
@@ -213,12 +214,12 @@ cv_reasonnosch_valueset <- section_c %>%
 # C-2 ==================================================================================
 
 ## ================================== C07TVET ================================== ##
-### age is less than 15 but with response in C07
+### age_computed is less than 15 but with response in C07
 cv_c07_notblank <- section_c %>% 
   filter(!is.na(C07TEACH), age_computed < 15) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C07TEACH)
 
-### age is 15 years and over but no response in C07
+### age_computed is 15 years and over but no response in C07
 cv_c07_blank <- section_c %>% 
   filter(is.na(C07TEACH), age_computed >= 15) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C07TEACH)
@@ -230,12 +231,12 @@ cv_c07_valueset <- section_c %>%
 
 ## ================================== C08TECHVOC ================================== ##
 
-## age is less than 15 but with response in C08
+## age_computed is less than 15 but with response in C08
 cv_c08_notblank <- section_c %>% 
   filter(!is.na(C08TECHVOC), age_computed < 15) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C08TECHVOC)
 
-### age is 15 years and over but no response in C08
+### age_computed is 15 years and over but no response in C08
 cv_c08_blank <- section_c %>% 
   filter(is.na(C08TECHVOC), age_computed >= 15) %>%
   select(case_id, pilot_area, LINENO, A01HHMEM, age_computed, C08TECHVOC)
@@ -313,9 +314,29 @@ cv_C03ATTEND5 <- hpq_individual %>%
   select(case_id, LINENO, age_computed, C03ATTEND, C05CURGRADE)
 
 cv_c06_reason_not_in_school_male_pregnant <- hpq_individual %>%
-  filter(age_computed %in% c(3:24), A05SEX == 2, C03ATTEND == 2, C06NOTATTEND == 3) %>%
+  filter(age_computed %in% c(3:24), A05SEX == 1, C03ATTEND == 2, C06NOTATTEND == 3) %>%
   select(case_id, LINENO, age_computed, A05SEX, C03ATTEND, C06NOTATTEND)
 
 cv_c06_reason_5_years_old_employed <- hpq_individual %>%
   filter(age_computed <= 5, C03ATTEND == 2, C06NOTATTEND == 6) %>%
   select(case_id, LINENO, age_computed, C03ATTEND, C06NOTATTEND, E01WORK)
+
+#Reason not in school for Verification
+cv_c06_6to11yo_reason_for_verification <- hpq_individual %>% 
+  filter(age_computed >=6 & age_computed <= 11, C03ATTEND == 2, C06NOTATTEND %in% c(3,4,6,7,11)) %>% 
+  select(case_id, LINENO, age_computed, C03ATTEND, C06NOTATTEND, C06SPECIFY)
+
+cv_c06_12to15yo_reason_for_verification <- hpq_individual %>% 
+  filter(age_computed >=12 & age_computed <= 15, C03ATTEND == 2, C06NOTATTEND %in% c(7,11)) %>% 
+  select(case_id, LINENO, age_computed, C03ATTEND, C06NOTATTEND, C06SPECIFY)
+
+cv_c06_16to17yo_reason_for_verification <- hpq_individual %>% 
+  filter(age_computed >=16 & age_computed <= 17, C03ATTEND == 2, C06NOTATTEND %in% c(7,11)) %>% 
+  select(case_id, LINENO, age_computed, C03ATTEND, C06NOTATTEND, C06SPECIFY)
+
+cv_c06_18to24yo_reason_for_verification <- hpq_individual %>% 
+  filter(age_computed >=18 & age_computed <= 24, C03ATTEND == 2, C06NOTATTEND == 11) %>% 
+  select(case_id, LINENO, age_computed, C03ATTEND, C06NOTATTEND, C06SPECIFY)
+
+
+# print('Section C complete!')
