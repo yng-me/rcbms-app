@@ -2,12 +2,12 @@
 print('Processing Section H...')
 
 section_h_hh <- hpq_data$SECTION_H %>% 
+  collect()  %>% 
   left_join(rov, by = 'case_id') %>% 
   filter(HSN < 7777, RESULT_OF_VISIT == 1, pilot_area == eval_area) %>% 
   select(case_id, pilot_area, starts_with('H')) %>% 
-  collect()  %>% 
   mutate_at(
-    vars(matches(c('^H4_MAJOR_', '^H4_CODE_', '^H4_NAME_', '^H2_SUSTENANCE'), '^H9_MONTH_')), 
+    vars(matches(c('^H4_MAJOR_', '^H4_CODE_', '^H4_NAME_', '^H2_SUSTENANCE', '^H9_MONTH_'))), 
     ~ as.character(str_trim(as.character(.)))
   ) %>% 
   na_if('')
