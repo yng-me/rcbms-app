@@ -1,0 +1,1895 @@
+
+# Section M {.unnumbered}
+
+
+section_m <- hpq$section_m %>% collect()
+
+
+
+### M01 - Household’s residence in current barangay is blank/not in the valueset
+
+## Household’s residence in current barangay should have an answer or answer should be in the given categories.
+(
+  cv_m01_tyhhresidence_nitv <- section_m %>% 
+    filter(!(m01_tyhhresidence %in% c(1, 2))) %>% 
+    select_cv(m01_tyhhresidence, h = 'm01_tyhhresidence')
+)[[1]]
+
+
+### M02A-E - Household’s experiences in current barangay compared with three (3) years ago (2019) is blank/not in the valueset
+
+## If the household continuously been residing in this barangay, household’s experiences in current barangay compared with three (3) years ago (2019) should have an answer or answer should be in the given categories.
+(
+  cv_m02ae_nitv <- section_m %>% 
+    filter(m01_tyhhresidence == 1) %>% 
+    filter_at(vars(matches('^m02[a-e]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m01_tyhhresidence, 
+      matches('^m02[a-e]_.*'), 
+      h = c(
+        'm02a_tyhhexp',
+        'm02b_tyhhexp',
+        'm02c_tyhhexp',
+        'm02d_tyhhexp',
+        'm02e_tyhhexp'
+        )
+      )
+)[[1]]
+
+
+### M02A-E - Household’s experiences in current barangay compared with three (3) years ago (2019) should be blank
+
+## If the household not continuously been residing in this barangay, household’s experiences in current barangay compared with three (3) years ago (2019) should be blank.
+(
+  cv_m02ae_decwater_wval <- section_m %>% 
+    filter(m01_tyhhresidence == 2) %>% 
+    filter_at(vars(matches('^m02[a-e]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m01_tyhhresidence, 
+      matches('^m02[a-e]_.*'), 
+      h = c(
+        'm01_tyhhresidence',
+        'm02a_tyhhexp',
+        'm02b_tyhhexp',
+        'm02c_tyhhexp',
+        'm02d_tyhhexp',
+        'm02e_tyhhexp'
+        )
+      )
+)[[1]]
+
+
+### M03 - Reason for the decrease in water supply is blank/not in the valueset
+ 
+## Household experienced the decrease in water supply, primary reason for the decrease in water supply should have an answer or answer should be in the given categories.
+(
+  cv_m03_reason_nitv <- section_m %>% 
+    filter(m02a_tyhhexp == 1, !(m03_preason %in% c(1:6, 9))) %>% 
+    select_cv(m02a_tyhhexp, m03_preason, h = 'm03_preason')
+)[[1]]
+
+
+### M03 - Reason for the decrease in water supply must be blank
+
+## Household did not experienced the decrease in water supply, reason for the decrease in water supply should be blank.
+(
+  cv_m03_reason_wval <- section_m %>% 
+    filter(m02a_tyhhexp == 2, !is.na(m03_preason)) %>% 
+    select_cv(m02a_tyhhexp, m03_preason, h = 'm03_preason')
+)[[1]]
+
+
+### M03 - Answer is 9 (other) but not specified 
+
+#### Cases with inconsistency
+
+## If responded 9 to M03 (other reason for the decrease in water supply), answer must be specified.
+(
+  cv_m03_other_missing <- section_m %>% 
+    filter(m03_preason == 9, is.na(m03a_preason)) %>% 
+    select_cv(m03_preason, m03a_preason, h = 'm03a_preason')
+)[[1]]
+
+
+#### Other responses
+
+## Recode answer for 'Others, specify' if necessary.
+( 
+  cv_m03_other <- section_m %>% 
+    filter(m03_preason == 9, !is.na(m03a_preason)) %>% 
+    select_cv(m03_preason, m03a_preason)
+)[[1]]
+
+
+### M04 - Duration for the flood to subside three (3) years ago is blank/not in the valueset
+
+## Household experienced more frequent flooding, duration for the flood to subside three (3) years ago should have an answer or answer should be in the given categories.
+(
+  cv_m04_duration_nitc <- section_m %>% 
+    filter(m02b_tyhhexp == 1, is.na(m04_tyfsubside)) %>% 
+    select_cv(m02b_tyhhexp, m04_tyfsubside, h = 'm04_tyfsubside')
+)[[1]]
+
+
+### M04 - Duration for the flood to subside three (3) years ago must be blank
+
+## Household did not experienced more frequent flooding, duration for the flood to subside three (3) years ago should be blank.
+(
+  cv_m04_duration_wval <- section_m %>% 
+    filter(m02b_tyhhexp == 2, !is.na(m04_tyfsubside)) %>% 
+    select_cv(m02b_tyhhexp, m04_tyfsubside, h = 'm04_tyfsubside')
+)[[1]]
+
+
+### M05 - Duration for the flood to subside in the past 12 months is blank/not in the valueset
+
+## Household experienced more frequent flooding, duration for the flood to subside in the past 12 months should have an answer or answer should be in the given categories.
+(
+  cv_m05_duration_nitc <- section_m %>% 
+    filter(m02b_tyhhexp == 1, is.na(m05_tmsubside)) %>% 
+    select_cv(m02b_tyhhexp, m05_tmsubside, h = 'm05_tmsubside')
+)[[1]]
+
+
+### M05 - Duration for the flood to subside in the past 12 months years ago must be blank
+
+## Household did not experienced more frequent flooding, duration for the flood to subside in the past 12 months should be blank.
+(
+  cv_m05_duration_wval <- section_m %>% 
+    filter(m02b_tyhhexp == 2, !is.na(m05_tmsubside)) %>% 
+    select_cv(m02b_tyhhexp, m05_tmsubside, h = 'm05_tmsubside')
+)[[1]]
+
+
+### M06 - Drought occurrence in the last three (3) years is blank/not in the valueset
+
+## Household experienced more frequent drought, drought occurrence in the last three (3) years should have an answer or answer should be in the given categories.
+(
+  cv_m06_drought_nitv <- section_m %>% 
+    filter(m02c_tyhhexp == 1, is.na(m06_tydrought)) %>% 
+    select_cv(m02c_tyhhexp, m06_tydrought, h = 'm06_tydrought')
+)[[1]]
+
+
+### M06 - Drought occurrence in the last three (3) years must be blank
+
+## Household did not experienced more frequent drought, drought occurrence in the last three (3) years should be blank.
+(
+  cv_m06_drought_wval <- section_m %>% 
+    filter(m02c_tyhhexp == 2, !is.na(m06_tydrought)) %>% 
+    select_cv(m02c_tyhhexp, m06_tydrought, h = 'm06_tydrought')
+)[[1]]
+
+
+### M07 - Location of evacuation area is blank/not in the valueset
+
+## Answer in 'Location of evacuation area' should be in the given categories.
+(
+  cv_m07_evacuation <- section_m %>% 
+    filter(!m07_evarea %in% c(1, 2)) %>% 
+    select_cv(m07_evarea, h = 'm07_evarea')
+)[[1]]
+
+
+### M08 - Temporary evacuation is blank/not in the valueset
+
+## Answer in 'Temporary evacuation' should be in the given categories.
+(
+  cv_m08_tempevac <- section_m %>% 
+    filter(!m08_tytempevarea %in% c(1, 2, 8)) %>% 
+    select_cv(m08_tytempevarea, h = 'm08_tytempevarea')
+)[[1]]
+
+
+### M09 - Main reason for temporary evacuation is blank/not in the valueset
+
+## The household temporarily evacuated in the past three years, main reason for temporary evacuation should have an answer or answer should be in the given categories.
+(
+  cv_m09_reason_nitv <-section_m %>% 
+    filter(m08_tytempevarea == 1, !(m09_tymreason %in% c(1:9, 99))) %>% 
+    select_cv(m08_tytempevarea, m09_tymreason, h = 'm09_tymreason')
+)[[1]]
+
+
+### M09 - Main reason for temporary evacuation must be blank
+
+## The household did not temporarily evacuated in the past three years, main reason for temporary evacuation should be blank.
+(
+  cv_m09_reason_wval <-section_m %>% 
+    filter(m08_tytempevarea %in% c(2, 8), !is.na(m09_tymreason)) %>% 
+    select_cv(m08_tytempevarea, m09_tymreason, h = 'm09_tymreason')
+)[[1]]
+
+
+### M09 - Answer is 99 (other) but not specified 
+
+
+#### Cases with inconsistency
+
+## If responded 99 to M09 (other reason for temporary evacuation), answer must be specified.
+(
+  cv_m09_other_missing <- section_m %>% 
+    filter(m09_tymreason == 99, is.na(m09a_tymreason)) %>% 
+    select_cv(m09_tymreason_fct, m09a_tymreason, h = 'm09a_tymreason')
+)[[1]]
+
+
+#### Other responses
+
+## Recode answer for 'Others, specify' if necessary.
+(
+  cv_m09_other <- section_m %>% 
+    filter(m09_tymreason == 99, !is.na(m09a_tymreason)) %>% 
+    select_cv(m09_tymreason_fct, m09a_tymreason, h = 'm09a_tymreason')
+)[[1]]
+
+
+### M10 - Last temporary evacuation in the past twelve (12) months is blank/not in the valueset
+
+## The household temporarily evacuated in the past three years, last temporary evacuation in the past twelve (12) months should have an answer or answer should be in the given categories.
+(
+  cv_m10_reason12_nitv <-section_m %>% 
+    filter(m08_tytempevarea == 1, !(m10_tmltemeva %in% c(1, 2))) %>% 
+    select_cv(m08_tytempevarea, m10_tmltemeva, h = 'm10_tmltemeva')
+)[[1]]
+
+
+### M10 - Last temporary evacuation in the past twelve (12) months must be blank
+
+## The household did not temporarily evacuated in the past three years, last temporary evacuation in the past twelve (12) months should be blank.
+(
+  cv_m09_reason12_wval <-section_m %>% 
+    filter(m08_tytempevarea == 2, !is.na(m10_tmltemeva)) %>% 
+    select_cv(m08_tytempevarea, m10_tmltemeva, h = 'm10_tmltemeva')
+)[[1]]
+
+
+### M11 - Place of last temporary evacuation is blank/not in the valueset
+
+## The household temporarily evacuated in the past three years, place of last temporary evacuation should have an answer or answer should be in the given categories.
+(
+  cv_m11_stayevarea_nitv <-section_m %>% 
+    filter(m08_tytempevarea == 1, m10_tmltemeva == 1, !m11_stayevarea %in% c(1:7, 9)) %>% 
+    select_cv(m08_tytempevarea, m10_tmltemeva, m11_stayevarea, h = 'm11_stayevarea')
+)[[1]]
+
+
+### M11 - Place of last temporary evacuation must be blank
+
+## The household did not temporarily evacuated in the past three years, place of last temporary evacuation should be blank.
+(
+  cv_m11_stayevarea_wval <-section_m %>% 
+    filter(m08_tytempevarea == 2, m10_tmltemeva == 2, !is.na(m11_stayevarea)) %>% 
+    select_cv(m08_tytempevarea, m10_tmltemeva, m11_stayevarea, h = 'm11_stayevarea')
+)[[1]]
+
+
+### M11 - Answer is 9 (other) but not specified 
+
+
+
+#### Cases with inconsistency
+
+## If responded 9 to M11 (other evacuation center), answer must be specified.
+(
+  cv_m11_other_missing <- section_m %>% 
+    filter(m11_stayevarea == 9, is.na(m11a_others)) %>% 
+    select_cv(m11_stayevarea_fct, m11a_others, h = 'm11a_others')
+)[[1]]
+
+
+#### Other responses
+
+## Recode answer for 'Others, specify' if necessary.
+(
+  cv_m11_other <- section_m %>% 
+    filter(m11_stayevarea == 9, !is.na(m11a_others)) %>% 
+    select_cv(m11_stayevarea_fct, m11a_others)
+)[[1]]
+
+
+### M12 - Length of stay in the evacuation area is blank/not in the 
+
+## The household temporarily evacuated in the past three years, length of stay in the evacuation area should have an answer or answer should be in the given categories.
+(
+  cv_m12_hlongevarea_nitv <-section_m %>% 
+    filter(m08_tytempevarea == 1, m10_tmltemeva == 1, is.na(m12_hlongevarea)) %>% 
+    select_cv(m08_tytempevarea, m10_tmltemeva, m11_stayevarea, m12_hlongevarea, h = 'm12_hlongevarea')
+)[[1]]
+
+
+### M12 - Length of stay in the evacuation area must be blank
+
+## The household did not temporarily evacuated in the past three years, length of stay in the evacuation area should be blank.
+(
+  cv_m12_hlongevarea_wval <- section_m %>% 
+    filter(m08_tytempevarea == 2, m10_tmltemeva == 2, !is.na(m12_hlongevarea)) %>% 
+    select_cv(m08_tytempevarea, m10_tmltemeva, m11_stayevarea, m12_hlongevarea, h = 'm12_hlongevarea')
+)[[1]]
+
+
+### M13AZ - Calamities which negatively affect the household in the past 12 months is blank/not in the valueset
+
+## Calamities which negatively affect the household in the past 12 months should have an answer or answer should be in the given categories.
+(
+  cv_m13az_negaff_nitv <- section_m %>% 
+    filter_at(vars(matches('m13[a-iz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      matches('m13[a-iz]_.*'), 
+      h = c(
+        'm13a_negaff',
+        'm13b_negaff',
+        'm13c_negaff',
+        'm13d_negaff',
+        'm13e_negaff',
+        'm13f_negaff',
+        'm13g_negaff',
+        'm13h_negaff',
+        'm13i_negaff',
+        'm13z_negaff'
+        )
+      )
+)[[1]]
+
+
+### M13Z - Answer is 'Yes' but not specified 
+
+
+#### Cases with inconsistency
+
+## If responded 'Yes' to M13Z (other calamity), answer must be specified.
+(
+  cv_m13_other_missing <- section_m %>% 
+    filter(m13z_negaff == 1, is.na(m13za_negaff)) %>% 
+    select_cv(m13z_negaff_fct, m13za_negaff, h = 'm13za_negaff')
+)[[1]]
+
+
+#### Other responses
+
+## Recode answer for 'Others, specify' if necessary.
+(
+  cv_m13_other <- section_m %>% 
+    filter(m13z_negaff == 1, !is.na(m13za_negaff)) %>% 
+    select_cv(m13z_negaff_fct, m13za_negaff)
+)[[1]]
+
+
+### M14A - Negative impacts of Typhoon to household is blank/not in the valueset
+
+## The household is negatively affected by typhoon in the past 12 months, negative impacts of the typhoon should have an answer or answer should be in the given categories.
+(
+  cv_m14ta_typhoon_nitv <-section_m %>%
+    filter(m13a_negaff == 1) %>% 
+    filter_at(vars(matches('^m14t[a-iz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13a_negaff, 
+      matches("^m14t[a-iz]_.*"), 
+      h = c(
+        'm14ta_typhoon',
+        'm14tb_typhoon',
+        'm14tc_typhoon',
+        'm14td_typhoon',
+        'm14te_typhoon',
+        'm14tf_typhoon',
+        'm14tg_typhoon',
+        'm14th_typhoon',
+        'm14ti_typhoon',
+        'm14tz_typhoon'
+        )
+      )
+)[[1]]
+
+
+### M14A - Negative impacts of Typhoon to the household must be blank
+
+## The household is not negatively affected by typhoon in the past 12 months, negative impacts of the typhoon should be blank.
+(
+  cv_m14ta_typhoon_wval <-section_m %>%
+    filter(m13a_negaff == 2) %>% 
+    filter_at(vars(matches('^m14t[a-iz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13a_negaff, 
+      matches("^m14t[a-iz]_.*"), 
+      h = c(
+        'm14ta_typhoon',
+        'm14tb_typhoon',
+        'm14tc_typhoon',
+        'm14td_typhoon',
+        'm14te_typhoon',
+        'm14tf_typhoon',
+        'm14tg_typhoon',
+        'm14th_typhoon',
+        'm14ti_typhoon',
+        'm14tz_typhoon'
+        )
+      )
+)[[1]]
+
+
+### M14B - Negative impacts of flood to the household is blank/not in the valueset
+
+## The household is negatively affected by flood in the past 12 months, negative impacts of the flood should have an answer or answer should be in the given categories.
+(
+  cv_m14b_flood_nitv <- section_m %>%
+    filter(m13b_negaff == 1) %>% 
+    filter_at(vars(matches('^m14f[a-iz]_flood$'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13b_negaff, 
+      matches("^m14f[a-iz]_flood$"), 
+      h = c(
+        'm14fa_flood',
+        'm14fb_flood',
+        'm14fc_flood',
+        'm14fd_flood',
+        'm14fe_flood',
+        'm14ff_flood',
+        'm14fg_flood',
+        'm14fh_flood',
+        'm14fi_flood',
+        'm14fz_flood'
+        )
+      )
+)[[1]]
+
+
+### M14B - Negative impacts of flood to the household must be blank
+
+## The household is not negatively affected by flood in the past 12 months, negative impacts of the flood should be blank.
+(
+  cv_m14_flood_wval <- section_m %>%
+    filter(m13b_negaff == 2) %>% 
+    filter_at(vars(matches('^m14f[a-iz]_flood$'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13b_negaff, 
+      matches("^m14f[a-iz]_flood$"), 
+      h = c(
+        'm14fa_flood',
+        'm14fb_flood',
+        'm14fc_flood',
+        'm14fd_flood',
+        'm14fe_flood',
+        'm14ff_flood',
+        'm14fg_flood',
+        'm14fh_flood',
+        'm14fi_flood',
+        'm14fz_flood'
+        )
+      )
+)[[1]]
+
+
+### M14C - Negative impacts of drought to the household is blank/not in the valueset
+
+## The household is negatively affected by drought in the past 12 months, negative impacts of the drought should have an answer or answer should be in the given categories.
+(
+  cv_m14c_drought_nitv <-section_m %>%
+    filter(m13c_negaff == 1) %>% 
+    filter_at(vars(matches('^m14d[a-iz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13c_negaff, 
+      matches("^m14d[a-iz]_.*"), 
+      h = c(
+        'm14da_drought',
+        'm14db_drought',
+        'm14dc_drought',
+        'm14dd_drought',
+        'm14de_drought',
+        'm14df_drought',
+        'm14dg_drought',
+        'm14dh_drought',
+        'm14di_drought',
+        'm14dz_drought'
+        )
+      )
+)[[1]]
+
+
+### M14C - Negative impacts of drought to the household must be blank
+
+## The household is not negatively affected by drought in the past 12 months, negative impacts of the drought should be blank.
+(
+  cv_m14c_drought_wval <-section_m %>%
+    filter(m13c_negaff == 2) %>% 
+    filter_at(vars(matches('^m14d[a-iz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13c_negaff, 
+      matches("^m14d[a-iz]_.*"), 
+      h = c(
+        'm14da_drought',
+        'm14db_drought',
+        'm14dc_drought',
+        'm14dd_drought',
+        'm14de_drought',
+        'm14df_drought',
+        'm14dg_drought',
+        'm14dh_drought',
+        'm14di_drought',
+        'm14dz_drought'
+        )
+      )
+)[[1]]
+
+
+### M14D - Negative impacts of earthquake to household is blank/not in the valueset
+
+## The household is negatively affected by earthquake in the past 12 months, negative impacts of the earthquake should have an answer or answer should be in the given categorie.
+(
+  cv_m14d_eartquake_nitv <-section_m %>%
+    filter(m13d_negaff == 1) %>% 
+    filter_at(vars(matches('^m14e[a-iz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13d_negaff, 
+      matches("^m14e[a-iz]_.*"), 
+      h = c(
+        'm14ea_earthquake',
+        'm14eb_earthquake',
+        'm14ec_earthquake',
+        'm14ed_earthquake',
+        'm14ee_earthquake',
+        'm14ef_earthquake',
+        'm14eg_earthquake',
+        'm14eh_earthquake',
+        'm14ei_earthquake',
+        'm14ez_earthquake'
+        )
+      )
+)[[1]]
+
+
+### M14D - Negative impacts of earthquake to household must be blank
+
+## The household is not negatively affected by earthquake in the past 12 months, negative impacts of the earthquake should be blank.
+(
+  cv_m14d_earthquake_wval <-section_m %>%
+    filter(m13d_negaff == 2) %>% 
+    filter_at(vars(matches('^m14e[a-iz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13d_negaff, 
+      matches("^m14e[a-iz]_.*"), 
+      h = c(
+        'm14ea_earthquake',
+        'm14eb_earthquake',
+        'm14ec_earthquake',
+        'm14ed_earthquake',
+        'm14ee_earthquake',
+        'm14ef_earthquake',
+        'm14eg_earthquake',
+        'm14eh_earthquake',
+        'm14ei_earthquake',
+        'm14ez_earthquake'
+        )
+      )
+)[[1]]
+
+
+### M14E - Negative impacts of volcanic to household is blank/not in the valueset
+
+## The household is negatively affected by earthquake in the past 12 months, negative impacts of the earthquake should have an answer or answer should be in the given categories.
+(
+  cv_m14e_volcanic_nitv <-section_m %>%
+    filter(m13e_negaff == 1) %>% 
+    filter_at(vars(matches('^m14v[a-iz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13e_negaff, 
+      matches("^m14v[a-iz]_.*"), 
+      h = c(
+        'm14va_volcaniceruption',
+        'm14vb_volcaniceruption',
+        'm14vc_volcaniceruption',
+        'm14vd_volcaniceruption',
+        'm14ve_volcaniceruption',
+        'm14vf_volcaniceruption',
+        'm14vg_volcaniceruption',
+        'm14vh_volcaniceruption',
+        'm14vi_volcaniceruption',
+        'm14vz_volcaniceruption'
+        )
+      )
+)[[1]]
+
+
+### M14E - Negative impacts of volcanic to household must be blank
+
+## The household is not negatively affected by earthquake in the past 12 months, negative impacts of the earthquake should be blank.
+(
+  cv_m14e_volcanic_wval <-section_m %>%
+    filter(m13e_negaff == 2) %>% 
+    filter_at(vars(matches('^m14v[a-iz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13e_negaff, 
+      matches("^m14v[a-iz]_.*"), 
+      h = c(
+        'm14va_volcaniceruption',
+        'm14vb_volcaniceruption',
+        'm14vc_volcaniceruption',
+        'm14vd_volcaniceruption',
+        'm14ve_volcaniceruption',
+        'm14vf_volcaniceruption',
+        'm14vg_volcaniceruption',
+        'm14vh_volcaniceruption',
+        'm14vi_volcaniceruption',
+        'm14vz_volcaniceruption'
+        )
+      )
+)[[1]]
+
+
+### M14F - Negative impacts of landslide to household is blank/not in the valueset
+
+## The household is negatively affected by landslide in the past 12 months, negative impacts of the landslide should have an answer or answer should be in the given categories.
+(
+  cv_m14f_landslide_nitv <-section_m %>%
+    filter(m13f_negaff == 1) %>% 
+    filter_at(vars(matches('^m14l[a-iz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13f_negaff, 
+      matches("^m14l[a-iz]_.*"), 
+      h = c(
+        'm14la_landslide',
+        'm14lb_landslide',
+        'm14lc_landslide',
+        'm14ld_landslide',
+        'm14le_landslide',
+        'm14lf_landslide',
+        'm14lg_landslide',
+        'm14lh_landslide',
+        'm14li_landslide',
+        'm14lz_landslide'
+        )
+      )
+)[[1]]
+
+
+### M14F - Negative impacts of landslide to household must be blank
+
+## The household is not negatively affected by landslide in the past 12 months, negative impacts of the landslide should be blank.
+(
+  cv_m14f_landslide_wval <-section_m %>%
+    filter(m13f_negaff == 2) %>% 
+    filter_at(vars(matches('^m14l[a-iz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13f_negaff, 
+      matches("^m14l[a-iz]_.*"), 
+      h = c(
+        'm14la_landslide',
+        'm14lb_landslide',
+        'm14lc_landslide',
+        'm14ld_landslide',
+        'm14le_landslide',
+        'm14lf_landslide',
+        'm14lg_landslide',
+        'm14lh_landslide',
+        'm14li_landslide',
+        'm14lz_landslide'
+        )
+      )
+)[[1]]
+
+
+### M14G - Negative impacts of fire to household is blank/not in the valueset
+
+## The household is negatively affected by fire in the past 12 months, negative impacts of the fire should have an answer or answer should be in the given categories.
+(
+  cv_m14g_fire_nitv <-section_m %>%
+    filter(m13g_negaff == 1) %>% 
+    filter_at(vars(matches('^m14fi[a-iz]_fire$'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13g_negaff, 
+      matches("^m14fi[a-iz]_fire$"), 
+      h = c(
+        'm14fia_fire',
+        'm14fib_fire',
+        'm14fic_fire',
+        'm14fid_fire',
+        'm14fie_fire',
+        'm14fif_fire',
+        'm14fig_fire',
+        'm14fih_fire',
+        'm14fii_fire',
+        'm14fiz_fire'
+        )
+      )
+)[[1]]
+
+
+### M14G - Negative impacts of fire to household must be blank
+
+## The household is not negatively affected by fire in the past 12 months, negative impacts of the fire should have an answer or answer should be in the given categories.
+(
+  cv_m14g_fire_wval <-section_m %>%
+    filter(m13g_negaff == 2) %>% 
+    filter_at(vars(matches('^m14fi[a-iz]_fire$'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13g_negaff, 
+      matches("^m14fi[a-iz]_fire$"), 
+      h = c(
+        'm14fia_fire',
+        'm14fib_fire',
+        'm14fic_fire',
+        'm14fid_fire',
+        'm14fie_fire',
+        'm14fif_fire',
+        'm14fig_fire',
+        'm14fih_fire',
+        'm14fii_fire',
+        'm14fiz_fire'
+        )
+      )
+)[[1]]
+
+
+### M14H - Negative impacts of pandemic to household is blank/not in the valueset
+
+## The household is negatively affected by pandemic in the past 12 months, negative impacts of the pandemic should have an answer or answer should be in the given categories.
+(
+  cv_m14h_pandemic_nitv <-section_m %>%
+    filter(m13h_negaff == 1) %>% 
+    filter_at(vars(matches('^m14p[a-iz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13h_negaff, 
+      matches("^m14p[a-iz]_.*"), 
+      h = c(
+        'm14pa_pandemic',
+        'm14pb_pandemic',
+        'm14pc_pandemic',
+        'm14pd_pandemic',
+        'm14pe_pandemic',
+        'm14pf_pandemic',
+        'm14pg_pandemic',
+        'm14ph_pandemic',
+        'm14pi_pandemic',
+        'm14pz_pandemic'
+        )
+      )
+)[[1]]
+
+
+### M14H - Negative impacts of pandemic to householdc must be blank
+
+## The household is not negatively affected by pandemic in the past 12 months, negative impacts of the pandemic should be blank.
+(
+  cv_m14h_pandemic_wval <-section_m %>%
+    filter(m13h_negaff == 2) %>% 
+    filter_at(vars(matches('^m14p[a-iz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13h_negaff, 
+      matches("^m14p[a-iz]_.*"), 
+      h = c(
+        'm14pa_pandemic',
+        'm14pb_pandemic',
+        'm14pc_pandemic',
+        'm14pd_pandemic',
+        'm14pe_pandemic',
+        'm14pf_pandemic',
+        'm14pg_pandemic',
+        'm14ph_pandemic',
+        'm14pi_pandemic',
+        'm14pz_pandemic'
+        )
+      )
+)[[1]]
+
+
+### M14I - Negative impacts of armed conflict to household is blank/not in the valueset
+
+## The household is negatively affected by armed conflict in the past 12 months, negative impacts of the armed conflict should have an answer or answer should be in the given categories.
+(
+  cv_m14i_armedconflict_nitv <-section_m %>%
+    filter(m13i_negaff == 1) %>% 
+    filter_at(vars(matches('^m14a[a-iz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13i_negaff, 
+      matches("^m14a[a-iz]_.*"), 
+      h = c(
+        'm14aa_armedconflict',
+        'm14ab_armedconflict',
+        'm14ac_armedconflict',
+        'm14ad_armedconflict',
+        'm14ae_armedconflict',
+        'm14af_armedconflict',
+        'm14ag_armedconflict',
+        'm14ah_armedconflict',
+        'm14ai_armedconflict',
+        'm14az_armedconflict'
+        )
+      )
+)[[1]]
+
+
+### M14I - Negative impacts of armed conflict to household must be blank
+
+## The household is not negatively affected by armed conflict in the past 12 months, negative impacts of the armed conflict should be blank.
+(
+  cv_m14i_armedconflict_wval <- section_m %>%
+    filter(m13i_negaff == 2) %>% 
+    filter_at(vars(matches('^m14a[a-iz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13i_negaff, 
+      matches("^m14a[a-iz]_.*"), 
+      h = c(
+        'm14aa_armedconflict',
+        'm14ab_armedconflict',
+        'm14ac_armedconflict',
+        'm14ad_armedconflict',
+        'm14ae_armedconflict',
+        'm14af_armedconflict',
+        'm14ag_armedconflict',
+        'm14ah_armedconflict',
+        'm14ai_armedconflict',
+        'm14az_armedconflict'
+        )
+      )
+)[[1]]
+
+
+### M14Z - Negative impacts of other calamity to household is blank/not in the valueset
+
+## The household is negatively affected by other calamity in the past 12 months, negative impacts of the calamity should have an answer or answer should be in the given categories.
+(
+  cv_m14i_armedconflict_nitv <-section_m %>%
+    filter(m13z_negaff == 1) %>% 
+    filter_at(vars(matches('^m14o[a-iz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13z_negaff, 
+      matches("^m14o[a-iz]_.*"), 
+      h = c(
+        'm14oa_others',
+        'm14ob_others',
+        'm14oc_others',
+        'm14od_others',
+        'm14oe_others',
+        'm14of_others',
+        'm14og_others',
+        'm14oh_others',
+        'm14oi_others',
+        'm14oz_others'
+        )
+      )
+)[[1]]
+
+
+### M14Z - Negative impacts of other calamity to household must be blank
+
+## The household is not negatively affected by other calamity in the past 12 months, negative impacts of the calamity should be blank.
+(
+  cv_m14i_armedconflict_wval <-section_m %>%
+    filter(m13z_negaff == 2) %>% 
+    filter_at(vars(matches('^m14o[a-iz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13z_negaff,
+      matches("^m14o[a-iz]_.*"), 
+      h = c(
+        'm14oa_others',
+        'm14ob_others',
+        'm14oc_others',
+        'm14od_others',
+        'm14oe_others',
+        'm14of_others',
+        'm14og_others',
+        'm14oh_others',
+        'm14oi_others',
+        'm14oz_others'
+        )
+      )
+)[[1]]
+
+
+### M15A - Estimated cost of damages to property is blank/not in the valueset
+
+## If in M14 the respondent answered that at least one (1) of the calamities caused damage to their property, estimated cost of damages to property should have an answer or answer should be in the given categories.
+(
+  cv_m15az_damage_nitv <-section_m %>%
+    filter_at(vars(matches('^m14[a-z]c_.*|^m14fic_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
+    filter(is.na(m15a_esttotdamage) | m15a_esttotdamage <= 0) %>% 
+    select_cv(matches('^m14[a-z]c_.*|^m14fic_.*'), m15a_esttotdamage , h = 'm15a_esttotdamage')
+)[[1]]
+
+
+### M15B - Estimated cost of damage to crops and/or livestock/poultry, fisheries/aquafarm is blank/not in the valueset
+
+## If in M14 the respondent answered that at least one (1) of the calamities caused damage to their crops and/or livestock/poultry, estimated cost of damage to crops and/or livestock/poultry, fisheries/aquafarm should have an answer or answer should be in the given categories.
+(
+  cv_m15b_damage_nitv <-section_m %>%
+    filter_at(vars(matches('^m14[a-z]d_.*|^m14fid_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
+    filter(is.na(m15b_esttotdamage) | m15b_esttotdamage <= 0) %>% 
+    select_cv(matches('^m14[a-z]d_.*|^m14fid_.*'), m15b_esttotdamage, h = 'm15b_esttotdamage')
+)[[1]]
+
+
+
+### M16 - Expenditure on reconstruction and repair is blank
+
+## If in M14 the respondent answered that at least one (1) of the calamities caused damage to property, expenditure on reconstruction and repair should have an answer or answer should be in the given categories.
+(
+  cv_m16_expenditure_nitv <-section_m %>%
+    filter_at(vars(matches('^m14[a-z]c_.*|^m14fic_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
+    filter(is.na(m16_reconrepair)) %>% 
+    select_cv(matches('^m14[a-z]c_.*|^m14fic_.*'), m16_reconrepair, h = 'm16_reconrepair')
+)[[1]]
+
+
+### M17A - Assistance provided to household to those negatively affected by typhoon is blank/not in the valueset
+
+## The household is negatively affected by typhoon in the past 12 months, assistance provided to the household should have an answer or answer should be in the given categories.
+(
+  cv_m17ta_typhoon_nitv <- section_m %>%
+    filter(m13a_negaff == 1) %>% 
+    filter_at(vars(matches('^m17t[a-dz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13a_negaff, 
+      matches("^m17t[a-dz]_.*"), 
+      h = c(
+        'm17ta_typhoon',
+        'm17tb_typhoon',
+        'm17tc_typhoon',
+        'm17td_typhoon',
+        'm17tz_typhoon'
+        )
+      )
+)[[1]]
+
+
+### M17A - Assistance provided to household to those negatively affected by typhoon must be blank
+
+## The household is not negatively affected by typhoon in the past 12 months, assistance provided to the household should be blank.
+(
+  cv_m17ta_typhoon_wval <- section_m %>%
+    filter(m13a_negaff == 2) %>% 
+    filter_at(vars(matches('^m17t[a-dz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13a_negaff, 
+      matches("^m17t[a-dz]_.*"), 
+       h = c(
+        'm17ta_typhoon',
+        'm17tb_typhoon',
+        'm17tc_typhoon',
+        'm17td_typhoon',
+        'm17tz_typhoon'
+        )
+      )
+)[[1]]
+
+
+### M17B - Assistance provided to household to those negatively affected by Flood is blank/not in the valueset
+
+## The household is negatively affected by flood in the past 12 months, assistance provided to the household should have an answer or answer should be in the given categories.
+(
+  cv_m17b_flood_nitv <- section_m %>%
+    filter(m13b_negaff == 1) %>% 
+    filter_at(vars(matches('^m17f[a-dz]_flood$'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13b_negaff, 
+      matches("^m17f[a-dz]_flood$"), 
+      h = c(
+        'm17fa_flood',
+        'm17fb_flood',
+        'm17fc_flood',
+        'm17fd_flood',
+        'm17fz_flood'
+        )
+      )
+)[[1]]
+
+
+### M17B - Assistance provided to household to those negatively affected by Flood must be blank
+
+## The household is not negatively affected by flood in the past 12 months, assistance provided to the household should be blank.
+(
+  cv_m17_flood_wval <- section_m %>%
+    filter(m13b_negaff == 2) %>% 
+    filter_at(vars(matches('^m17f[a-dz]_flood$'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13b_negaff, 
+      matches("^m17f[a-dz]_flood$"), 
+      h = c(
+        'm17fa_flood',
+        'm17fb_flood',
+        'm17fc_flood',
+        'm17fd_flood',
+        'm17fz_flood'
+        )
+      )
+)[[1]]
+
+
+### M17C - Assistance provided to household to those negatively affected by Drought is blank/not in the valueset
+
+## The household is negatively affected by drought in the past 12 months, assistance provided to the household should have an answer or answer should be in the given categories.
+(
+  cv_m17c_drought_nitv <-section_m %>%
+    filter(m13c_negaff == 1) %>% 
+    filter_at(vars(matches('^m17d[a-dz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13c_negaff, 
+      matches("^m17d[a-dz]_.*"), 
+      h = c(
+        'm17da_drought',
+        'm17db_drought',
+        'm17dc_drought',
+        'm17dd_drought',
+        'm17dz_drought'
+        )
+      )
+)[[1]]
+
+
+### M17C - Assistance provided to household to those negatively affected by Drought must be blank
+
+## The household is not negatively affected by drought in the past 12 months, assistance provided to the household should be blank.
+(
+  cv_m17c_drought_wval <-section_m %>%
+    filter(m13c_negaff == 2) %>% 
+    filter_at(vars(matches('^m17d[a-dz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13c_negaff, 
+      matches("^m17d[a-dz]_.*"), 
+      h = c(
+        'm17da_drought',
+        'm17db_drought',
+        'm17dc_drought',
+        'm17dd_drought',
+        'm17dz_drought'
+        )
+      )
+)[[1]]
+
+
+### M17D - Assistance provided to household to those negatively affected by Earthquake is blank/not in the valueset
+
+## The household is negatively affected by earthquake in the past 12 months, assistance provided to the household should have an answer or answer should be in the given categories.
+(
+  cv_m17d_eartquake_nitv <- section_m %>%
+    filter(m13d_negaff == 1) %>% 
+    filter_at(vars(matches('^m17e[a-dz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13d_negaff, 
+      matches("^m17e[a-dz]_.*"), 
+      h = c(
+        'm17ea_earthquake',
+        'm17eb_earthquake',
+        'm17ec_earthquake',
+        'm17ed_earthquake',
+        'm17ez_earthquake'
+        )
+      )
+)[[1]]
+
+
+### M17D - Assistance provided to household to those negatively affected by Earthquake must be blank
+
+## The household is not negatively affected by earthquake in the past 12 months, assistance provided to the household should be blank.
+(
+  cv_m17d_earthquake_wval <- section_m %>%
+    filter(m13d_negaff == 2) %>% 
+    filter_at(vars(matches('^m17e[a-dz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13d_negaff, 
+      matches("^m17e[a-dz]_.*"), 
+      h = c(
+        'm17ea_earthquake',
+        'm17eb_earthquake',
+        'm17ec_earthquake',
+        'm17ed_earthquake',
+        'm17ez_earthquake'
+        )
+      )
+)[[1]]
+
+
+### M17E - Assistance provided to household to those negatively affected by volcanic eruption is blank/not in the valueset
+
+## The household is negatively affected by volcanic eruption in the past 12 months, assistance provided to the household should have an answer or answer should be in the given categories.
+(
+  cv_m17e_volcanic_nitv <- section_m %>%
+    filter(m13e_negaff == 1) %>% 
+    filter_at(vars(matches('^m17v[a-dz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13e_negaff, 
+      matches("^m17v[a-dz]_.*"), 
+      h = c(
+        'm17va_eruption',
+        'm17vb_eruption',
+        'm17vc_eruption',
+        'm17vd_eruption',
+        'm17vz_eruption'
+        )
+      )
+)[[1]]
+
+
+### M17E - Assistance provided to household to those negatively affected by volcanic eruption must be blank
+
+## The household is  not negatively affected by volcanic eruption in the past 12 months, assistance provided to the household should be blank.
+(
+  cv_m17e_volcanic_wval <-section_m %>%
+    filter(m13e_negaff == 2) %>% 
+    filter_at(vars(matches('^m17v[a-dz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13e_negaff, 
+      matches("^m17v[a-dz]_.*"), 
+      h = c(
+        'm17va_eruption',
+        'm17vb_eruption',
+        'm17vc_eruption',
+        'm17vd_eruption',
+        'm17vz_eruption'
+        )
+      )
+)[[1]]
+
+
+### M17F - Assistance provided to household to those negatively affected by Landslide is blank/not in the valueset
+
+## The household is negatively affected by landslide in the past 12 months, assistance provided to the household should have an answer or answer should be in the given categories.
+(
+  cv_m17f_landslide_nitv <- section_m %>%
+    filter(m13f_negaff == 1) %>% 
+    filter_at(vars(matches('^m17l[a-dz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13f_negaff, 
+      matches("^m17l[a-dz]_.*"), 
+      h = c(
+        'm17la_landslide',
+        'm17lb_landslide',
+        'm17lc_landslide',
+        'm17ld_landslide',
+        'm17lz_landslide'
+        )
+      )
+)[[1]]
+
+
+### M17F - Assistance provided to household to those negatively affected by Landslide must be blank
+
+## The household is not negatively affected by landslide in the past 12 months, assistance provided to the household should be blank.
+(
+  cv_m17f_landslide_wval <- section_m %>%
+    filter(m13f_negaff == 2) %>% 
+    filter_at(vars(matches('^m17l[a-dz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13f_negaff, 
+      matches("^m17l[a-dz]_.*"), 
+      h = c(
+        'm17la_landslide',
+        'm17lb_landslide',
+        'm17lc_landslide',
+        'm17ld_landslide',
+        'm17lz_landslide'
+        )
+      )
+)[[1]]
+
+
+### M17G - Assistance provided to household to those negatively affected by Fire is blank/not in the valueset
+
+## The household is negatively affected by fire in the past 12 months, assistance provided to the household should have an answer or answer should be in the given categories.
+(
+  cv_m17g_fire_nitv <- section_m %>%
+    filter(m13g_negaff == 1) %>% 
+    filter_at(vars(matches('^m17f[a-dz]_fire$'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13g_negaff, 
+      matches("^m17f[a-dz]_fire$"), 
+      h = c(
+        'm17fa_fire',
+        'm17fb_fire',
+        'm17fc_fire',
+        'm17fd_fire',
+        'm17fz_fire'
+        )
+      )
+)[[1]]
+
+
+### M17G - Assistance provided to household to those negatively affected by Fire must be blank
+
+## The household is not negatively affected by fire in the past 12 months, assistance provided to the household should be blank.
+(
+  cv_m17g_fire_wval <-section_m %>%
+    filter(m13g_negaff == 2) %>% 
+    filter_at(vars(matches('^m17f[a-dz]_fire$'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13g_negaff, 
+      matches("^m17f[a-dz]_fire$"), 
+      h = c(
+        'm17fa_fire',
+        'm17fb_fire',
+        'm17fc_fire',
+        'm17fd_fire',
+        'm17fz_fire'
+        )
+      )
+)[[1]]
+
+
+### M17H - Assistance provided to household to those negatively affected by Pandemic is blank/not in the valueset
+
+## The household is negatively affected by pandemic in the past 12 months, assistance provided to the household should have an answer or answer should be in the given categories.
+(
+  cv_m17h_pandemic_nitv <-section_m %>%
+    filter(m13h_negaff == 1) %>% 
+    filter_at(vars(matches('^m17p[a-dz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13h_negaff, 
+      matches("^m17p[a-dz]_.*"), 
+      h = c(
+        'm17pa_pandemic',
+        'm17pb_pandemic',
+        'm17pc_pandemic',
+        'm17pd_pandemic',
+        'm17pz_pandemic'
+        )
+      )
+)[[1]]
+
+
+### M17H - Assistance provided to household to those negatively affected by Pandemic must be blank
+
+## The household is not negatively affected by pandemic in the past 12 months, assistance provided to the household should be blank.
+(
+  cv_m17h_pandemic_wval <-section_m %>%
+    filter(m13h_negaff == 2) %>% 
+    filter_at(vars(matches('^m17p[a-dz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13h_negaff, 
+      matches("^m17p[a-dz]_.*"), 
+      h = c(
+        'm17pa_pandemic',
+        'm17pb_pandemic',
+        'm17pc_pandemic',
+        'm17pd_pandemic',
+        'm17pz_pandemic'
+        )
+      )
+)[[1]]
+
+
+### M17I - Assistance provided to household to those negatively affected by Armed conflict is blank/not in the valueset
+
+## The household is negatively affected by armed conflict in the past 12 months, assistance provided to the household should have an answer or answer should be in the given categories.
+(
+  cv_m17i_armedconflict_nitv <- section_m %>%
+    filter(m13i_negaff == 1) %>% 
+    filter_at(vars(matches('^m17a[a-dz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13i_negaff, 
+      matches("^m17a[a-dz]_.*"), 
+      h = c(
+        'm17aa_armedconflict',
+        'm17ab_armedconflict',
+        'm17ac_armedconflict',
+        'm17ad_armedconflict',
+        'm17az_armedconflict'
+        )
+      )
+)[[1]]
+
+
+### M17I - Assistance provided to household to those negatively affected by Armed conflict must be blank
+
+## The household is not negatively affected by armed conflict in the past 12 months, assistance provided to the household should be blank.
+(
+  cv_m17i_armedconflict_wval <- section_m %>%
+    filter(m13i_negaff == 2) %>% 
+    filter_at(vars(matches('^m17a[a-dz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13i_negaff, 
+      matches("^m17a[a-dz]_.*"), 
+      h = c(
+        'm17aa_armedconflict',
+        'm17ab_armedconflict',
+        'm17ac_armedconflict',
+        'm17ad_armedconflict',
+        'm17az_armedconflict'
+        )
+      )
+)[[1]]
+
+
+### M17Z - Assistance provided to household to those negatively affected by Other calamity is blank/not in the valueset
+
+## The household is negatively affected by other calamity in the past 12 months, assistance provided to the household should have an answer or answer should be in the given categories.
+(
+  cv_m17i_armedconflict_nitv <- section_m %>%
+    filter(m13z_negaff == 1) %>% 
+    filter_at(vars(matches('^m17o[a-dz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13z_negaff, 
+      matches("^m17o[a-dz]_.*"), 
+      h = c(
+        'm17oa_others',
+        'm17ob_others',
+        'm17oc_others',
+        'm17od_others',
+        'm17oz_others'
+        )
+      )
+)[[1]]
+
+
+### M17Z - Assistance provided to household to those negatively affected by Other calamity must be blank
+
+## The household is not negatively affected by other calamity in the past 12 months, assistance provided to the household should be blank.
+(
+  cv_m17i_armedconflict_wval <- section_m %>%
+    filter(m13z_negaff == 2) %>% 
+    filter_at(vars(matches('^m17o[a-dz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m13z_negaff, 
+      matches("^m17o[a-dz]_.*"), 
+      h = c(
+        'm17oa_others',
+        'm17ob_others',
+        'm17oc_others',
+        'm17od_others',
+        'm17oz_others'
+        )
+      )
+)[[1]]
+
+
+### M18A - Typhoon: Entity/ies who provided assistance to the household is blank/not in the valueset
+
+## If answered at least one (1) ‘1’ for Yes in any of the types of assistance listed in M17, entity/ies who provided assistance to the household is blank/not in the valueset.
+(
+  cv_m18ta_typhoon_nitv <-section_m %>%
+    filter(m13a_negaff == 1) %>% 
+    filter_at(vars(matches('^m17t[a-dz]_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
+    filter_at(vars(matches('^m18t[a-hz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13a_negaff, 
+      matches('^m17t[a-dz]_.*'), 
+      matches('^m18t[a-hz]_.*'), 
+      h = c(
+        'm18ta_typhoon',
+        'm18tb_typhoon',
+        'm18tc_typhoon',
+        'm18td_typhoon',
+        'm18te_typhoon',
+        'm18tf_typhoon',
+        'm18tg_typhoon',
+        'm18th_typhoon',
+        'm18tz_typhoon'
+        )
+      )
+)[[1]]
+
+
+### M18B - Flood: Entity/ies who provided assistance to the household is blank/not in the valueset
+
+## If answered at least one (1) ‘1’ for Yes in any of the types of assistance listed in M17, entity/ies who provided assistance to the household is blank/not in the valueset.
+(
+  cv_m18b_flood_nitv <- section_m %>%
+    filter(m13b_negaff == 1) %>% 
+    filter_at(vars(matches('^m17f[a-dz]_flood$'), -matches("fct$")), any_vars(. == 1)) %>% 
+    filter_at(vars(matches('^m18f[a-hz]_flood$'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13b_negaff, 
+      matches("^m17f[a-dz]_flood$"),
+      matches("^m18f[a-hz]_flood$"), 
+      h = c(
+        'm18fa_flood',
+        'm18fb_flood',
+        'm18fc_flood',
+        'm18fd_flood',
+        'm18fe_flood',
+        'm18ff_flood',
+        'm18fg_flood',
+        'm18fh_flood',
+        'm18fz_flood'
+        )
+      ,)
+)[[1]]
+
+
+### M18C - Drought: Entity/ies who provided assistance to the household is blank/not in the valueset
+
+## If answered at least one (1) ‘1’ for Yes in any of the types of assistance listed in M17, entity/ies who provided assistance to the household is blank/not in the valueset.
+(
+  cv_m18c_drought_nitv <- section_m %>%
+    filter(m13b_negaff == 1) %>% 
+    filter_at(vars(matches('^m17d[a-dz]_drought$'), -matches("fct$")), any_vars(. == 1)) %>% 
+    filter_at(vars(matches('^m18d[a-hz]_drought$'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13b_negaff, 
+      matches("^m17d[a-dz]_drought$"), 
+      matches("^m18d[a-z]_drought$"), 
+      h = c(
+        'm18da_drought',
+        'm18db_drought',
+        'm18dc_drought',
+        'm18dd_drought',
+        'm18de_drought',
+        'm18df_drought',
+        'm18dg_drought',
+        'm18dh_drought',
+        'm18dz_drought'
+        )
+      )
+)[[1]]
+
+
+### M18D - Earthquake: Entity/ies who provided assistance to the household is blank/not in the valueset
+
+## If answered at least one (1) ‘1’ for Yes in any of the types of assistance listed in M17, entity/ies who provided assistance to the household is blank/not in the valueset.
+(
+  cv_m18d_eartquake_nitv <-section_m %>%
+    filter(m13d_negaff == 1) %>% 
+    filter_at(vars(matches('^m17e[a-dz]_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
+    filter_at(vars(matches('^m18e[a-hz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13d_negaff, 
+      matches("^m17e[a-dz]_.*"), 
+      matches("^m18e[a-hz]_.*"), 
+      h = c(
+        'm18ea_earthquake',
+        'm18eb_earthquake',
+        'm18ec_earthquake',
+        'm18ed_earthquake',
+        'm18ee_earthquake',
+        'm18ef_earthquake',
+        'm18eg_earthquake',
+        'm18eh_earthquake',
+        'm18ez_earthquake'
+        )
+      )
+)[[1]]
+
+
+### M18E - Volcanic: Entity/ies who provided assistance to the household is blank/not in the valueset
+
+## If answered at least one (1) ‘1’ for Yes in any of the types of assistance listed in M17, entity/ies who provided assistance to the household is blank/not in the valueset.
+(
+  cv_m18e_volcanic_nitv <-section_m %>%
+    filter(m13e_negaff == 1) %>% 
+    filter_at(vars(matches('^m17v[a-dz]_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
+    filter_at(vars(matches('^m18v[a-hz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13e_negaff, 
+      matches("^m17v[a-dz]_.*"), 
+      matches("^m18v[a-hz]_.*"), 
+      h = c(
+        'm18va_eruption',
+        'm18vb_eruption',
+        'm18vc_eruption',
+        'm18vd_eruption',
+        'm18ve_eruption',
+        'm18vf_eruption',
+        'm18vg_eruption',
+        'm18vh_eruption',
+        'm18vz_eruption'
+        )
+      )
+)[[1]]
+
+
+### M18F - Landslide: Entity/ies who provided assistance to the household is blank/not in the valueset
+
+## If answered at least one (1) ‘1’ for Yes in any of the types of assistance listed in M17, entity/ies who provided assistance to the household is blank/not in the valueset.
+(
+  cv_m18f_landslide_nitv <- section_m %>%
+    filter(m13f_negaff == 1) %>% 
+    filter_at(vars(matches('^m17l[a-dz]_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
+    filter_at(vars(matches('^m18l[a-hz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13f_negaff, 
+      matches("^m17l[a-dz]_.*"), 
+      matches("^m18l[a-hz]_.*"), 
+      h = c(
+        'm18la_landslide',
+        'm18lb_landslide',
+        'm18lc_landslide',
+        'm18ld_landslide',
+        'm18le_landslide',
+        'm18lf_landslide',
+        'm18lg_landslide',
+        'm18lh_landslide',
+        'm18lz_landslide'
+        )
+      )
+)[[1]]
+
+
+### M18G - Fire: Entity/ies who provided assistance to the household is blank/not in the valueset
+
+## If answered at least one (1) ‘1’ for Yes in any of the types of assistance listed in M17, entity/ies who provided assistance to the household is blank/not in the valueset.
+(
+  cv_m18g_fire_nitv <- section_m %>%
+    filter(m13g_negaff == 1) %>% 
+    filter_at(vars(matches('^m17f[a-dz]_fire$'), -matches("fct$")), any_vars(. == 1)) %>% 
+    filter_at(vars(matches('^m18f[a-hz]_fire$'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13g_negaff, 
+      matches("^m17f[a-dz]_fire$"), 
+      matches("^m18f[a-hz]_fire$"), 
+      h = c(
+        'm18fa_fire',
+        'm18fb_fire',
+        'm18fc_fire',
+        'm18fd_fire',
+        'm18fe_fire',
+        'm18ff_fire',
+        'm18fg_fire',
+        'm18fh_fire',
+        'm18fz_fire'
+        )
+      )
+)[[1]]
+
+
+### M18H - Pandemic: Entity/ies who provided assistance to the household is blank/not in the valueset
+
+## If answered at least one (1) ‘1’ for Yes in any of the types of assistance listed in M17, entity/ies who provided assistance to the household is blank/not in the valueset.
+(
+  cv_m18h_pandemic_nitv <-section_m %>%
+    filter(m13h_negaff == 1) %>% 
+    filter_at(vars(matches('^m17p[a-dz]_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
+    filter_at(vars(matches('^m18p[a-hz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13h_negaff, 
+      matches("^m17p[a-dz]_.*"), 
+      matches("^m18p[a-hz]_.*"), 
+      h = c(
+        'm18pa_pandemic',
+        'm18pb_pandemic',
+        'm18pc_pandemic',
+        'm18pd_pandemic',
+        'm18pe_pandemic',
+        'm18pf_pandemic',
+        'm18pg_pandemic',
+        'm18ph_pandemic',
+        'm18pz_pandemic'
+        )
+      )
+)[[1]]
+
+
+### M18I - Armed conflict: Entity/ies who provided assistance to the household is blank/not in the valueset
+
+## If answered at least one (1) ‘1’ for Yes in any of the types of assistance listed in M17, entity/ies who provided assistance to the household is blank/not in the valueset.
+(
+  cv_m18i_armedconflict_nitv <-section_m %>%
+    filter(m13i_negaff == 1) %>% 
+    filter_at(vars(matches('^m17a[a-dz]_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
+    filter_at(vars(matches('^m18a[a-hz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13i_negaff, 
+      matches("^m17a[a-dz]_.*"), 
+      matches("^m18a[a-hz]_.*"), 
+      h = c(
+        'm18aa_armedconflict',
+        'm18ab_armedconflict',
+        'm18ac_armedconflict',
+        'm18ad_armedconflict',
+        'm18ae_armedconflict',
+        'm18af_armedconflict',
+        'm18ag_armedconflict',
+        'm18ah_armedconflict',
+        'm18az_armedconflict'
+        )
+      )
+)[[1]]
+
+
+### M18Z - Others: Entity/ies who provided assistance to the household is blank/not in the valueset
+
+## If answered at least one (1) ‘1’ for Yes in any of the types of assistance listed in M17, entity/ies who provided assistance to the household is blank/not in the valueset.
+(
+  cv_m18z_others_nitv <- section_m %>%
+    filter(m13z_negaff == 1) %>% 
+    filter_at(vars(matches('^m17o[a-dz]_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
+    filter_at(vars(matches('^m18o[a-hz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m13z_negaff, 
+      matches("^m17o[a-dz]_.*"), 
+      matches("^m18o[a-hz]_.*"), 
+      h = c(
+        'm18oa_other',
+        'm18ob_other',
+        'm18oc_other',
+        'm18od_other',
+        'm18oe_other',
+        'm18of_other',
+        'm18og_other',
+        'm18oh_other',
+        'm18oz_other'
+        )
+      )
+)[[1]]
+
+
+### M19 - Disaster preparedness kit is blank/not in the valueset
+
+## Presence of disaster preparedness kit  should have an answer or answer should be in the given categories.
+(
+  cv_m19_diskit_nitv <- section_m %>% 
+    filter(!m19_diskit %in% c(1, 2)) %>% 
+    select_cv(m19_diskit, h = 'm19_diskit')
+)[[1]]
+
+
+### M20 - Proof of having a disaster preparedness kit is blank/not in the valueset
+
+## Answer in M19 is 1 - Yes, proof of having a disaster preparedness kit should have an answer or answer should be in the given categories.
+(
+  cv_m20_diskit_nitv <- section_m %>% 
+    filter(m19_diskit == 1, !(m20_diskit %in% c(1, 2))) %>% 
+    select_cv(m19_diskit, m20_diskit, h = 'm20_diskit')
+)[[1]]
+
+
+### M20 - Disaster preparedness kit must be blank
+
+## Answer in M19 is 2 - No, proof of having a disaster preparedness kit should be blank.
+(
+  cv_m20_diskit_wval <- section_m %>% 
+    filter(m19_diskit == 2, !is.na(m20_diskit)) %>% 
+    select_cv(m19_diskit, m20_diskit, h = c('m19_diskit','m20_diskit'))
+)[[1]]
+
+
+### M21AZ - Contents of the disaster preparedness kit is not in the valueset
+
+## Answer in M20 is 1 - Yes, contents of the disaster preparedness kit should have an answer or answer should be in the given categories.
+(
+  cv_m21_az_nitv <- section_m %>% 
+    filter(m20_diskit == 1) %>% 
+    filter_at(vars(matches('^m21_[a-qz].*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m20_diskit, 
+      matches('^m21_[a-qz].*'), 
+      h = c(
+        'm21_afood',
+        'm21_bmaintenance',
+        'm21_cclothes',
+        'm21_dinfant',
+        'm21_emedical',
+        'm21_fmoney',
+        'm21_gimportant',
+        'm21_hwater',
+        'm21_imatcheslighter',
+        'm21_jcandle',
+        'm21_kbattery',
+        'm21_lfacemasks',
+        'm21_mflashlight',
+        'm21_nradio',
+        'm21_owhistle',
+        'm21_pblanket',
+        'm21_qcellphone',
+        'm21_zothers'
+        )
+      )
+)[[1]]
+
+
+### M21AZ - Contents of the disaster preparedness kit must be blank
+
+## Answer in M20 is 2 - No, contents of the disaster preparedness kit should be blank.
+(
+  cv_m21_az_wval <-section_m %>% 
+    filter(m20_diskit == 2) %>% 
+    filter_at(vars(matches("^m21_[a-qz].*"), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m20_diskit, 
+      matches("^m21_[a-qz].*"), 
+      h = c(
+        'm21_afood',
+        'm21_bmaintenance',
+        'm21_cclothes',
+        'm21_dinfant',
+        'm21_emedical',
+        'm21_fmoney',
+        'm21_gimportant',
+        'm21_hwater',
+        'm21_imatcheslighter',
+        'm21_jcandle',
+        'm21_kbattery',
+        'm21_lfacemasks',
+        'm21_mflashlight',
+        'm21_nradio',
+        'm21_owhistle',
+        'm21_pblanket',
+        'm21_qcellphone',
+        'm21_zothers'
+        )
+      )
+)[[1]]
+
+
+### M21 - All no in all items in M21
+
+## Answer in M20 is 1 - Yes, contents of the disaster preparedness kit should not be empty.
+(
+  cv_m21_allno <- section_m %>% 
+    filter(m20_diskit == 1) %>% 
+    filter_at(vars(matches('^m21_[a-qz].*'), -matches("fct$")), all_vars(. == 2)) %>% 
+    select_cv(
+      m20_diskit, 
+      matches('^m21_[a-qz].*'), 
+      h = c(
+        'm21_afood',
+        'm21_bmaintenance',
+        'm21_cclothes',
+        'm21_dinfant',
+        'm21_emedical',
+        'm21_fmoney',
+        'm21_gimportant',
+        'm21_hwater',
+        'm21_imatcheslighter',
+        'm21_jcandle',
+        'm21_kbattery',
+        'm21_lfacemasks',
+        'm21_mflashlight',
+        'm21_nradio',
+        'm21_owhistle',
+        'm21_pblanket',
+        'm21_qcellphone',
+        'm21_zothers'
+        )
+      )
+)[[1]]
+
+
+### M21Z - Answer is 'Yes' but not specified 
+
+
+
+#### Cases with inconsistency
+
+## If responded 'Yes' to M21Z (other preparedness kit), answer must be specified.
+(
+  cv_m21_other_missing <- section_m %>% 
+    filter(m21_others == 1, is.na(m21_zothers)) %>% 
+    select_cv(m21_others_fct, m21_zothers, h = 'm21_zothers')
+)[[1]]
+
+
+#### Other responses
+
+## Recode answer for 'Others, specify' if necessary.
+(
+  cv_m21_other <- section_m %>% 
+    filter(m21_others == 1, !is.na(m21_zothers)) %>% 
+    select_cv(m21_others_fct, m21_zothers)
+)[[1]]
+
+
+
+### M22 - Actual value of the contents of the disaster kit is blank/not in the valueset
+
+## Answer in M20 is 1 - Yes, actual value of the contents of the disaster kit should have an answer or answer should be in the given categories.
+(
+  cv_m22_totalcost_nitv <- section_m %>% 
+    filter(m20_diskit == 1, is.na(m22_totalcost) | m22_totalcost <= 0)%>% 
+    select_cv(m20_diskit, m22_totalcost, h = 'm22_totalcost')
+)[[1]]
+
+
+### M22 - Actual value of the contents of the disaster kit must be blank
+
+## Answer in M20 is 2 - No, actual value of the contents of the disaster kit should be blank.
+(
+  cv_m22_totalcost_wval <-section_m %>% 
+    filter(m20_diskit == 2, !is.na(m22_totalcost))%>% 
+    select_cv(m20_diskit, m22_totalcost, h = 'm22_totalcost')
+)[[1]]
+
+
+### M23 - Participation in the Barangay Disaster Risk Reduction Management (DRRM) Planning is blank/not in the valueset
+
+## Participation in the Barangay Disaster Risk Reduction Management (DRRM) Planning should have an answer or answer should be in the given categories.
+(
+  cv_m23_participate_nitv <- section_m %>% 
+    filter(!(m23_participate %in% c(1, 2))) %>% 
+    select_cv(m23_participate , h = 'm23_participate')
+)[[1]]
+
+
+### M24AZ - Participation in the Barangay Disaster Risk Reduction Management (DRRM) Planning is blank/not in the valueset
+
+## If answered ‘1’ for Yes in M23, participation in the Barangay Disaster Risk Reduction Management (DRRM) planning should have an answer or answer should be in the given categories.
+(
+  cv_m24az_nitv <- section_m %>% 
+    filter(m23_participate == 1) %>% 
+    filter_at(vars(matches('^m24[a-dz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      m23_participate, 
+      matches('^m24[a-dz]_.*'), 
+      h = c(
+        'm24a_chair',
+        'm24b_emplo',
+        'm24c_assembly',
+        'm24d_comment',
+        'm24z_others'
+        
+        )
+      )
+)[[1]]
+
+
+### M24AZ - Participation in the Barangay Disaster Risk Reduction Management (DRRM) Planning must be blank
+
+## If answered ‘2’ for Yes in M23, participation in the Barangay Disaster Risk Reduction Management (DRRM) planning should be blank.
+(
+  cv_m24az_wval <- section_m %>% 
+    filter(m23_participate == 2) %>% 
+    filter_at(vars(matches('^m24[a-dz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    select_cv(
+      m23_participate, 
+      matches('^m24[a-dz]_.*'), 
+      h = c(
+        'm24a_chair',
+        'm24b_emplo',
+        'm24c_assembly',
+        'm24d_comment',
+        'm24z_others'
+        
+        )
+      )
+)[[1]]
+
+
+### M24Z - Answer is 'Yes' but not specified 
+
+
+#### Cases with inconsistency
+
+## If responded 'Yes' to M24Z (other way of participating in DRRM), answer must be specified.
+(
+  cv_m24_other_missing <- section_m %>% 
+    filter(m24z_others == 1, is.na(m24za_others)) %>% 
+    select_cv(m24z_others_fct, m24za_others, h = 'm24za_others')
+)[[1]]
+
+
+#### Other responses
+
+## Recode answer for 'Others, specify' if necessary.
+(
+  cv_m24_other <- section_m %>% 
+    filter(m24z_others == 1, !is.na(m24za_others)) %>% 
+    select_cv(m24z_others_fct, m24za_others)
+)[[1]]
+
+
+
+### M25 - Receiving information from the barangay about natural disasters preparedness thru meetings or written notice/information is blank/not in the valueset
+
+## Member of household receive information from the barangay about natural disasters preparedness either through meetings or written notice/information should have an answer or answer should be in the given categories.
+(
+  cv_m25_info_nitv <- section_m %>% 
+    filter(!m25_info %in% c(1, 2))%>% 
+    select_cv(m25_info, h = 'm25_info')
+)[[1]]
+
+
+### M26 - Disaster preparedness of household members is blank/not in the valueset
+
+## Disaster preparedness of household members should have an answer or answer should be in the given categories.
+(
+  cv_m26_prepare_nitv <- section_m %>% 
+    filter(!m26_prepare %in% c(1, 2))%>% 
+    select_cv(m26_prepare, h = 'm26_prepare')
+)[[1]]
+
+
+### M27 - Emergency numbers/hotlines awareness is blank/not in the valueset
+
+## Emergency numbers/hotlines awareness should have an answer or answer should be in the given categories.
+(
+  cv_m27_cnumber_nitv <- section_m %>% 
+    filter(!m27_cnumber %in% c(1, 2))%>% 
+    select_cv(m27_cnumber, h = 'm27_cnumber')
+)[[1]]
+
+
+### M28 - Evacuation plans is blank/not in the valueset
+
+## Evacuation plans should have an answer or answer should be in the given categories.
+(
+  cv_m28_evace_nitv <- section_m %>% 
+    filter(!m28_evac %in% c(1,2))%>% 
+    select_cv(m28_evac, h = 'm28_evac')
+)[[1]]
+

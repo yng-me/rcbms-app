@@ -1,0 +1,1312 @@
+
+# Section P {.unnumbered}
+
+section_g <- hpq$section_g_new %>% 
+  collect() %>% 
+  filter_at(vars(matches('^g\\d.*')), any_vars(!is.na(.))) %>% 
+  distinct(case_id, .keep_all = T) %>% 
+  select(case_id, g11_1_hhengage) 
+
+section_p1 <- hpq$section_p1 %>% 
+  collect() %>% 
+  filter(!is.na(p02_2_membership) | !is.na(p02_2_lno))
+  
+section_p <- hpq$section_p %>%
+  collect() %>% 
+  filter_at(vars(matches('^p\\d.*')), any_vars(!is.na(.))) %>% 
+  distinct(case_id, .keep_all = T) %>% 
+  left_join(section_g, by = 'case_id') 
+
+
+
+### P01AG - Data items P01A-G are blank/not in the valueset
+
+## Answer to Social insurance Programs should not be blank and should be in the value set (P01A-G = 1 | 2).
+(
+  cv_p01ag_nitv <- section_p %>%
+    filter_at(vars(matches('^p01[a-g]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      matches('^p01[a-g]_.*'), 
+      h = c(
+        'p01a_sss',
+        'p01b_gsis',
+        'p01c_owwa',
+        'p01d_medinsure',
+        'p01e_lifeinsure',
+        'p01f_pagibig',
+        'p01g_phlhealth'
+        )
+      )
+)[[1]]
+
+
+### P02.1A - Answered yes in the dependent/membership in SSS, but no HH member selected in P02.1
+
+## If the HH has/have dependent/membership in SSS (P01A = 1), P02.1A should have Household member/s selected
+(
+  cv_p02_1a_sss_nitv <- section_p %>% 
+    filter(p01a_sss == 1, !(grepl('\\d', p02_1a_sss)) | nchar(p02_1a_sss) %% 2 != 0) %>% 
+    select_cv(p01a_sss, p02_1a_sss, h = 'p02_1a_sss')
+)[[1]]
+
+
+### P02.1B - Answered yes in the dependent/membership in GSIS, but no HH member selected in P02.1
+
+## If answer in P01B is Yes (P01B = 1), P02.1B should have Household member/s selected
+(
+  cv_p02_1b_gsis_nitv <- section_p %>% 
+    filter(p01b_gsis == 1, !(grepl('\\d', p02_1b_gsis)) | nchar(p02_1b_gsis) %% 2 != 0) %>% 
+    select_cv(p01b_gsis, p02_1b_gsis, h = 'p02_1b_gsis')
+)[[1]]
+
+
+### P02.1C - Answered yes in the dependent/membership in OWWA, but no HH member selected in P02.1
+
+## If answer in P01C is Yes (P01C = 1), P02.1C should have Household member/s selected
+(
+  cv_p02_1c_owwa_nitv <- section_p %>% 
+    filter(p01c_owwa == 1, !(grepl('\\d', p02_1c_owwa)) | nchar(p02_1c_owwa) %% 2 != 0) %>% 
+    select_cv(p01c_owwa, p02_1c_owwa, h = 'p02_1c_owwa')
+)[[1]]
+
+
+### P02.1D - Answered yes in the dependent/membership in Other Health Insurance, but no HH member selected in P02.1
+
+## If answer in P01D is Yes (P01D = 1), P02.1D should have Household member/s selected
+(
+  cv_p02_1d_medinsure_nitv <- section_p %>% 
+    filter(p01d_medinsure == 1, !(grepl('\\d', p02_1d_medinsure)) | nchar(p02_1d_medinsure) %% 2 != 0) %>% 
+    select_cv(p01d_medinsure, p02_1d_medinsure, h = 'p02_1d_medinsure')
+)[[1]]
+
+
+### P02.1E - Answered yes in the dependent/membership in LifeInsurance, but no HH member selected in P02.1
+
+## If answer in P01E is Yes (P01E = 1), P02.1E should have Household member/s selected
+(
+  cv_p02_1e_lifeinsure_nitv <- section_p %>% 
+    filter(p01e_lifeinsure == 1, !(grepl('\\d', p02_1e_lifeinsure)) | nchar(p02_1e_lifeinsure) %% 2 != 0) %>% 
+    select_cv(p01e_lifeinsure, p02_1e_lifeinsure, h = 'p02_1e_lifeinsure')
+)[[1]]
+
+
+### P02.1F - Answered yes in the dependent/membership in Pagibig, but no HH member selected in P02.1
+
+## If answer in P01F is Yes (P01F = 1), P02.1F should have Household member/s selected
+(
+  cv_p02_1f_pagibig_nitv <- section_p %>% 
+    filter(p01f_pagibig == 1, !(grepl('\\d', p02_1f_pagibig)) | nchar(p02_1f_pagibig) %% 2 != 0) %>% 
+    select_cv(p01f_pagibig, p02_1f_pagibig, h = 'p02_1f_pagibig')
+)[[1]]
+
+
+### P02.1G - Answered yes in the dependent/membership in Philhealth, but no HH member selected in P02.1
+
+## If answer in P01G is Yes (P01G = 1), P02.1G should have Household member/s selected
+(
+  cv_p02_1g_phlhealth_nitv <- section_p %>% 
+    filter(p01g_phlhealth == 1, !(grepl('\\d', p02_1g_phlhealth)) | nchar(p02_1g_phlhealth) %% 2 != 0) %>% 
+    select_cv(p01g_phlhealth, p02_1g_phlhealth, h = 'p02_1g_phlhealth')
+)[[1]]
+
+
+### P02.1A - Answered no in the dependent/membership in SSS, but with HH member selected in P02.1
+
+## If answer in P01A is No (P01A = 2), P02.1A should have no answer (no Household member selected)
+(
+  cv_p02_1a_sss_wval <- section_p %>% 
+    filter(p01a_sss == 2, !is.na(p02_1a_sss)) %>% 
+    select_cv(p01a_sss, p02_1a_sss, h = 'p02_1a_sss')
+)[[1]]
+
+
+### P02.1B - Answered no in the dependent/membership in GSIS, but with HH member selected in P02.1
+
+## If answer in P01B is No (P01B = 2), P02.1B should have no answer (no Household member selected)
+(
+  cv_p02_1b_gsis_wval <- section_p %>% 
+    filter(p01b_gsis == 2, !is.na(p02_1b_gsis)) %>% 
+    select_cv(p01b_gsis, p02_1b_gsis, h = 'p02_1b_gsis')
+)[[1]]
+
+
+### P02.1C - Answered no in the dependent/membership in OWWA, but with HH member selected in P02.1
+
+## If answer in P01C is No (P01C = 2), P02.1C should have no answer (no Household member selected)
+(
+  cv_p02_1c_owwa_wval <- section_p %>% 
+    filter(p01c_owwa == 2, !is.na(p02_1c_owwa)) %>% 
+    select_cv(p01c_owwa, p02_1c_owwa, h = 'p02_1c_owwa')
+)[[1]]
+
+
+### P02.1D - Answered no in the dependent/membership in Other Health Insurance, but with HH member selected in P02.1
+
+## If answer in P01D is No (P01D = 2), P02.1D should have no answer (no Household member selected)
+(
+  cv_p02_1d_medinsure_wval <- section_p %>% 
+    filter(p01d_medinsure == 2, !is.na(p02_1d_medinsure)) %>% 
+    select_cv(p01d_medinsure, p02_1d_medinsure, h = 'p02_1d_medinsure')
+)[[1]]
+
+
+### P02.1E - Answered no in the dependent/membership in LifeInsurance, but with HH member selected in P02.1
+
+## If answer in P01E is No (P01E = 2), P02.1E should have no answer (no Household member selected)
+(
+  cv_p02_1e_lifeinsure_wval <- section_p %>% 
+    filter(p01e_lifeinsure == 2, !is.na(p02_1e_lifeinsure)) %>% 
+    select_cv(p01e_lifeinsure, p02_1e_lifeinsure, h = 'p02_1e_lifeinsure')
+)[[1]]
+
+
+### P02.1F - Answered no in the dependent/membership in Pagibig, but with HH member selected in P02.1
+
+## If answer in P01F is No (P01F = 2), P02.1F should have no answer (no Household member selected)
+(
+  cv_p02_1f_pagibig_wval <- section_p %>% 
+    filter(p01f_pagibig == 2, !is.na(p02_1f_pagibig)) %>% 
+    select_cv(p01f_pagibig, p02_1f_pagibig, h = 'p02_1f_pagibig')
+)[[1]]
+
+
+### P02.1G - Answered no in the dependent/membership in Philhealth, but with HH member selected in P02.1
+
+## If answer in P01G is No (P01G = 2), P02.1G should have no answer (no Household member selected)
+(
+  cv_p02_1g_phlhealth_wval <- section_p %>% 
+    filter(p01g_phlhealth == 2, !is.na(p02_1g_phlhealth)) %>% 
+    select_cv(p01g_phlhealth, p02_1g_phlhealth, h = 'p02_1g_phlhealth')
+)[[1]]
+
+
+### P03A - Avail/Receive in SSS is blank/not in the valueset
+
+## If there is/are HH members who is/are dependent/beneficiary/member of SSS (P01A is Yes (P01A = 1)), P03A should not be blank and should be in the value set (P03A = 1 | 2).
+(
+  cv_p03a_sss_nitv <- section_p %>% 
+    filter(p01a_sss == 1, !(p03a_sss %in% c(1, 2))) %>% 
+    select_cv(p01a_sss, p03a_sss, h = 'p03a_sss')
+)[[1]]
+
+
+### P03B - Avail/Receive in GSIS is blank/not in the valueset
+
+## If there is/are HH members who is/are dependent/beneficiary/member of GSIS (P01B is Yes (P01B = 1)), P03B should not be blank and should be in the value set (P03B = 1 | 2).
+(
+  cv_p03b_gsis_nitv <- section_p %>% 
+    filter(p01b_gsis == 1, !(p03b_gsis %in% c(1, 2))) %>% 
+    select_cv(p01b_gsis, p03b_gsis, h = 'p03b_gsis')
+)[[1]]
+
+
+### P03C - Avail/Receive in OWWA (P03C) is blank/not in the valueset
+
+## If there is/are HH members who is/are dependent/beneficiary/member of OWWA (P01C is Yes (P01C = 1)), P03C should not be blank and should be in the value set (P03C = 1 | 2).
+(
+  cv_p03c_owwa_nitv <- section_p %>% 
+    filter(p01c_owwa == 1, !(p03c_owwa %in% c(1, 2))) %>% 
+    select_cv(p01c_owwa, p03c_owwa, h = 'p03c_owwa')
+)[[1]]
+
+
+### P03D - Avail/Receive in Health Medical Insurance is blank/not in the valueset
+
+## If there is/are HH members who is/are dependent/beneficiary/member of Health Medical Insurance (P01D is Yes (P01D = 1)), P03D should not be blank and should be in the value set (P03D = 1 | 2).
+(
+  cv_p03d_medinsure_nitv <- section_p %>% 
+    filter(p01d_medinsure == 1, !(p03d_medinsure %in% c(1, 2))) %>% 
+    select_cv(p01d_medinsure, p03d_medinsure, h = 'p03d_medinsure')
+)[[1]]
+
+
+### P03E - Avail/Receive in Life Insurance is blank/not in the valueset
+
+## If there is/are HH members who is/are dependent/beneficiary/member of Life insurance (P01E is Yes (P01E = 1)), P03E should not be blank and should be in the value set (P03E = 1 | 2).
+(
+  cv_p03e_lifeinsuree_nitv <- section_p %>% 
+    filter(p01e_lifeinsure == 1, !(p03e_lifeinsure %in% c(1, 2))) %>% 
+    select_cv(p01e_lifeinsure, p03e_lifeinsure, h = 'p03e_lifeinsure')
+)[[1]]
+
+
+### P03F - Avail/Receive in PAGIBIG is blank/not in the valueset
+
+## If there is/are HH members who is/are dependent/beneficiary/member of PAGIBIG (P01F is Yes (P01F = 1)), P03F should not be blank and should be in the value set (P03F = 1 | 2).
+(
+  cv_p03f_pagibig_nitv <- section_p %>% 
+    filter(p01f_pagibig == 1, !(p03f_pagibig %in% c(1, 2))) %>% 
+    select_cv(p01f_pagibig, p03f_pagibig, h = 'p03f_pagibig')
+)[[1]]
+
+
+### P03G - Avail/Receive in Philhealth is blank/not in the valueset
+
+## If there is/are HH members who is/are dependent/beneficiary/member of Philhealth (P01A is Yes (P01G = 1)), P03G should not be blank and should be in the value set (P03G = 1 | 2).
+(
+  cv_p03g_phlhealth_nitv <- section_p %>% 
+    filter(p01g_phlhealth == 1, !(p03g_phlhealth %in% c(1, 2))) %>% 
+    select_cv(p01g_phlhealth, p03g_phlhealth, h = 'p03g_phlhealth')
+)[[1]]
+
+
+### P03A - Answer in P01A is No but has an answer in P03A.
+
+## If there is/are no HH members who is/are member/s of SSS (P01A = 2), P03A should have no answer.
+(
+  cv_p03a_sss_nitv <- section_p %>% 
+    filter(p01a_sss == 2, !is.na(p03a_sss)) %>% 
+    select_cv(p01a_sss, p03a_sss, h = 'p03a_sss')
+)[[1]]
+
+
+### P03B - Answer in P01B is No but has an answer in P03B
+
+## If there is/are no HH members who is/are member/s of GSIS (P01B = 2), P03B should have no answer.
+(
+  cv_p03b_gsis_nitv <- section_p %>% 
+    filter(p01b_gsis == 2, !is.na(p03b_gsis)) %>% 
+    select_cv(p01b_gsis, p03b_gsis, h = 'p03b_gsis')
+)[[1]]
+
+
+### P03C - Answer in P01C is No but has an answer in P03C
+
+## If there is/are no HH members who is/are member/s of OWWA (P01C = 2), P03C should have no answer.
+(
+  cv_p03c_owwa_nitv <- section_p %>% 
+    filter(p01c_owwa == 2, !is.na(p03c_owwa)) %>% 
+    select_cv(p01c_owwa, p03c_owwa, h = 'p03c_owwa')
+)[[1]]
+
+
+### P03D - Answer in P01D is No but has an answer in P03D
+
+## If there is/are no HH members who is/are member/s of Health medical insurance (P01D = 2), P03D should have no answer.
+(
+  cv_p03d_medinsure_nitv <- section_p %>% 
+    filter(p01d_medinsure == 2, !is.na(p03d_medinsure)) %>% 
+    select_cv(p01d_medinsure, p03d_medinsure, h = 'p03d_medinsure')
+)[[1]]
+
+
+### P03E - Answer in P01E is No but has an answer in P03E
+
+## If there is/are no HH members who is/are member/s of Life insurance (P01E = 2), P03E should have no answer.
+(
+  cv_p03e_lifeinsuree_nitv <- section_p %>% 
+    filter(p01e_lifeinsure == 2, !is.na(p03e_lifeinsure)) %>% 
+    select_cv(p01e_lifeinsure, p03e_lifeinsure, h = 'p03e_lifeinsure')
+)[[1]]
+
+
+### P03F - Answer in P01F is No but has an answer in P03F
+
+## If there is/are no HH members who is/are member/s of PAGIBIG (P01F = 2), P03F should have no answer.
+(
+  cv_p03f_pagibig_nitv <- section_p %>% 
+    filter(p01f_pagibig == 2, !is.na(p03f_pagibig)) %>% 
+    select_cv(p01f_pagibig, p03f_pagibig, h = 'p03f_pagibig')
+)[[1]]
+
+
+### P03G - Answer in P01G is No but has an answer in P03G
+
+## If there is/are no HH members who is/are member/s of Philhealth (P01G = 2), P03G should have no answer.
+(
+  cv_p03g_phlhealth_nitv <- section_p %>% 
+    filter(p01g_phlhealth == 2, !is.na(p03g_phlhealth)) %>% 
+    select_cv(p01g_phlhealth, p03g_phlhealth, h = 'p03g_phlhealth')
+)[[1]]
+
+
+### P04A - Answered yes in the availment /receive benefits/grants/assitance from SSS, but no HH member selected in p04
+
+## If the HH member/s avail/receive benefits/grants/assistance/payment from SSS (P03A = 1), P04A should have HH member/s selected.
+(
+  cv_p04a_sss_nitv <- section_p %>% 
+    filter(p03a_sss == 1, !(grepl('\\d', p04a_sss)) | nchar(p04a_sss) %% 2 != 0) %>% 
+    select_cv(p03a_sss, p04a_sss, h = 'p04a_sss')
+)[[1]]
+
+
+### P04B - Answered yes in the availment /receive benefits/grants/assitance from GSIS, but no HH member selected in p04
+
+## If the HH member/s avail/receive benefits/grants/assistance/payment from GSIS (P03B = 1), P04A should have HH member/s selected.
+(
+  cv_p02_1b_gsis_nitv <- section_p %>% 
+  filter(p03b_gsis == 1, !(grepl('\\d', p04b_gsis)) | nchar(p04b_gsis) %% 2 != 0) %>% 
+  select_cv(p03b_gsis, p04b_gsis, h = 'p04b_gsis')
+)[[1]]
+
+
+### P04C - Answered yes in the availment /receive benefits/grants/assitance from OWWA, but no HH member selected in p04
+
+## If the HH member/s avail/receive benefits/grants/assistance/payment from OWWA (P03C = 1), P04A should have HH member/s selected.
+(
+  cv_p04c_owwa_nitv <- section_p %>% 
+  filter(p03c_owwa == 1, !(grepl('\\d', p04c_owwa)) | nchar(p04c_owwa) %% 2 != 0) %>% 
+  select_cv(p03c_owwa, p04c_owwa, h = 'p04c_owwa')
+)[[1]]
+
+
+### P04D - Answered yes in the availment /receive benefits/grants/assitance from OWWA, but no HH member selected in p04
+
+## If the HH member/s avail/receive benefits/grants/assistance/payment from OWWA (P03A = 1), P04D should have HH member/s selected.
+(
+  cv_p04d_medinsure_nitv <- section_p %>% 
+    filter(p03d_medinsure == 1, !(grepl('\\d', p04d_medinsure)) | nchar(p04d_medinsure) %% 2 != 0) %>% 
+    select_cv(p03d_medinsure, p04d_medinsure, h = 'p04d_medinsure')
+)[[1]]
+
+
+### P04E - Answered yes in the availment /receive benefits/grants/assitance from Life Insurance, but no HH member selected in p04
+
+## If the HH member/s avail/receive benefits/grants/assistance/payment from life insurance (P03E = 1), P04E should have HH member/s selected.
+(
+  cv_p04e_lifeinsure_nitv <- section_p %>% 
+    filter(p03e_lifeinsure == 1, !(grepl('\\d', p04e_lifeinsure)) | nchar(p04e_lifeinsure) %% 2 != 0) %>% 
+    select_cv(p03e_lifeinsure, p04e_lifeinsure, h = 'p04e_lifeinsure')
+)[[1]]
+
+
+### P04F - Answered yes in the availment /receive benefits/grants/assitance from PAGIBIG, but no HH member selected in p04
+
+## If the HH member/s avail/receive benefits/grants/assistance/payment from PAGIBIG (P03F = 1), P04F should have HH member/s selected.
+(
+  cv_p04f_pagibig_nitv <- section_p %>% 
+    filter(p03f_pagibig == 1, !(grepl('\\d', p04f_pagibig)) | nchar(p04f_pagibig) %% 2 != 0) %>% 
+    select_cv(p03f_pagibig, p04f_pagibig, h = 'p04f_pagibig')
+)[[1]]
+
+
+### P04G - Answered yes in the availment /receive benefits/grants/assitance in Philhealth, but no HH member selected in p04
+
+## If the HH member/s avail/receive benefits/grants/assistance/payment from Philhealth (P03G = 1), P04G should have HH member/s selected.
+(
+  cv_p04g_phlhealth_nitv <- section_p %>% 
+    filter(p03g_phlhealth == 1, !(grepl('\\d', p04g_phlhealth)) | nchar(p04g_phlhealth) %% 2 != 0) %>% 
+    select_cv(p03g_phlhealth, p04g_phlhealth, h = 'p04g_phlhealth')
+)[[1]]
+
+
+### P04A - Answered no in the availment /receive benefits/grants/assitance in SSS, but with HH member selected in p04
+
+## If the HH member/s did not avail/receive benefits/grants/assistance/payment from SSS (P03A = 2), P04G should no answer
+(
+  cv_p04a_sss_nitv <- section_p %>% 
+    filter(p03a_sss == 2, !is.na(p04a_sss)) %>% 
+    select_cv(p03a_sss, p04a_sss, h = 'p04a_sss')
+)[[1]]
+
+
+### P04B - Answered no in the availment /receive benefits/grants/assitance in GSIS, but with HH member selected in p04
+
+## If the HH member/s did not avail/receive benefits/grants/assistance/payment from GSIS (P03B = 2), P04G should no answer
+(
+  cv_p02_1b_gsis_nitv <- section_p %>% 
+    filter(p03b_gsis == 2, !is.na(p04b_gsis)) %>% 
+    select_cv(p03b_gsis, p04b_gsis, h = 'p04b_gsis')
+)[[1]]
+
+
+### P04C - Answered no in the availment /receive benefits/grants/assitance in OWWA, but with HH member selected in p04
+
+## If the HH member/s did not avail/receive benefits/grants/assistance/payment from OWWA (P03C = 2), P04G should no answer
+(
+  cv_p04c_owwa_nitv <- section_p %>% 
+    filter(p03c_owwa == 2, !is.na(p04c_owwa)) %>% 
+    select_cv(p03c_owwa, p04c_owwa, h = 'p04c_owwa')
+)[[1]]
+
+
+### P04D - Answered no in the availment /receive benefits/grants/assitance in OWWA, but with HH member selected in p04
+
+## If the HH member/s did not avail/receive benefits/grants/assistance/payment from SSS (P03D = 2), P04G should no answer
+(
+  cv_p04d_medinsure_nitv <- section_p %>% 
+    filter(p03d_medinsure == 2, !is.na(p04d_medinsure)) %>% 
+    select_cv(p03d_medinsure, p04d_medinsure, h = 'p04d_medinsure')
+)[[1]]
+
+
+### P04E - Answered no in the availment /receive benefits/grants/assitance in Life Insurance, but with HH member selected in p04
+
+## If the HH member/s did not avail/receive benefits/grants/assistance/payment from life insurance  (P03E = 1), P04E should no answer
+(
+  cv_p04e_lifeinsure_nitv <- section_p %>% 
+    filter(p03e_lifeinsure == 2, !is.na(p04e_lifeinsure)) %>% 
+    select_cv(p03e_lifeinsure, p04e_lifeinsure, h = 'p04e_lifeinsure')
+)[[1]]
+
+
+### P04F - Answered no in the availment /receive benefits/grants/assitance in PAGIBIG, but with HH member selected in p04
+
+## If the HH member/s did no avail/receive benefits/grants/assistance/payment from PAGIBIG (P03F = 1), P04F should no answer
+(
+  cv_p04f_pagibig_nitv <- section_p %>% 
+    filter(p03f_pagibig == 2, !is.na(p04f_pagibig)) %>% 
+    select_cv(p03f_pagibig, p04f_pagibig, h = 'p04f_pagibig')
+)[[1]]
+
+
+### P04G - Answered no in the availment /receive benefits/grants/assitance in Philhealth, but with HH member selected in p04
+
+## If the HH member/s did not avail/receive benefits/grants/assistance/payment from Philhealth (P03G = 1), P04G should no answer
+(
+  cv_p04g_phlhealth_nitv <- section_p %>% 
+    filter(p03g_phlhealth == 2, !is.na(p04g_phlhealth)) %>% 
+    select_cv(p03g_phlhealth, p04g_phlhealth, h = 'p04g_phlhealth')
+)[[1]]
+
+
+### P02.2 - There is/are HHmem/s in the roster but answered blank/not in the valueset in P02.2
+
+## If there is/are HH member/s who is/are member/s of Philhealth (P01A = 1), there should be an answer in P02.2 (P02.2 = 1 |2).
+(
+  cv_p02_2_nitv <- section_p1 %>% 
+    filter(!(p02_2_membership %in% c(1, 2))) %>% 
+    select_cv(p02_2_membership, h = 'p02_2_membership')
+)[[1]]
+
+
+### P05AZ - Regular Conditional Cash Transfer (4Ps) is blank/ not in the valueset
+
+## Answer to Social Assistance Programs should not be blank and should be in the value set (P05A-J, Z = 1 | 2).
+(
+  cv_p05az_nitv <- section_p %>% 
+    filter_at(vars(matches('^p05[a-jz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      matches('^p05[a-jz]_.*'), 
+      h = c(
+        'p05a_reg4ps',
+        'p05b_mod4ps',
+        'p05c_uct',
+        'p05d_socpen',
+        'p05e_imap',
+        'p05f_stufap',
+        'p05g_snrhigh',
+        'p05h_esa',
+        'p05i_housing',
+        'p05j_health',
+        'p05z_others'
+        )
+      )
+)[[1]]
+
+
+### P05Z - Answer is 'Yes' but not specified 
+
+
+#### Cases with inconsistency
+
+## If responded 'Yes' to P05Z (other social assistance program), answer must be specified.
+(
+  cv_p05_other_missing <- section_p %>%
+    filter(p05z_others == 1, is.na(p05za_others)) %>% 
+    select_cv(p05z_others_fct, p05za_others, h = 'p05za_others')
+)[[1]]
+
+
+#### Other responses
+
+## Recode answer for 'Others, specify' if necessary.
+(
+  cv_p05_other <- section_p %>%
+    filter(p05z_others == 1, !is.na(p05za_others)) %>% 
+    select_cv(p05z_others_fct, p05za_others)
+)[[1]]
+
+
+### P06A - Answered "YES" in P05A but no selected member in P06A
+
+## If there is/are HH member/s who receive benefits/grants/assistance/payment from Regular Conditional Cash Transfer 4Ps (P05A = 1), there should be an answer in P06A.
+(
+  cv_p06a_reg4ps_nitv <- section_p %>% 
+    filter(p05a_reg4ps == 1, !(grepl('\\d', p06a_reg4ps)) | nchar(p06a_reg4ps) %% 2 != 0) %>% 
+    select_cv(p05a_reg4ps, p06a_reg4ps, h = 'p06a_reg4ps')
+)[[1]]
+
+
+### P06B - Answered "YES" in P05B but no selected member in P06B
+
+## If there is/are HH member/s who receive benefits/grants/assistance/payment from Modified Conditional Cash Transfer 4Ps (P05B = 1), there should be an answer in P06B.
+(
+  cv_p06b_mod4ps_nitv <- section_p %>% 
+    filter(p05b_mod4ps == 1, !(grepl('\\d', p06b_mod4ps)) | nchar(p06b_mod4ps) %% 2 != 0) %>% 
+    select_cv(p05b_mod4ps, p06b_mod4ps, h = 'p06b_mod4ps')
+)[[1]]
+
+
+### P06C - Answered "YES" in P05C but no selected member in P06C
+
+## If there is/are HH member/s who receive benefits/grants/assistance/payment from Unconditional Cash Transfer (P05C = 1), there should be an answer in P06C.
+(
+  cv_p06c_uct_nitv <- section_p %>% 
+    filter(p05c_uct == 1, !(grepl('\\d', p06c_uct)) | nchar(p06c_uct) %% 2 != 0) %>% 
+    select_cv(p05c_uct, p06c_uct, h = 'p06c_uct')
+)[[1]]
+
+
+### P06D - Answered "YES" in P05D but no selected member in P06D
+
+## If there is/are HH member/s who receive benefits/grants/assistance/payment from SocPen (P05D = 1), there should be an answer in P06D.
+(
+  cv_p06d_socpen_nitv <- section_p %>% 
+    filter(p05d_socpen == 1, !(grepl('\\d', p06d_socpen)) | nchar(p06d_socpen) %% 2 != 0) %>% 
+    select_cv(p05d_socpen, p06d_socpen, h = 'p06d_socpen')
+)[[1]]
+
+
+### P06E - Answered "YES" in P05E but no selected member in P06E
+
+## If there is/are HH member/s who receive benefits/grants/assistance/payment from IMAP (P05E = 1), there should be an answer in P06E.
+(
+  cv_p06e_imap_nitv <- section_p %>% 
+    filter(p05e_imap == 1, !(grepl('\\d', p06e_imap)) | nchar(p06e_imap) %% 2 != 0) %>% 
+    select_cv(p05e_imap, p06e_imap, h = 'p06e_imap')
+)[[1]]
+
+
+### P06F - Answered "YES" in P05F but no selected member in P06F
+
+## If there is/are HH member/s who receive benefits/grants/assistance/payment from StuFap (P05F = 1), there should be an answer in P06F.
+(
+  cv_p06f_stufap_nitv <- section_p %>% 
+    filter(p05f_stufap == 1, !(grepl('\\d', p06f_stufap)) | nchar(p06f_stufap) %% 2 != 0) %>% 
+    select_cv(p05f_stufap, p06f_stufap, h = 'p06f_stufap')
+)[[1]]
+
+
+### P06G - Answered "YES" in P05G but no selected member in P06G
+
+## If there is/are HH member/s who receive benefits/grants/assistance/payment from Senior Highschol Voucher (P05G = 1), there should be an answer in P06G.
+(
+  cv_p06g_snrhigh_nitv <- section_p %>% 
+    filter(p05g_snrhigh == 1, !(grepl('\\d', p06g_snrhigh)) | nchar(p06g_snrhigh) %% 2 != 0) %>% 
+    select_cv(p05g_snrhigh, p06g_snrhigh, h = 'p06g_snrhigh')
+)[[1]]
+
+
+### P06H - Answered "YES" in P05H but no selected member in P06H
+
+## If there is/are HH member/s who receive benefits/grants/assistance/payment from emergency Shelter Assistance Voucher (P05H = 1), there should be an answer in P06H.
+(
+  cv_p06h_esa_nitv <- section_p %>% 
+    filter(p05h_esa == 1, !(grepl('\\d', p06h_esa)) | nchar(p06h_esa) %% 2 != 0) %>% 
+    select_cv(p05h_esa, p06h_esa, h = 'p06h_esa')
+)[[1]]
+
+
+### P06I - Answered "YES" in P05I but no selected member in P06I
+
+## If there is/are HH member/s who receive benefits/grants/assistance/payment from Housing PRogram (P05I = 1), there should be an answer in P06I.
+(
+  cv_p06i_housing_nitv <- section_p %>% 
+    filter(p05i_housing == 1, !(grepl('\\d', p06i_housing)) | nchar(p06i_housing) %% 2 != 0) %>% 
+    select_cv(p05i_housing, p06i_housing, h = 'p06i_housing')
+)[[1]]
+
+
+### P06J - Answered "YES" in P05J but no selected member in P06J
+
+## If there is/are HH member/s who receive benefits/grants/assistance/payment from Health assistance (P05J = 1), there should be an answer in P06J.
+(
+  cv_p06j_health_nitv <- section_p %>% 
+    filter(p05j_health == 1, !(grepl('\\d', p06j_health)) | nchar(p06j_health) %% 2 != 0) %>% 
+    select_cv(p05j_health, p06j_health, h = 'p06j_health')
+)[[1]]
+
+
+### P06Z - Answered "YES" in P05Z but no selected member in P06Z
+
+## If there is/are HH member/s who receive benefits/grants/assistance/payment from Other Social Assistance Program (P05Z = 1), there should be an answer in P06Z.
+(
+  cv_p06z_others_nitv <- section_p %>% 
+    filter(p05z_others == 1, !(grepl('\\d', p06z_others)) | nchar(p06z_others) %% 2 != 0) %>% 
+    select_cv(p05z_others, p06z_others, h = 'p06z_others')
+)[[1]]
+
+
+### P06A - Answered "NO" in P05A but with selected member in P06A
+
+## If the HH member/s did not receive benefits/grants/assistance/payment from Regular Conditional Cash Transfer (4Ps) (P05A = 2), there should be no answer in P06Z.
+(
+  cv_p06a_reg4ps_nitv <- section_p %>% 
+    filter(p05a_reg4ps == 2, !is.na(p06a_reg4ps)) %>% 
+    select_cv(p05a_reg4ps, p06a_reg4ps, h = 'p06a_reg4ps')
+)[[1]]
+
+
+### P06B - Answered "NO" in P05B but with selected member in P06B
+
+## If the HH member/s did not receive benefits/grants/assistance/payment from Modified Conditional Cash Transfer (4Ps) (P05B = 2), there should be no answer in P06B.
+(
+  cv_p06b_mod4ps_nitv <- section_p %>% 
+    filter(p05b_mod4ps == 2, !is.na(p06b_mod4ps)) %>% 
+    select_cv(p05b_mod4ps, p06b_mod4ps, h = 'p06b_mod4ps')
+)[[1]]
+
+
+### P06C - Answered "NO" in P05C but with selected member in P06C
+
+## If the HH member/s did not receive benefits/grants/assistance/payment from Unconditional Cash Transfer (P05C = 2), there should be no answer in P06C.
+(
+  cv_p06c_uct_nitv <- section_p %>% 
+    filter(p05c_uct == 2, !is.na(p06c_uct)) %>% 
+    select_cv(p05c_uct, p06c_uct, h = 'p06c_uct')
+)[[1]]
+
+
+### P06D - Answered "NO" in P05D but with selected member in P06D
+
+## If the HH member/s did not receive benefits/grants/assistance/payment from SocPen (P05D = 2), there should be no answer in P06D.
+(
+  cv_p06d_socpen_nitv <- section_p %>% 
+    filter(p05d_socpen == 2, !is.na(p06d_socpen)) %>% 
+    select_cv(p05d_socpen, p06d_socpen, h = 'p06d_socpen')
+)[[1]]
+
+
+### P06E - Answered "NO" in P05E but with selected member in P06E
+
+## If the HH member/s did not receive benefits/grants/assistance/payment from IMAP (P05E = 2), there should be no answer in P06E.
+(
+  cv_p06e_imap_nitv <- section_p %>% 
+    filter(p05e_imap == 2, !is.na(p06e_imap)) %>% 
+    select_cv(p05e_imap, p06e_imap, h = 'p06e_imap')
+)[[1]]
+
+
+### P06F - Answered "NO" in P05F but with selected member in P06F
+
+## If the HH member/s did not receive benefits/grants/assistance/payment from StuFap (P05F = 2), there should be no answer in P06F.
+(
+  cv_p06f_stufap_nitv <- section_p %>% 
+    filter(p05f_stufap == 2, !is.na(p06f_stufap)) %>% 
+    select_cv(p05f_stufap, p06f_stufap, h = 'p06f_stufap')
+)[[1]]
+
+
+### P06G - Answered "NO" in P05G but with selected member in P06G
+
+## If the HH member/s did not receive benefits/grants/assistance/payment from Senior Highschool Voucher (P05G = 2), there should be no answer in P06G.
+(
+  cv_p06g_snrhigh_nitv <- section_p %>% 
+    filter(p05g_snrhigh == 2, !is.na(p06g_snrhigh)) %>% 
+    select_cv(p05g_snrhigh, p06g_snrhigh, h = 'p06g_snrhigh')
+)[[1]]
+
+
+### P06H - Answered "NO" in P05H but with selected member in P06H
+
+## If the HH member/s did not receive benefits/grants/assistance/payment from Emergency Shelter assistance voucher (P05H = 2), there should be no answer in P06H.
+(
+  cv_p06h_esa_nitv <- section_p %>% 
+    filter(p05h_esa == 2, !is.na(p06h_esa)) %>% 
+    select_cv(p05h_esa, p06h_esa, h = 'p06h_esa')
+)[[1]]
+
+
+### P06I - Answered "NO" in P05I but with selected member in P06I
+
+## If the HH member/s did not receive benefits/grants/assistance/payment from Housing Program Voucher (P05I = 2), there should be no answer in P06I.
+(
+  cv_p06i_housing_nitv <- section_p %>% 
+    filter(p05i_housing == 2, !is.na(p06i_housing)) %>% 
+    select_cv(p05i_housing, p06i_housing, h = 'p06i_housing')
+)[[1]]
+
+
+### P06J - Answered "NO" in P05J but with selected member in P06J
+
+## If the HH member/s did not receive benefits/grants/assistance/payment from Health Assistance (P05J = 2), there should be no answer in P06J.
+(
+  cv_p06j_health_nitv <- section_p %>% 
+    filter(p05j_health == 2, !is.na(p06j_health)) %>% 
+    select_cv(p05j_health, p06j_health, h = 'p06j_health')
+)[[1]]
+
+
+### P06Z - Answered "NO" in P05Z but with selected member in P06Z
+
+## If the HH member/s did not receive benefits/grants/assistance/payment from Other Social Assistance Program (P05Z = 2), there should be no answer in P06Z.
+(
+  cv_p06z_others_nitv <- section_p %>% 
+    filter(p05z_others == 2, !is.na(p06z_others)) %>% 
+    select_cv(p05z_others, p06z_others, h = 'p06z_others')
+)[[1]]
+
+
+### P07A - Answer in P05A is Yes but P07A is blank/not in valueset
+
+## If HH member/s receive benefits/grants/assistance/payment from Regular conditional cash transfer (4Ps) (P05A = 1), there should be an answer in P07A.
+(
+  cv_p07a_4ps_nitv <- section_p %>% 
+    filter(p05a_reg4ps == 1, !(p07a_reg4ps %in% c(0:99))) %>% 
+    select_cv(p05a_reg4ps, p07a_reg4ps, h = 'p07a_reg4ps')
+)[[1]]
+
+
+### P07B - Answer in P05B is Yes but P07B is blank/not in valueset
+
+## If HH member/s receive benefits/grants/assistance/payment from Modified conditional cash transfer (4Ps) (P05B = 1), there should be an answer in P07B.
+(
+  cv_p07b_4ps_nitv <- section_p %>% 
+    filter(p05b_mod4ps == 1, !(p07b_mod4ps %in% c(0:99))) %>% 
+    select_cv(p05b_mod4ps, p07b_mod4ps, h = 'p07b_mod4ps')
+)[[1]]
+
+
+### P07C - Answer in P05C is Yes but P07C is blank/not in valueset
+
+## If HH member/s receive benefits/grants/assistance/payment from Unconditional cash transfer (P05C = 1), there should be an answer in P07C.
+(
+  cv_p07c_4ps_nitv <- section_p %>% 
+    filter(p05c_uct == 1, !(p07c_uct %in% c(0:99))) %>% 
+    select_cv(p05c_uct, p07c_uct, h = 'p07c_uct')
+)[[1]]
+
+
+### P07D - Answer in P05D is Yes but P07D is blank/not in valueset
+
+## If HH member/s receive benefits/grants/assistance/payment from SocPen (P05D = 1), there should be an answer in P07D.
+(
+  cv_p07d_4ps_nitv <- section_p %>% 
+    filter(p05d_socpen == 1, !(p07d_socpen %in% c(0:99))) %>% 
+    select_cv(p05d_socpen, p07d_socpen, h = 'p07d_socpen')
+)[[1]]
+
+
+### P07E - Answer in P05E is Yes but P07E is blank/not in valueset
+
+## If HH member/s receive benefits/grants/assistance/payment from IMAP (P05E = 1), there should be an answer in P07E.
+(
+  cv_p07e_4ps_nitv <- section_p %>% 
+    filter(p05e_imap == 1, !(p07e_imap %in% c(0:99))) %>% 
+    select_cv(p05e_imap, p07e_imap, h = 'p07e_imap')
+)[[1]]
+
+
+### P07F - Answer in P05F is Yes but P07F is blank/not in valueset
+
+## If HH member/s receive benefits/grants/assistance/payment from StuFap (P05F = 1), there should be an answer in P07F.
+(
+  cv_p07f_4ps_nitv <- section_p %>% 
+    filter(p05f_stufap == 1, !(p07f_stufap %in% c(0:99))) %>% 
+    select_cv(p05f_stufap, p07f_stufap, h = 'p07f_stufap')
+)[[1]]
+
+
+### P07G - Answer in P05G is Yes but P07G is blank/not in valueset
+
+## If HH member/s receive benefits/grants/assistance/payment from Senior highschool voucher (P05G = 1), there should be an answer in P07G.
+(
+  cv_p07g_4ps_nitv <- section_p %>% 
+    filter(p05g_snrhigh == 1, !(p07g_snrhigh %in% c(0:99))) %>% 
+    select_cv(p05g_snrhigh, p07g_snrhigh, h = 'p07g_snrhigh')
+)[[1]]
+
+
+### P07H - Answer in P05H is Yes but P07H is blank/not in valueset
+
+## If HH member/s receive benefits/grants/assistance/payment from Emergency shelter assistance (P05H = 1), there should be an answer in P07C.H
+(
+  cv_p07h_4ps_nitv <- section_p %>% 
+    filter(p05g_snrhigh == 1, !(p07g_snrhigh %in% c(0:99))) %>% 
+    select_cv(p05g_snrhigh, p07g_snrhigh, h = 'p07g_snrhigh')
+)[[1]]
+
+
+### P07I - Answer in P05I is Yes but P07I is blank/not in valueset
+
+## If HH member/s receive benefits/grants/assistance/payment from Housing program (P05I = 1), there should be an answer in P07I.
+(
+  cv_p07i_4ps_nitv <- section_p %>% 
+    filter(p05i_housing == 1, !(p07i_housing %in% c(0:99))) %>% 
+    select_cv(p05i_housing, p07i_housing, h = 'p07i_housing')
+)[[1]]
+
+
+### P07J - Answer in P05J is Yes but P07J is blank/not in valueset
+
+## If HH member/s receive benefits/grants/assistance/payment from Health assistance (P05J = 1), there should be an answer in P07J.
+(
+  cv_p07j_4ps_nitv <- section_p %>% 
+    filter(p05j_health == 1, !(p07j_health %in% c(0:99))) %>% 
+    select_cv(p05j_health, p07j_health, h = 'p07j_health')
+)[[1]]
+
+
+### P07Z - Answer in P05Z is Yes but P07Z is blank/not in valueset
+
+## If HH member/s receive benefits/grants/assistance/payment from other social assistance programs (P05Z = 1), there should be an answer in P07Z.
+(
+  cv_p07z_4ps_nitv <- section_p %>% 
+    filter(p05z_others == 1, !(p07z_others %in% c(0:99))) %>% 
+    select_cv(p05z_others, p07z_others, h = 'p07z_others')
+)[[1]]
+
+
+### P07A - Answer in P05A is NO but with answer in P07A.
+
+## If HH member/s receive benefits/grants/assistance/payment from Regular conditional cash transfer (P05A = 2), there should be no answer in P07A.
+(
+  cv_p07a_reg4ps_nitv <- section_p %>% 
+    filter(p05a_reg4ps == 2, !is.na(p07a_reg4ps)) %>% 
+    select_cv(p05a_reg4ps, p07a_reg4ps, h = 'p07a_reg4ps')
+)[[1]]
+
+
+### P07B - Answer in P05B is NO but with answer in P07B.
+
+## If HH member/s receive benefits/grants/assistance/payment from Modified conditional cash transfer (P05B = 2), there should be no answer in P07B.
+(
+  cv_p07b_mod4ps_nitv <- section_p %>% 
+    filter(p05b_mod4ps == 2, !is.na(p07b_mod4ps)) %>% 
+    select_cv(p05b_mod4ps, p07b_mod4ps, h = 'p07b_mod4ps')
+)[[1]]
+
+
+### P07C - Answer in P05C is NO but with answer in P07C.
+
+## If HH member/s receive benefits/grants/assistance/payment from Unconditional cash transfer (P05C = 2), there should be no answer in P07C.
+(
+  cv_p07c_uct_nitv <- section_p %>% 
+    filter(p05c_uct == 2, !is.na(p07c_uct)) %>% 
+    select_cv(p05c_uct, p07c_uct, h = 'p07c_uct')
+)[[1]]
+
+
+### P07D - Answer in P05D is NO but with answer in P07D.
+
+## If HH member/s receive benefits/grants/assistance/payment from SocPen (P05D = 2), there should be no answer in P07D.
+(
+  cv_p07d_socpen_nitv <- section_p %>% 
+    filter(p05d_socpen == 2, !is.na(p07d_socpen)) %>% 
+    select_cv(p05d_socpen, p07d_socpen, h = 'p07d_socpen')
+)[[1]]
+
+
+### P07E - Answer in P05E is NO but with answer in P07E.
+
+## If HH member/s receive benefits/grants/assistance/payment from IMAP (P05E = 2), there should be no answer in P07E.
+(
+  cv_p07e_imap_nitv <- section_p %>% 
+    filter(p05e_imap == 2, !is.na(p07e_imap)) %>% 
+    select_cv(p05e_imap, p07e_imap, h = 'p07e_imap')
+)[[1]]
+
+
+### P07F - Answer in P05F is NO but with answer in P07F.
+
+## If HH member/s receive benefits/grants/assistance/payment from StuFap (P05F = 2), there should be no answer in P07F.
+(
+  cv_p07f_stufap_nitv <- section_p %>% 
+    filter(p05f_stufap == 2, !is.na(p07f_stufap)) %>% 
+    select_cv(p05f_stufap, p07f_stufap, h = 'p07f_stufap')
+)[[1]]
+
+
+### P07G - Answer in P05G is NO but with answer in P07G.
+
+## If HH member/s receive benefits/grants/assistance/payment from Senior high schoool voucher (P05G = 2), there should be no answer in P07G.
+(
+  cv_p07g_snrhigh_nitv <- section_p %>% 
+    filter(p05g_snrhigh == 2, !is.na(p07g_snrhigh)) %>% 
+    select_cv(p05g_snrhigh, p07g_snrhigh, h = 'p07g_snrhigh')
+)[[1]]
+
+
+### P07H - Answer in P05H is NO but with answer in P07H.
+
+## If HH member/s receive benefits/grants/assistance/payment from Emergency shelter assistance (P05H = 2), there should be no answer in P07H.
+(
+  cv_p07h_esa_nitv <- section_p %>% 
+    filter(p05h_esa == 2, !is.na(p07h_esa)) %>% 
+    select_cv(p05h_esa, p07h_esa, h = 'p07h_esa')
+)[[1]]
+
+
+### P07I - Answer in P05I is NO but with answer in P07I.
+
+## If HH member/s receive benefits/grants/assistance/payment from Housing program (P05I = 2), there should be no answer in P07I.
+(
+  cv_p07i_housing_nitv <- section_p %>% 
+    filter(p05i_housing == 2, !is.na(p07i_housing)) %>% 
+    select_cv(p05i_housing, p07i_housing, h = 'p07i_housing')
+)[[1]]
+
+
+### P07J - Answer in P05J is NO but with answer in P07J.
+
+## If HH member/s receive benefits/grants/assistance/payment from Health assistance (P05J = 2), there should be no answer in P07J.
+(
+  cv_p07j_health_nitv <- section_p %>% 
+    filter(p05j_health == 2, !is.na(p07j_health)) %>% 
+    select_cv(p05j_health, p07j_health, h = 'p07j_health')
+)[[1]]
+
+
+### P07Z - Answer in P05Z is NO but with answer in P07Z.
+
+## If HH member/s receive benefits/grants/assistance/payment from Other social assistance program (P05Z = 2), there should be no answer in P07Z.
+(
+  cv_p07z_others_nitv <- section_p %>% 
+    filter(p05z_others == 2, !is.na(p07z_others)) %>% 
+    select_cv(p05z_others, p07z_others, h = 'p07z_others')
+)[[1]]
+
+
+### P08 - Government feeding program is blank/not in the valueset
+
+## Answer to Government feeding Programs should not be blank and should be in the value set (P08 = 1 | 2).
+(
+  cv_p08_memfeedng_nitv <- section_p %>% 
+    filter(!p08_memfeedng %in% c(1, 2)) %>% 
+    select_cv(p08_memfeedng, h = 'p08_memfeedng')
+)[[1]]
+
+
+### P09 - Line number of household member who avail/receive government feeding program is blank/invalid
+
+## If the HH availed government feeding program (P08 = 1), there should be an answer in P09.
+(
+  cv_p09_availfeed_nitv <- section_p %>% 
+    filter(p08_memfeedng == 1, is.na(p09_availfeed) | !grepl('^\\d', p09_availfeed) | nchar(p09_availfeed) %% 2 != 0) %>% 
+    select_cv(p08_memfeedng, p09_availfeed, h = 'p09_availfeed')
+)[[1]]
+
+
+### P09 - Feeding Program must be blank
+
+## If the HH did not avail government feeding program (P08 = 2), there should be no answer in P09.
+(
+  cv_p09_availfeed_wval <- section_p %>% 
+    filter(p08_memfeedng == 2, !is.na(p09_availfeed))%>% 
+    select_cv(p08_memfeedng, p09_availfeed, h = 'p09_availfeed')
+)[[1]]
+
+
+### P10 - Benefit of feeding Program is blank/invalid
+
+## If the HH availed government feeding program (P08 = 1), there should be an answer in P10.
+(
+  cv_p10_recvfeed_nitv <- section_p %>% 
+    filter(p08_memfeedng == 1, !(p10_recvfeed %in% c(0:99))) %>% 
+    select_cv(p08_memfeedng, p10_recvfeed, h = 'p10_recvfeed')
+)[[1]]
+
+
+### P10 - Feeding Program must not be blank
+
+## If the HH did not avail the government feeding program (P08 = 2), there should be no answer in P10.
+(
+  cv_p10_recvfeed_nitv <- section_p %>% 
+    filter(p08_memfeedng == 2, !is.na(p10_recvfeed))%>% 
+    select_cv(p08_memfeedng, p10_recvfeed, h = 'p10_recvfeed')
+)[[1]]
+
+
+### P11A-G - Missing/invalid
+
+## Answer to Labor market intervention programs should not be blank and should be in the value set (P11 = 1 | 2).
+(
+  cv_p11ag_nitv <- section_p %>% 
+    filter_at(vars(matches('^p11[a-g]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      matches('^p11[a-g]_.*'), 
+      h = c(
+        'p11a_microslp',
+        'p11b_empslp',
+        'p11c_livelihood',
+        'p11d_cash',
+        'p11e_food',
+        'p11f_cbep',
+        'p11g_doletupad'
+        )
+      )
+)[[1]]
+
+
+### P12A - Answer in P11A is YES but P12A is blank/not in value set.
+
+## If HH member/s benefit/avail from micro enterprise development (P11A = 1), there should be an answer in P12A.
+(
+  cv_p12a_microslp_nitv <- section_p %>% 
+    filter(p11a_microslp == 1, !(grepl('\\d', p12a_microslp)) | nchar(p12a_microslp) %% 2 != 0) %>% 
+    select_cv(p11a_microslp, p12a_microslp, h = 'p12a_microslp')
+)[[1]]
+
+
+### P12B - Answer in P11B is YES but P12B is blank/not in value set.
+
+## If HH member/s benefit/avail from Employment facilitation track (P11B = 1), there should be an answer in P12B.
+(
+  cv_p12b_empslp_nitv <- section_p %>% 
+    filter(p11b_empslp == 1, !(grepl('\\d', p12b_empslp)) | nchar(p12b_empslp) %% 2 != 0) %>% 
+    select_cv(p11b_empslp, p12b_empslp, h = 'p12b_empslp')
+)[[1]]
+
+
+### P12C - Answer in P11C is YES but P12C is blank/not in value set.
+
+## If HH member/s benefit/avail from integrated livelihood (P11C = 1), there should be an answer in P12C.
+(
+  cv_p12c_livelihood_nitv <- section_p %>% 
+    filter(p11c_livelihood == 1, !(grepl('\\d', p12c_livelihood)) | nchar(p12c_livelihood) %% 2 != 0) %>% 
+    select_cv(p11c_livelihood, p12c_livelihood, h = 'p12c_livelihood')
+)[[1]]
+
+
+### P12D - Answer in P11D is YES but P12D is blank/not in value set.
+
+## If HH member/s benefit/avail from cash for work (P11D = 1), there should be an answer in P12D.
+(
+  cv_p12d_cash_nitv <- section_p %>% 
+    filter(p11d_cash == 1, !(grepl('\\d', p12d_cash)) | nchar(p12d_cash) %% 2 != 0) %>% 
+    select_cv(p11d_cash, p12d_cash, h = 'p12d_cash')
+)[[1]]
+
+
+### P12E - Answer in P11E is YES but P12E is blank/not in value set.
+
+## If HH member/s benefit/avail from food for work (P11E = 1), there should be an answer in P12E.
+(
+  cv_p12e_food_nitv <- section_p %>% 
+    filter(p11e_food == 1, !(grepl('\\d', p12e_food)) | nchar(p12e_food) %% 2 != 0) %>% 
+    select_cv(p11e_food, p12e_food, h = 'p12e_food')
+)[[1]]
+
+
+### P12F - Answer in P11F is YES but P12F is blank/not in value set.
+
+## If HH member/s benefit/avail from community-based employment program (P11F = 1), there should be an answer in P12F.
+(
+  cv_p12f_cbep_nitv <- section_p %>% 
+    filter(p11f_cbep == 1, !(grepl('\\d', p12f_cbep)) | nchar(p12f_cbep) %% 2 != 0) %>% 
+    select_cv(p11f_cbep, p12f_cbep, h = 'p12f_cbep')
+)[[1]]
+
+
+### P12G - Answer in P11G is YES but P12G is blank/not in value set.
+
+## If HH member/s benefit/avail from DOLE-TUPAD (P11G = 1), there should be an answer in P12G
+(
+  cv_p12g_doletupad_nitv <- section_p %>% 
+    filter(p11g_doletupad == 1, !(grepl('\\d', p12g_doletupad)) | nchar(p12g_doletupad) %% 2 != 0) %>% 
+    select_cv(p11g_doletupad, p12g_doletupad, h = 'p12g_doletupad')
+)[[1]]
+
+
+### P13A - Answer in P11A is YES, but blank in P13A.
+
+## If HH member/s benefit/avail from micro enterprise (P11A = 1), there should be an answer in P13A.
+(
+  cv_p13a_microslp_nitv <- section_p %>% 
+    filter(p11a_microslp == 1, !(p13a_microslp %in% c(0:99))) %>% 
+    select_cv(p11a_microslp, p13a_microslp, h = 'p13a_microslp')
+)[[1]]
+
+
+### P13B - Answer in P11B is YES, but blank in P13B.
+
+## If HH member/s benefit/avail from employment facilitation track (P11B = 1), there should be an answer in P13B.
+(
+  cv_p13b_empslp_nitv <- section_p %>% 
+    filter(p11b_empslp == 1, !(p13b_empslp %in% c(0:99))) %>% 
+    select_cv(p11b_empslp, p13b_empslp, h = 'p13b_empslp')
+)[[1]]
+
+
+### P13C - Answer in P11C is YES, but blank in P13C.
+
+## If HH member/s benefit/avail from integrated livelihood (P11C = 1), there should be an answer in P13C.
+(
+  cv_p13c_livelihood_nitv <- section_p %>% 
+    filter(p11c_livelihood == 1, !(p13c_livelihood %in% c(0:99))) %>% 
+    select_cv(p11c_livelihood, p13c_livelihood, h = 'p13c_livelihood')
+)[[1]]
+
+
+### P13D - Answer in P11D is YES, but blank in P13D.
+
+## If HH member/s benefit/avail from cash for work (P11D = 1), there should be an answer in P13D.
+(
+  cv_p13d_cash_nitv <- section_p %>% 
+    filter(p11d_cash == 1, !(p13d_cash %in% c(0:99))) %>% 
+    select_cv(p11d_cash, p13d_cash, h = 'p13d_cash')
+)[[1]]
+
+
+### P13E - Answer in P11B is YES, but blank in P13B.
+
+## If HH member/s benefit/avail from food for work (P11E = 1), there should be an answer in P13E.
+(
+  cv_p13e_food_nitv <- section_p %>% 
+    filter(p11e_food == 1, !(p13e_food %in% c(0:99))) %>% 
+    select_cv(p11e_food, p13e_food, h = 'p13e_food')
+)[[1]]
+
+
+### P13F - Answer in P11F is YES, but blank in P13F.
+
+## If HH member/s benefit/avail from community_based employment (P11F = 1), there should be an answer in P13F.
+(
+  cv_p13f_cbep_nitv <- section_p %>% 
+    filter(p11f_cbep == 1, !(p13f_cbep %in% c(0:99))) %>% 
+    select_cv(p11f_cbep, p13f_cbep, h = 'p13f_cbep')
+)[[1]]
+
+
+### P13G - Answer in P11G is YES, but blank in P13G.
+
+## If HH member/s benefit/avail from DOLE Tupad (P11G = 1), there should be an answer in P13G.
+(
+  cv_p13g_doletupad_nitv <- section_p %>% 
+    filter(p11g_doletupad == 1, !(p13g_doletupad %in% c(0:99))) %>% 
+    select_cv(p11g_doletupad, p13g_doletupad, h = 'p13g_doletupad')
+)[[1]]
+
+
+### P13A - Answer in P11A is NO but with answer in P13A.
+
+## If HH member/s receive benefits/grants/assistance/payment from micro enterprise development track (P11A = 2), there should be no answer in P13A.
+(
+  cv_p13a_microslp_nitv <- section_p %>% 
+    filter(p11a_microslp == 2, !is.na(p13a_microslp)) %>% 
+    select_cv(p11a_microslp, p13a_microslp, h = 'p13a_microslp')
+)[[1]]
+
+
+### P13B - Answer in P11B is NO but with answer in P13B.
+
+## If HH member/s receive benefits/grants/assistance/payment from employment facilitation track (P11B = 2), there should be no answer in P13B.
+(
+  cv_p13b_empslp_nitv <- section_p %>% 
+    filter(p11b_empslp == 2, !is.na(p13b_empslp)) %>% 
+    select_cv(p11b_empslp, p13b_empslp, h = 'p13b_empslp')
+)[[1]]
+
+
+### P13C - Answer in P11C is NO but with answer in P13C.
+
+## If HH member/s receive benefits/grants/assistance/payment from integrated livelihood (P11C = 2), there should be no answer in P13C.
+(
+  cv_p13c_livelihood_nitv <- section_p %>% 
+    filter(p11c_livelihood == 2, !is.na(p13c_livelihood)) %>% 
+    select_cv(p11c_livelihood, p13c_livelihood, h = 'p13c_livelihood')
+)[[1]]
+
+
+### P13D - Answer in P11D is NO but with answer in P13D.
+
+## If HH member/s receive benefits/grants/assistance/payment from cash for work (P11D = 2), there should be no answer in P13D.
+(
+  cv_p13d_cash_nitv <- section_p %>% 
+    filter(p11d_cash == 2, !is.na(p13d_cash)) %>% 
+    select_cv(p11d_cash, p13d_cash, h = 'p13d_cash')
+)[[1]]
+
+
+### P13E - Answer in P11E is NO but with answer in P13E.
+
+## If HH member/s receive benefits/grants/assistance/payment from food for work (P11E = 2), there should be no answer in P13E.
+(
+  cv_p13e_food_nitv <- section_p %>% 
+    filter(p11e_food == 2, !is.na(p13e_food)) %>% 
+    select_cv(p11e_food, p13e_food, h = 'p13e_food')
+)[[1]]
+
+
+### P13F - Answer in P11F is NO but with answer in P13F.
+
+## If HH member/s receive benefits/grants/assistance/payment from community_based employment program (P11F = 2), there should be no answer in P13F.
+(
+  cv_p13f_cbep_nitv <- section_p %>% 
+    filter(p11f_cbep == 2, !(p13f_cbep)) %>% 
+    select_cv(p11f_cbep, p13f_cbep, h = 'p13f_cbep')
+)[[1]]
+
+
+### P13G - Answer in P11G is NO but with answer in P13G.
+
+## If HH member/s receive benefits/grants/assistance/payment from DOLE tupad (P11G = 2), there should be no answer in P13G.
+(
+  cv_p13g_doletupad_nitv <- section_p %>% 
+    filter(p11g_doletupad == 2, !is.na(p13g_doletupad)) %>% 
+    select_cv(p11g_doletupad, p13g_doletupad, h = 'p13g_doletupad')
+)[[1]]
+
+
+### P14AZ - Answer in G11.1 is YES but Blank/not in the valueset in P14A-D, Z
+
+## If the HH is engaged in agricultural and fishery activities (G11.1 = 1), there should be an answer in P14A-D and Z.
+(
+  cv_p14az_nitv <- section_p %>% 
+    filter(g11_1_hhengage == 1) %>% 
+    filter_at(vars(matches('^p14[a-dz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      g11_1_hhengage, 
+      matches('^p14[a-dz]_.*'), 
+      h = c(
+        'p14a_prodserv',
+        'p14b_postprod',
+        'p14c_dvlptrain',
+        'p14d_cash',
+        'p14z_other'
+        )
+      )
+)[[1]]
+
+
+
+### P14Z - Answer is 'Yes' but not specified 
+
+
+
+#### Cases with inconsistency
+
+## If responded 'Yes' to P14Z (other agri and fisheries program), answer must be specified.
+(
+  cv_p14_other_missing <- section_p %>%
+    filter(p14z_other == 1, is.na(p14za_other)) %>% 
+    select_cv(p14z_other_fct, p14za_other, h = 'p14za_other')
+)[[1]]
+
+
+#### Other responses
+
+## Recode answer for 'Others, specify' if necessary.
+(
+  cv_p14_other <- section_p %>%
+    filter(p14z_other == 1, !is.na(p14za_other)) %>% 
+    select_cv(p14z_other_fct, p14za_other)
+)[[1]]
+
+
+
+
+### P15AK - Answer in P15A-K is Blank/not in the valueset
+
+## There should be answers in social assistance program under bayanihan act (P15A-K = 1 | 2).
+(
+  cv_p15ak_nitv <- section_p %>% 
+    filter_at(vars(matches('^p15[a-k]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    select_cv(
+      matches('^p15[a-k]_.*'), 
+      h = c(
+        'p15a_sap',
+        'p15b_dolecamp',
+        'p15c_doleakap',
+        'p15d_dtilive',
+        'p15e_daricefarm',
+        'p15f_govrelif',
+        'p15g_othergov',
+        'p15h_bayanihan1',
+        'p15i_bayanihan2',
+        'p15j_bayanihan3',
+        'p15k_bayanihan4'
+        )
+      )
+)[[1]]

@@ -1,0 +1,266 @@
+# Section F {.unnumbered}
+
+section_f1 <- hpq$section_f1 %>%
+  collect() %>% 
+  filter_at(vars(matches('^f(0[5-9]|10|11).*'), -matches('_fct$')), any_vars(!is.na(.))) 
+
+section_f <- hpq$section_f %>%
+  collect() %>%
+  filter_at(vars(matches('^f0[1-3].*'), -matches('_fct$')), any_vars(!is.na(.))) %>% 
+  distinct(case_id, .keep_all = T) %>%
+  mutate_at(vars(matches('^f03_.*'), -matches('_fct$')), list(n = ~ if_else(. == 2, 0L, .))) %>% 
+  mutate(count = rowSums(select(., matches('^f03_.*_n$'), -matches('_fct$')), na.rm = T)) %>% 
+  select(-matches('^f03_.*_n$')) %>%
+  left_join(dplyr::select(section_f1, case_id) %>% count(case_id), by = 'case_id') %>% 
+  mutate(n = if_else(is.na(n), 0L, n))
+
+
+### F01 - Produce goods for Home Consumption is blank/not in the value set.
+
+## Produce goods for home consumption should be in the value set.
+(
+  cv_f01_goods <- section_f %>% 
+    filter(!(f01_foodconsum %in% c(1, 2))) %>% 
+    select_cv(f01_foodconsum, h = 'f01_foodconsum')
+)[[1]]
+
+
+### F01 - Produce goods for Home Consumption is Yes and F02 - Sustenance activity is all NO
+
+## If F01 = 1 (Yes in produce goods for home consumption), F02 (Sustenance activity) should have at least one Yes (1).
+(
+  cv_f01_yes1 <- section_f %>% 
+    filter(f01_foodconsum == 1) %>%
+    filter_at(vars(matches('f02_[a-e].*'), -matches('_fct$')), all_vars(. == 2)) %>% 
+    select_cv(
+      f01_foodconsum, 
+      matches('f02_[a-e].*'), 
+      h = c(
+        'f02_afishing',
+        'f02_blogging',
+        'f02_chunting',
+        'f02_dfarming',
+        'f02_eraising'
+        )
+      )
+)[[1]]
+
+
+### F01 - Produce goods for Home Consumption is No and F02 - Sustenance activity is not Blank
+
+## If F01 = 2 (No in produce goods for home consumption), F02 (Sustenance activity) should be blank.
+(
+  cv_f01_no <- section_f %>% 
+    filter(f01_foodconsum == 2) %>% 
+    filter_at(vars(matches('^f02_[a-e].*'), -matches('_fct$')), any_vars(!is.na(.))) %>%
+    select_cv(
+      f01_foodconsum, 
+      matches('^f02_[a-e].*'), 
+      h = c(
+        'f02_afishing',
+        'f02_blogging',
+        'f02_chunting',
+        'f02_dfarming',
+        'f02_eraising'
+        )
+      )
+)[[1]]
+
+
+### F02 - Produce goods for Home Consumption is Yes and F02 - Sustenance activity is Blank and not in the value set
+
+## If F01 = 1 (Yes in produce goods for home consumption), F02 (Sustenance activity) should not be blank and in the value set.
+(
+  cv_f01_yes <- section_f %>% 
+    filter(f01_foodconsum == 1) %>% 
+    filter_at(vars(matches('^f02_[a-e].*'), -matches('_fct$')), any_vars(!(. %in% c(1, 2)))) %>%
+    select_cv(
+      f01_foodconsum, 
+      matches('^f02_[a-e].*'), 
+      h = c(
+        'f02_afishing',
+        'f02_blogging',
+        'f02_chunting',
+        'f02_dfarming',
+        'f02_eraising'
+        )
+      )
+)[[1]]
+
+
+### F03 - Engage as operator is Blank and not in the valueset
+
+## Engage as operator should be in the value set.
+(
+  cv_f03_engage <- section_f %>% 
+    filter_at(vars(matches('^f03_.*'), -matches('fct$')), any_vars(!(. %in% c(1, 2)))) %>%
+    select_cv(
+      matches('^f03_.*'), 
+      h = c(
+        'f03_crop_fct',
+        'f03_livestock_fct',
+        'f03_fish_fct',
+        'f03_forest_fct',
+        'f03_mining_fct',
+        'f03_manufac_fct',
+        'f03_electric_fct',
+        'f03_water_fct',
+        'f03_construct_fct',
+        'f03_wholesale_fct',
+        'f03_transport_fct',
+        'f03_comm_fct',
+        'f03_accom_fct',
+        'f03_infocomm_fct',
+        'f03_fin_fct',
+        'f03_realesta_fct',
+        'f03_profbus_fct',
+        'f03_educ_fct',
+        'f03_humsoc_fct',
+        'f03_admin_fct',
+        'f03_artenrec_fct',
+        'f03_oth_fct'
+        )
+      )
+)[[1]]
+
+
+### F03 - Number of 'Yes' in F03 is not equal to the number of entrep declared
+
+## Number of Yes (1) from F03 (engage as operator) in any of the entrepreneurial activities (A-V) should be equal to the number of entrepreneurial declared (no_entrep).
+(
+  cv_f03_entrep_count <- section_f %>% 
+    filter(no_entrep != count) %>% 
+    rename(
+      'Number of Yes Answer from F03A-V' = count,
+      'Number of Entrep Declared (no_entrep)' = no_entrep
+    ) %>% 
+    select_cv(`Number of Entrep Declared (no_entrep)`, `Number of Yes Answer from F03A-V`, matches('^f03'))
+)[[1]]
+
+
+### F03 - Number of 'Yes' in F03 is not equal to the number of entrep listed
+
+## Number of Yes (1) from F03 (engage as operator) in any of the entrepreneurial activities (A-V) should be equal to the number of entrepreneurial activities listed.
+(
+  cv_f03_entrep_list <- section_f %>% 
+    filter(count > n) %>% 
+    rename(
+      'Number of Yes Answer from F03A-V' = count,
+      'Entrepreneurial Activities Listed' = n
+    ) %>% 
+    select_cv(
+      `Number of Yes Answer from F03A-V`, 
+      `Entrepreneurial Activities Listed`, 
+      matches('^f03'), 
+      h = c(
+        'Number of Yes Answer from F03A-V',
+        'Entrepreneurial Activities Listed'
+        )
+      )
+)[[1]]
+
+
+### F04 - Engage as operator is any YES and F04 (Entrepreneurial Activity) is invalid
+
+## If F03 (engage as operator) is any Yes (1), F04 (entrepreneurial activity) should have an entry.
+(
+  cv_f04_f11_yes_all <- section_f1 %>%
+    filter(grepl(ref_invalid_keyword, f04_entrep, ignore.case = T) | nchar(f04_entrep) < 3) %>% 
+    select_cv(f04_entrep, h = 'f04_entrep')
+)[[1]]
+
+
+### F05 - Missing/invalid PSIC code
+
+## PSIC of Entrepreneurial Activity should be valid and not missing.
+(
+  cv_f05_numeric <- section_f1 %>%
+    filter(f05_psic == 0 | is.na(f05_psic)) %>%
+    select_cv(f05_psic, h = 'f05_psic')
+)[[1]]
+
+
+### F06 - Use e-commerce platform is missing or not in the valueset
+
+## Use e-commerce platform is should be in the value set.
+(
+  cv_f06_ecommerce <- section_f1 %>% 
+    filter(!(f06_entact %in% c(1, 2))) %>% 
+    select_cv(f06_entact, h = 'f06_entact')
+)[[1]]
+
+
+### F07 - Use social media is not in the valueset
+
+## Use social media is should be in the value set.
+(
+  cv_f07_social <- section_f1 %>% 
+    filter(!(f07_socmed %in% c(1, 2))) %>% 
+    select_cv(f07_socmed, h = 'f07_socmed')
+)[[1]]
+
+
+### F08 - Year started to operate is invalid or not in the correct year range
+
+## Year started to operate is should be valid or in the correct year range from 1900 to 2022.
+(
+  cv_f08_year <- section_f1 %>% 
+    filter(!grepl('\\d{4}', f08_year) | !(f08_year %in% c(1900:2022))) %>%
+    select_cv(f08_year, h = 'f08_year')
+)[[1]]
+
+
+### F09 - Month started to operate is not in the valueset
+
+## Month started to operate is should be in the value set.
+(
+  cv_f09_month <- section_f1 %>% 
+    filter(!grepl('M|[A-L]+', f09_month)) %>% 
+    select_cv(f09_month, h = 'f09_month')
+)[[1]]
+
+
+### F10A-B - Number of persons worked in the entrepreneurial activity is missing or invalid
+
+## Number of persons worked in the entrepreneurial activity should be valid and not missing.
+(
+  cv_f10_persons <- section_f1 %>% 
+    filter_at(vars(matches('^f10[ab]_.*'), -matches('_fct$')), any_vars(!(. %in% c(0:999)))) %>% 
+    select_cv(
+      matches('^f10[ab]_.*'), 
+      h = c(
+        'f10a_wrkown',
+        'f10b_pdemp'
+        )
+      )
+)[[1]]
+
+
+### F10A - Workers in the entrepreneurial activity is zero
+
+## Number of workers in the entrepreneurial activity should not be zero.
+(
+  cv_f10_persons <- section_f1 %>% 
+    filter_at(vars(matches('^f10a_.*'), -matches('_fct$')), all_vars(. == 0)) %>% 
+    select_cv(matches('^f10a_.*'), h = 'f10a_wrkown')
+)[[1]]
+
+
+### F10C - Total persons worked in the entrepreneurial activity is inconsistent
+
+## Total persons worked in the entrepreneurial activity (F10c) should be consistent to the number of persons worked in the household's entrepreneurial activity (F10a and F10b).
+(
+  cv_f10_persons <- section_f1 %>% 
+    filter(f10a_wrkown + f10b_pdemp != f10c_total) %>% 
+    select_cv(matches('^f10c_.*'), h = 'f10c_total')
+)[[1]]
+
+
+### F11 - Registration of entrepreneurial activity/ies to government agency is missing or not in the valueset
+
+## Registration of entrepreneurial activity/ies to government agency should be in the value set and not missing.
+(
+  cv_f11_government <- section_f1 %>% 
+    filter(!grepl('[A-FX]+', f11_gov)) %>% 
+    select_cv(f11_gov, h = 'f11_gov')
+)[[1]]
