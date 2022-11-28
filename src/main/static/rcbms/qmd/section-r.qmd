@@ -559,10 +559,10 @@ If there is presence of electricity in the dwelling (R12 = 1), the source/s of e
 (
   cv_r13a  <- section_r %>% 
     filter(r12_elctrcty == 1) %>% 
-    filter_at(vars(matches('^r13[a-ez]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
+    filter_at(vars(matches('^r13[a-e]_.*'), -matches('_fct$')), any_vars(!(. %in% c(1, 2)))) %>% 
     select_cv(
       r12_elctrcty,
-      matches('^r13[a-ez]_.*'), 
+      matches('^r13[a-e]_.*'), 
       h = c(
         'r13a_ecmpny',
         'r13b_gnrator',
@@ -597,10 +597,10 @@ If there is presence of electricity in the dwelling (R12 = 1), there should be a
 (
   cv_r13a  <- section_r %>% 
     filter(r12_elctrcty == 1) %>% 
-    filter_at(vars(matches('^r13[a-ez]_.*'), -matches("fct$")), all_vars(. == 2)) %>% 
+    filter_at(vars(matches('^r13[a-e]_.*'), -matches('_fct$')), all_vars(. == 2)) %>% 
     select_cv(
       r12_elctrcty,
-      matches('^r13[a-ez]_.*'), 
+      matches('^r13[a-e]_.*'), 
       h = c(
         'r13a_ecmpny',
         'r13b_gnrator',
@@ -999,10 +999,10 @@ If the household has no electricity in the dwelling (R12 = 2), sources of electr
 (
   cv_r12vs13  <- section_r %>% 
     filter(r12_elctrcty == 2) %>% 
-    filter_at(vars(matches('^r13[a-ez]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
+    filter_at(vars(matches('^r13[a-e]_.*'), -matches('fct$')), any_vars(!is.na(.))) %>% 
     select_cv(
       r12_elctrcty,
-      matches('^r13[a-ez]_.*'), 
+      matches('^r13[a-e]_.*'), 
       h = c(
         'r13a_ecmpny',
         'r13b_gnrator',

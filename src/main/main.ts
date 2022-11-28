@@ -169,9 +169,6 @@ const mountedPayload = () => {
 
   const source = rConfig().use_pilot_data ? '2021-pilot-cbms' : '2022-cbms'
 
-  console.log(textDataCheck(source, rConfig().run_after_edit));
-  
-
   return {
     rConfig: rConfig(), 
     exportLog: exportLogCheck().data,

@@ -118,10 +118,12 @@ exp_case_wise <- do.call('rbind', validation_data) %>%
 if(Sys.info()[1] == 'Darwin' || Sys.info()[1] == 'darwin') {
   justification_path <- './references/justifications/'
 } else {
-  justification_path <- config$paths$justifications
+  justification_path <- config$paths$justification_path
 }
 
-j_files <- paste0(justification_path, '\\', list.files(justification_path))
+j_files <- as_tibble(paste0(justification_path, '\\', list.files(justification_path))) %>% 
+  filter(grepl('\\.xlsx$', value, ignore.case = T)) %>% 
+  pull(value)
 
 if(config$include_justifiction & dir.exists(justification_path) & length(j_files) > 0) {
   
@@ -182,10 +184,11 @@ if(config$include_justifiction & dir.exists(justification_path) & length(j_files
 } else {
   
   exp_case_wise <- exp_case_wise %>% 
+    distinct() %>%
     mutate(
       Status = NA,
       'Remarks / Justification' = NA
-    )
+    ) 
 }
 
 

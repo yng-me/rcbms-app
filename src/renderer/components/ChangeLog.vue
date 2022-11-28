@@ -7,6 +7,41 @@ import ChangeLogItem from './ChangeLogItem.vue';
 
 const changeLogs = reactive([
     {
+        version: 'RCBMS v1.0.8',
+        releaseDate: '28 November 2022',
+        logs: [
+            {
+                feature: 'DPS Manual', 
+                type: 'news',
+                info: [
+                    'The 2022 CBMS Data Processing System (DPS) Manual is now available in <span class="font-semibold">CBMS Resources</span> at <a href="https://cbmsr.app/dps/" target="_blank" class="font-semibold text-teal-600">https://cbmsr.app/dps</a>'
+                ]
+            },
+            {
+                feature: 'Allow mutliple justification files from different DPs',
+                type: 'enhancement',
+                info: [
+                    'Instead on one (1) Excel justification file, you can now load multiple files.',
+                    'Make sure to save all justification files in one folder and set the correct path from the Settings menu > Configuration tab > Justification file path.'
+                ]
+            },
+            {
+                feature: 'Export Logs reset',
+                type: 'bug fix',
+                info: [
+                    'Export logs will now be appended everytime you generate cases with inconsistencies.'
+                ]
+            },
+            { 
+                feature: 'R Script 2021 Pilot CBMS',
+                type: 'enhancement',
+                // info: [
+                //     'Removed Priority C and add '
+                // ]
+            }
+        ]  
+    },
+    {
         version: 'RCBMS v1.0.7',
         releaseDate: '23 November 2022',
         logs: [ 
