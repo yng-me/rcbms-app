@@ -169,9 +169,6 @@ const mountedPayload = () => {
 
   const source = rConfig().use_pilot_data ? '2021-pilot-cbms' : '2022-cbms'
 
-  console.log(textDataCheck(source, rConfig().run_after_edit));
-  
-
   return {
     rConfig: rConfig(), 
     exportLog: exportLogCheck().data,
@@ -219,18 +216,13 @@ ipcMain.on('update-r-config', (event, data) => {
   })
 })
 
-ipcMain.on('check-text-data', (event, data) => {
-  console.log(data);
-  
+ipcMain.on('check-text-data', (event, data) => {  
   event.reply('check-text-data', textDataCheck(data.source, data.mode))
 })
 
 ipcMain.on('configure-path', (event, payload) => {
   dialog.showOpenDialog({properties: [payload.property] }).then((response : any) => {
     if (!response.canceled) {
-      // console.log(payload);
-      console.log(response.filePaths[0]);
-
       const newPath = response.filePaths[0];
       const updatedConfig = { 
         ...rConfig(), 
@@ -387,6 +379,8 @@ ipcMain.on('arrow', (event, request) => {
     sp.on('close', (code) => {
      if(code == 0) {
        const payload = JSON.parse(df)
+       console.log(payload);
+       
        event.reply('return-arrow', {
          data: payload,
          script
