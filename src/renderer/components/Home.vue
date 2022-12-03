@@ -2,7 +2,7 @@
 
 import { ipcRenderer } from '../electron'
 import { onMounted, reactive, ref, onBeforeMount, computed, watch } from 'vue';
-import { RConfig, UpdateConfig } from '../utils/types'
+import { RConfig, UpdateConfig, CSDBEList } from '../utils/types'
 
 // @ts-ignore
 import Dashboard from './Dashboard.vue';
@@ -28,9 +28,9 @@ const g = 'b13c4cbb792ef13d5a60a916'
 const doneCopyingResources = ref(false)
 
 interface IData  { 
-  errors: any
+  errors: { message: string, url?: string }[]
   exportLog: any,
-  csdbeList: any
+  csdbeList: CSDBEList[]
 }
 
 const data = reactive<IData>({
@@ -89,9 +89,10 @@ ipcRenderer.on('mounted', (event, payload) => {
   rConfig.use_raw_data_from_tablet = payload.rConfig.use_raw_data_from_tablet
   rConfig.use_pilot_data = payload.rConfig.use_pilot_data
 
-  data.csdbeList = payload.csdbeList
+  const csdbeList = payload.csdbeList as CSDBEList[] 
+  data.csdbeList = csdbeList
 
-  selectedCSDBE.value = payload.csdbeList.map((el : any) => el.file)
+  selectedCSDBE.value = csdbeList.length ? csdbeList.map(el => el.file) : []
 
   data.errors = []
 
@@ -115,7 +116,7 @@ ipcRenderer.on('mounted', (event, payload) => {
   checks.textDataCheck = textDataCheck
   checks.withDownloadedData = { ...withDownloadedData, label: 'Before-edit data folder', property: 'openDirectory' }
   checks.withEditedData = { ...withEditedData, label: 'After-edit data folder', property: 'openDirectory' }
-  checks.withJustification = { ...payload.withJustification, label: 'Justification file path', property: 'openDirectory' }
+  checks.withJustification = { ...payload.withJustification, label: 'Justification file path', property: 'openFile' }
   checks.withOutputFolder = { ...payload.withOutputFolder, label: 'Output folder location', property: 'openDirectory' }
   checks.withRInstalled = { ...payload.withRInstalled, label : 'R installation path', property: 'openFile' }
   checks.withRStudioInstalled = { ...payload.withRStudioInstalled, label: 'RStudio installation path', property: 'openFile' }
@@ -152,7 +153,7 @@ ipcRenderer.on('mounted', (event, payload) => {
       url: 'https://www.csprousers.org/downloads/cspro/cspro7.7.3.exe'
     })
   }
-  
+
 })
 
 const updateConfig = (event : UpdateConfig) => {
@@ -191,10 +192,7 @@ const loadData = () => {
 ipcRenderer.on('data-loaded', (event, payload) => { 
   if(!payload.error) {
     const source = rConfig.use_pilot_data ? '2021-pilot-cbms' : '2022-cbms'
-    ipcRenderer.send('check-text-data', {
-      source,
-      mode: rConfig.run_after_edit
-    })
+    ipcRenderer.send('check-text-data', source)
   } else {
     setTimeout(() => {
       loading.value = false
@@ -338,12 +336,12 @@ const showLoadData = () => {
   }, 1000);
 }
 
-const selectedCSDBE = ref([])
+const selectedCSDBE = ref<string[]>([])
 const selectAllCSDBE = ref(true)
 
 watch(selectAllCSDBE, (newValue) => {
   if(newValue === true) {
-    selectedCSDBE.value = data.csdbeList.map((el : any) => el.file)
+    selectedCSDBE.value = data.csdbeList.map(el => el.file)
   }
   
   if(newValue === false && selectedCSDBE.value.length === data.csdbeList.length) { 

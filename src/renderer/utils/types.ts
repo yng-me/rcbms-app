@@ -61,3 +61,10 @@ export interface SavedTables {
     script?: string
     dataTable: any
 }
+
+export interface CSDBEList {
+    file: string, 
+    cityMun: string, 
+    brgy: string, 
+    ean: string
+}
