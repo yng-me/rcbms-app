@@ -46,8 +46,8 @@ export const updateRCBMS = () => {
             join('qmd', 'cross-section.qmd'),
             join('references', 'export_settings.xlsx'),
             join('references', 'HPQF2_DICT.dcf'),
+            join('scripts', '2021-pilot-cbms'),
             'utils',
-            'scripts',
         ]
 
         applyUpdate(filesToUpdate)
@@ -108,7 +108,7 @@ export const updateRCBMS = () => {
         seen = false
         applyUpdate([
             'utils',
-            'scripts',
+            join('scripts', '2021-pilot-cbms'),
             join('qmd', 'section-r.qmd'),
         ])
     }

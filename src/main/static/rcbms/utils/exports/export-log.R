@@ -1,5 +1,6 @@
 get_df <- function(df) eval(as.name(df)) %>% tibble()
-ref_exists <- file.exists('./output/Export Logs.xlsx')
+logs_path <- paste0(config$paths$output_path, '/Export Logs.xlsx')
+ref_exists <- file.exists(logs_path)
 
 ref_as_of_date <- paste0(
   sprintf('%02d', day(today())), ' ', 
@@ -15,7 +16,7 @@ ref_cv_all <- exp_eval_summary %>%
 
 if(ref_exists == TRUE) {
   
-  ref_cv_prev <- read.xlsx('./output/Export Logs.xlsx') %>% 
+  ref_cv_prev <- read.xlsx(logs_path) %>% 
     tibble() %>% 
     rename_all(~ str_replace_all(., '\\.', ' ')) 
   
@@ -54,6 +55,4 @@ if(ref_exists == TRUE) {
   addStyle(wl, ref_as_of_date, createStyle(fgFill = '#fffbed'), 1:nr, ncol(ref_cv_combined), T, T)
 }
 
-saveWorkbook(wl, './output/Export Logs.xlsx', overwrite = T)
-
-
+saveWorkbook(wl, logs_path, overwrite = T)
