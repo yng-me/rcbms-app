@@ -42,11 +42,12 @@ export const updateRCBMS = () => {
             join('qmd', 'section-g.qmd'),
             join('qmd', 'section-m.qmd'),
             join('qmd', 'section-l.qmd'),
+            join('qmd', 'section-r.qmd'),
             join('qmd', 'cross-section.qmd'),
             join('references', 'export_settings.xlsx'),
             join('references', 'HPQF2_DICT.dcf'),
+            join('scripts', '2021-pilot-cbms'),
             'utils',
-            'scripts',
         ]
 
         applyUpdate(filesToUpdate)
@@ -91,7 +92,6 @@ export const updateRCBMS = () => {
     }
 
     if(version == '1.0.5') {
-        seen = false
         applyUpdate([
             'utils',
             join('qmd', 'section-g.qmd'),
@@ -99,9 +99,17 @@ export const updateRCBMS = () => {
     }
 
     if(version == '1.0.6') {
-        seen = false
         applyUpdate([
             join('utils', 'exports', 'export-config.R'),
+        ])
+    }
+
+    if(version == '1.0.7') {
+        seen = false
+        applyUpdate([
+            'utils',
+            join('scripts', '2021-pilot-cbms'),
+            join('qmd', 'section-r.qmd'),
         ])
     }
 

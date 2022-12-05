@@ -1,0 +1,516 @@
+# Section C {.unnumbered}
+
+section_c <- hpq$section_c %>% collect()
+
+### C01 - age is \< 5 but with response in literacy and HGC
+
+## Household members age less than 5 years old should not have responses in C01 and C02. Either verify the age or delete the entries in C01 and C02.
+(
+  cv_c01_literacy_age <- section_c %>% 
+    filter(age < 5) %>% 
+    filter_at(vars(matches('^c0[1-2]_.*'), -matches('fct$')), any_vars(!is.na(.))) %>% 
+    select_cv(
+      age, 
+      matches('^c0[1-2]_.*'),
+      h = c(
+        'c01_read',
+        'c02_hgclevel',
+        'c02_hgc',
+        'c02_hgc_specify'
+        )
+      )
+)[[1]]
+
+### C01 - Response in literacy is NOT in the value set OR missing
+
+## Response in literacy is either '1' for Yes or '2' for No only. Either verify the age or the literacy.
+(
+  cv_c01_literacy_age_na <- section_c %>% 
+    filter(age >= 5, !(c01_read %in% c(1, 2))) %>%
+    select_cv(age, c01_read, c02_hgc, c02_hgc_specify, c02_hgc_fct, h = 'c01_read')
+)[[1]]
+
+
+### C02 - HGC level and/or HGC is/are missing
+
+## HGC level and HGC should not be missing. Either check the HGC for HGC level, or verify HGC.
+(
+  cv_c02_hgc_blank <- section_c %>% 
+    filter(age >= 5) %>% 
+    filter_at(vars(matches('^c02_.*'), -matches('(specify|fct)$')), any_vars(is.na(.))) %>% 
+    select_cv(
+      age, 
+      matches('^c02_.*'), 
+      h = c(
+        'c02_hgclevel',
+        'c02_hgc',
+        'c02_hgc_specify'
+        )
+      )
+)[[1]]
+
+### C02 - HGC level is NOT in the value set
+
+## You may check HGC for the HGC level. Otherwise, verify HGC level and HGC.
+(
+  cv_c02_hgc_age_NOT_valueset <- section_c %>% 
+    filter(age >= 5, !(c02_hgclevel %in% c(0:8))) %>%
+    select_cv(age, c02_hgclevel, c02_hgc, h = 'c02_hgclevel')
+)[[1]]
+
+
+### C02 - HGC level is NOT equal to first digit of HGC
+
+## HGC level should be equal to first digit of HGC. You may check HGC for the HGC level. Otherwise, verify HGC level and HGC.
+(
+  cv_c02_hgclevel_not_equal_hgc <- section_c %>% 
+    filter(!is.na(c02_hgc)) %>% 
+    mutate(
+      c02_hgc1st = if_else(nchar(c02_hgc) == 5, as.integer(substr(c02_hgc, 1, 1)), 0L),
+      check_c02_hgclevelhgc1st = if_else(c02_hgclevel == c02_hgc1st, 1, 0)
+    ) %>% 
+    filter(age >= 5, check_c02_hgclevelhgc1st == 0) %>% 
+    select_cv(age, c02_hgclevel, c02_hgc, h = 'c02_hgclevel')
+)[[1]]
+
+
+### C02 - At least high school graduate but not literate
+
+## Verify literacy and HGC.
+(
+  cv_c02_hgc_literacy <- section_c %>% 
+    filter(age >= 5, c01_read == 2, c02_hgc >= 24011 | c02_hgclevel >= 2) %>%
+    select_cv(c01_read, c02_hgc, h = 'c02_hgc')
+)[[1]]
+
+
+### C02 - HGC vs age
+
+## Either verify age or HGC.
+(
+  cv_c02_hgc_age_cross <- section_c %>% 
+    filter(
+      (age == 5 & c02_hgc > 2000) |
+      (age == 6 & c02_hgc > 10011) |
+      (age == 7 & c02_hgc > 10012) |
+      (age == 8 & c02_hgc > 10013) |
+      (age == 9 & c02_hgc > 10014) |
+      (age == 10 & c02_hgc > 10015) |
+      (age == 11 & c02_hgc > 10018) |
+      (age == 12 & c02_hgc > 24011) |
+      (age == 13 & c02_hgc > 24012) |
+      (age == 14 & c02_hgc > 24013) |
+      (age == 15 & c02_hgc > 24015) |
+      (age == 16 & (c02_hgc > 34011 & c02_hgc < 34021)) |   #academic track
+      (age == 16 & (c02_hgc > 34021 & c02_hgc < 34031)) |   #arts & design track
+      (age == 16 & (c02_hgc > 34031 & c02_hgc < 35011)) |   #sports track
+      (age == 16 & (c02_hgc > 35011)) |                     #tvet track
+      (age == 17 & (c02_hgc > 34018 & c02_hgc < 34023)) |   #academic track
+      (age == 17 & (c02_hgc > 34028 & c02_hgc < 34033)) |   #arts & design track
+      (age == 17 & (c02_hgc > 34033 & c02_hgc < 35013)) |   #sports track
+      (age == 17 & c02_hgc > 35018) |                       #tvet track
+      (age == 18 & c02_hgc > 60001) |
+      (age == 19 & c02_hgc > 60002) |  
+      (age == 20 & c02_hgc > 60003) |
+      (age == 21 & c02_hgc > 69999) |
+      (age == 22 & c02_hgc > 70010) |
+      (age == 23 & c02_hgc > 79999) |
+      (age == 24 & c02_hgc > 80010) |
+      (age == 25 & c02_hgc > 89999)
+    ) %>%
+    select_cv(
+      age, 
+      c02_hgclevel, 
+      c02_hgc,
+      h = c(
+        'age',
+        'c02_hgclevel',
+        'c02_hgc'
+        )
+      )
+)[[1]]
+
+
+### C02 - Age \< 22 but HGC is 10017
+
+## Either verify age or HGC.
+(
+  cv_c02_hgc_10017 <- section_c %>% 
+    filter(age < 22, c02_hgc == 10017) %>%
+    select_cv(age, c02_hgclevel, c02_hgc, c05_curgradelevel, c05_curgrade, h = 'c02_hgc')
+)[[1]]
+
+
+### C03 - Age is NOT 3 to 24 but have response in c03 to c06
+
+## Household members not aged 3-24 years old should not have responses in C03 and C06. Either verify the age or delete the entries in C03 to C06.
+(
+  cv_c03_schoolattendance_age <- section_c %>%
+    filter(!(age %in% c(3:24))) %>% 
+    filter_at(vars(matches('^c0[3-6]_.*'), -matches('fct$')), any_vars(!is.na(.))) %>%
+    select_cv(
+      age, 
+      matches('^c0[3-6]_.*'),
+      h = c(
+        'c03_curattend',
+        'c04_cursch',
+        'c05_curgradelevel',
+        'c05_curgrade',
+        'c06_notcursch'
+        )
+      )
+)[[1]]
+
+
+### C03 - Reponse in school attendance is NOT in the valueset or missing
+
+## Response in school attendance is either '1' for Yes or '2' for No only. Either verify the age or the school attendance.
+(
+  cv_c03_schoolattendance_NOT_valueset <- section_c %>% 
+    filter(age %in% c(3:24), !(c03_curattend %in% c(1, 2))) %>%
+    select_cv(
+      age, 
+      matches('^c0[3-6]_.*'),
+      h = c(
+        'c03_curattend',
+        'c04_cursch',
+        'c05_curgradelevel',
+        'c05_curgrade',
+        'c06_notcursch'
+        )
+      )
+)[[1]]
+
+
+### C04 - Currently attending but WITHOUT response in school type
+
+## Verify school type: public, private, or homeschool.
+(
+  cv_c04_school_age_na <- section_c %>% 
+    filter(age %in% c(3:24), c03_curattend == 1, !(c04_cursch %in% c(1:3))) %>%
+    select_cv(age, c03_curattend, c04_cursch, h = 'c04_cursch')
+)[[1]]
+
+
+### C04 - Not currently attending but with response in school type
+
+## Verify if the household member is indeed not currently attending school.
+(
+  cv_c04_school_age_notna <- section_c %>% 
+    filter(age %in% c(3:24), c03_curattend == 2, !is.na(c04_cursch)) %>%
+    select_cv(age, c03_curattend, c04_cursch, h = 'c04_cursch')
+)[[1]]
+
+
+### C05 - Currently attending but NO response in current grade level and/or current grade
+
+## Verify if the household member is indeed currently attending school. Otherwise, verify current grade level and/or current grade.
+(
+  cv_c05_curgrade_blank <- section_c %>% 
+    filter(age %in% c(3:24), c03_curattend == 1, !(c05_curgradelevel %in% c(0:8)) | is.na(c05_curgrade)) %>%
+    select_cv(
+      age, 
+      c03_curattend, 
+      c05_curgradelevel, 
+      c05_curgrade, 
+      h = c(
+        'c05_curgrade',
+        'c05_curgradelevel'
+        )
+      )
+)[[1]]
+
+
+### C05 - Current grade level is NOT equal to first digit of current grade
+
+## Current grade level should be equal to first digit of current grade. You may check current grade for the current grade level. Otherwise, verify current grade level and current grade.
+(
+  cv_c05_curgrade_NOT_equal <- section_c %>%
+    filter(age %in% c(3:24), c03_curattend == 1, !is.na(c05_curgradelevel)) %>% 
+    mutate(check_specify = if_else(nchar(c05_curgrade) == 5, as.integer(substr(c05_curgrade, 1, 1)), 0L)) %>% 
+    filter(check_specify != c05_curgradelevel) %>% 
+    select_cv(
+      age, 
+      c03_curattend, 
+      c05_curgradelevel, 
+      c05_curgrade, 
+      h = c(
+        'c05_curgrade',
+        'c05_curgradelevel'
+        )
+      )
+)[[1]]
+
+
+### C05 - Not currently attending but with response in current grade
+
+## Verify if the household member is indeed not currently attending school.
+(
+  cv_c05_curgrade_age_NOTna <- section_c %>% 
+    filter(age %in% c(3:24), c03_curattend == 2, !is.na(c05_curgradelevel) | !is.na(c05_curgrade)) %>%
+    select_cv(
+      age, 
+      c03_curattend, 
+      c05_curgradelevel, 
+      c05_curgrade, 
+      h = c(
+        'c05_curgrade',
+        'c05_curgradelevel'
+        )
+      )
+)[[1]]
+
+
+### C05 - C05 - HGC >= Current grade
+
+## Verify HGC and current grade.
+(
+  cv_c05_curgrade_equal_hgc <- section_c %>%
+    filter(age %in% c(3:24), c02_hgc >= c05_curgrade) %>%
+    select_cv(
+      age, 
+      c02_hgc, 
+      c05_curgrade, 
+      h = c(
+       'c02_hgc',
+       'c05_curgrade'
+       )
+      )
+)[[1]]
+
+
+### C05 - Current grade vs age
+
+## Verify age and current grade.
+(
+  cv_c05_curgrade_age_cross <- section_c %>% 
+    filter(
+      (age == 3 & c05_curgrade > 1000) |
+      (age == 4 & c05_curgrade > 2000) |
+      (age == 5 & c05_curgrade > 10011) |
+      (age == 6 & c05_curgrade > 10012) |
+      (age == 7 & c05_curgrade > 10013) |
+      (age == 8 & c05_curgrade > 10014) |
+      (age == 9 & c05_curgrade > 10015) |
+      (age == 10 & c05_curgrade > 10016) |
+      (age == 11 & c05_curgrade > 24011) |
+      (age == 12 & c05_curgrade > 24012) |
+      (age == 13 & c05_curgrade > 24013) |
+      (age == 14 & c05_curgrade > 24014) |
+      (age == 15 & (c05_curgrade > 34011 & c05_curgrade < 34021)) |   #academic track
+      (age == 15 & (c05_curgrade > 34021 & c05_curgrade < 34031)) |   #arts & design track
+      (age == 15 & (c05_curgrade > 34031 & c05_curgrade < 35011)) |   #sports track
+      (age == 15 & (c05_curgrade > 35011)) |                          #tvet track
+      (age == 16 & (c05_curgrade > 34012 & c05_curgrade < 34021)) |   #academic track
+      (age == 16 & (c05_curgrade > 34022 & c05_curgrade < 34031)) |   #arts & design track
+      (age == 16 & (c05_curgrade > 34032 & c05_curgrade < 35011)) |   #sports track
+      (age == 16 & c05_curgrade > 35012) |                            #tvet track
+      (age == 17 & c05_curgrade > 60001) |
+      (age == 18 & c05_curgrade > 60002) |  
+      (age == 19 & c05_curgrade > 60003) |
+      (age == 20 & c05_curgrade > 60004) |
+      (age == 21 & c05_curgrade > 70010) |
+      (age == 23 & c05_curgrade > 80010)
+    ) %>%
+    select_cv(age, c02_hgc, c05_curgrade, h = 'c05_curgrade')
+)[[1]]
+
+
+### C06 - Currently attending but with response in reason for not attending school
+
+## Verify if the household member is indeed currently attending school.
+(
+  cv_c06_reasonNOTattend_NOT_na <- section_c %>% 
+    filter(age %in% c(3:24), c03_curattend == 1, !is.na(c06_notcursch)) %>%
+    select_cv(age, c03_curattend, c06_notcursch, h = 'c06_notcursch')
+)[[1]]
+
+
+### C06 - Reason for not attending school is NOT in the value set or missing
+
+## Reason for not attending school should be within the value set.
+(
+  cv_c06_reasonNOTattend_NOT_valueset <- section_c %>% 
+    filter(age %in% c(3:24), c03_curattend == 2, !(c06_notcursch %in% c(0:17, 99))) %>%
+    select_cv(age, c03_curattend, c06_notcursch, h = 'c06_notcursch')
+)[[1]]
+
+
+### C06 - Aged 3 to 12 whose reason for not attending school is due to pregnancy
+
+## Verify if the reason for not attending school is indeed pregnancy for household members aged 3 to 12 years old. Otherwise, verify age.
+(
+  cv_c06_reasonNOTattend_pregnancy <- section_c %>% 
+    filter(age %in% c(3:12), c03_curattend == 2, c06_notcursch == 4) %>%
+    select_cv(age, c03_curattend, c06_notcursch, h = 'c06_notcursch')
+)[[1]]
+
+
+### C06 - Aged 3 to 12 whose reason for not attending school is due to marriage
+
+## Verify if the reason for not attending school is indeed marriage for household members aged 3 to 12 years old. Otherwise, verify age.
+(
+  cv_c06_reasonNOTattend_marriage <- section_c %>% 
+    filter(age %in% c(3:12), c03_curattend == 2, c06_notcursch == 5) %>%
+    select_cv(age, c03_curattend, c06_notcursch, h = 'c06_notcursch')
+)[[1]]
+
+
+### C06 - Aged 3 to 17 whose reason for not attending school is due to employment
+
+## Verify if the reason for not attending school is indeed employment for household members aged 3 to 17 years old. Otherwise, verify age.
+(
+  cv_c06_reasonNOTattend_employment <- section_c %>% 
+    filter(age %in% c(3:17), c03_curattend == 2, c06_notcursch == 7) %>%
+    select_cv(age, c03_curattend, c06_notcursch, h = 'c06_notcursch')
+)[[1]]
+
+
+### C06 - Aged 3 to 17 whose reason for not attending school is finished schooling
+
+## Verify if the reason for not attending school is indeed finished schooling for household members aged 3 to 17 years old. Otherwise, verify age.
+(
+  cv_c06_reasonNOTattend_finished_school <- section_c %>% 
+    filter(age %in% c(3:17), c03_curattend == 2, c06_notcursch == 8) %>%
+    select_cv(age, c03_curattend, c06_notcursch, h = 'c06_notcursch')
+)[[1]]
+
+
+### C06 - Aged 3 to 17 whose reason for not attending school is looking for work
+
+## Verify if the reason for not attending school is indeed looking for work for household members aged 3 to 17 years old. Otherwise, verify age.
+(
+  cv_c06_reasonNOTattend_looking_for_work <- section_c %>%
+    filter(age %in% c(3:17), c03_curattend == 2, c06_notcursch == 9) %>%
+    select_cv(age, c03_curattend, c06_notcursch, h = 'c06_notcursch')
+)[[1]]
+
+
+### C06 - Aged 6 to 24 whose reason for not attending school is too young to go to school
+
+## Verify if the reason for not attending school is indeed too young to go to school for household members aged 6 to 24 years old. Otherwise, verify age.
+(
+  cv_c06_reasonNOTattend_too_young <- section_c %>%
+    filter(age %in% c(6:24), c03_curattend == 2, c06_notcursch == 12) %>%
+    select_cv(age, c03_curattend, c06_notcursch, h = 'c06_notcursch')
+)[[1]]
+
+
+### C06 - Male and aged 3 to 24 whose reason for not attending school is pregnancy
+
+## Verify if the reason for not attending school is indeed pregnancy for MALE household members aged 3 to 24 years old. Otherwise, verify sex.
+(
+  cv_c06_reasonNOTattend_male_pregnant <- section_c %>%
+    filter(age %in% c(3:24), a05_sex == 1, c03_curattend == 2, c06_notcursch == 4) %>%
+    select_cv(age, a05_sex, c03_curattend, c06_notcursch, h = 'c06_notcursch')
+)[[1]]
+
+
+### C06 - Answer is 99 but not specified
+
+##  panel-tabset
+#### Cases with inconsistency
+
+## If responded 99 to C06 (reason for not attending school), answer must be specified.
+(
+  cv_c06_other_missing <- section_c %>% 
+    filter(c06_notcursch == 99, is.na(c06a_notcursch)) %>% 
+    select_cv(c06_notcursch_fct, c06a_notcursch, h = 'c06a_notcursch')
+)[[1]]
+
+
+#### Other responses
+
+## Recode answer for 'Others, specify' if necessary.
+(
+  cv_c06_other <- section_c %>% 
+    filter(c06_notcursch == 99, !is.na(c06a_notcursch)) %>% 
+    select_cv(c06_notcursch_fct, c06a_notcursch)
+)[[1]]
+
+
+### C07 - Age is \< 15 but with response in C07 to C09
+
+## Household members age less than 15 years old should not have responses in C07 to C09. Either verify the age or delete the entries in C07 to C09.
+(
+  cv_c07_gradtech_age <- section_c %>% 
+    filter(age < 15) %>% 
+    filter_at(vars(matches('^c0[7-9]_.*'), -matches('fct$')), any_vars(!is.na(.))) %>%
+    select_cv(
+      age, 
+      matches('^c0[7-9]_.*'), 
+      h = c(
+        'c07_gradtech',
+        'c08_trnskl',
+        'c09_skldev',
+        'c09_skldev1',
+        'c09_skldev2',
+        'c09_skldev3',
+        'c09_skldev4'
+        )
+      )
+)[[1]]
+
+
+### C07 - Response if graduate of TVET course is NOT in the valueset OR missing
+
+## Response in question asking if the household member is a graduate of TVET course is either '1' for Yes or '2' for No only. Either verify the age or whether the household member is indeed a graduate of TVET course.
+(
+  cv_c07_gradtech_blankc07 <- section_c %>% 
+    filter(age >= 15, !(c07_gradtech %in% c(1, 2))) %>%
+    select_cv(age, c07_gradtech, h = 'c07_gradtech')
+)[[1]]
+
+
+### C08 - Currently attending TVET for skill development is NOT in the valueset OR missing
+
+## Response in currently attending TVET for skill development is either '1' for Yes or '2' for No only. Either verify the age or the household member is indeed currently attending TVET for skill development.
+(
+  cv_c08_trnskl_NOT_valueset <- section_c %>%
+    filter(age >= 15, !(c08_trnskl %in% c(1, 2))) %>%
+    select_cv(age, c08_trnskl, h = 'c08_trnskl')
+)[[1]]
+
+
+### C09 - C07 OR C08 has answer, but response in C09 is NOT in the valueset OR missing
+
+## Verify the TVET course/s attended currently and/or attended in the past.
+(
+  cv_c09_skldev_NOT_valueset <-section_c %>%
+    filter(c07_gradtech == 1 | c08_trnskl == 1) %>%
+    filter_at(vars(matches('^c09_.*'), -matches('_fct$')), all_vars(!(. %in% c(1:277, 999)))) %>%  
+    select_cv(
+      c07_gradtech, 
+      c08_trnskl, 
+      matches('^c09_.*'), 
+      h = c(
+        'c09_skldev',
+        'c09_skldev1',
+        'c09_skldev2',
+        'c09_skldev3',
+        'c09_skldev4'
+        )
+      )
+)[[1]]
+
+
+### C09 - NOT graduate or currently not attending, but have skill dev training in C09
+
+## Verify if the household member is indeed not a graduate or currently not attending TVET for skill development.
+(
+  cv_c09_skldev_NOT_na <-section_c %>%
+    filter(c07_gradtech == 2, c08_trnskl == 2) %>%
+    filter_at(vars(matches('^c09_.*'), -matches('_fct$')), any_vars(!is.na(.))) %>%  
+    select_cv(
+      c07_gradtech, 
+      c08_trnskl, 
+      matches('^c09_.*'), 
+      h = c(
+        'c09_skldev',
+        'c09_skldev1',
+        'c09_skldev2',
+        'c09_skldev3',
+        'c09_skldev4'
+        )
+      )
+)[[1]]

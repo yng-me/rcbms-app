@@ -4,7 +4,8 @@ import { ref } from "@vue/reactivity"
 const bg : any = {
     'feature': 'bg-teal-600',
     'bug fix': 'bg-red-600',
-    'enhancement': 'bg-orange-600'
+    'enhancement': 'bg-orange-600',
+    'news': 'bg-cyan-600'
 }
 
 defineProps(['item', 'order'])

@@ -1,0 +1,311 @@
+
+# Section D {.unnumbered}
+
+section_d <- hpq$section_d %>% 
+  select(-matches('specify')) %>% 
+  collect()
+
+### Below 15 years old but have entry
+
+## If the household member is below 15 years old, this section should have no answer.
+(
+  cv_d_below15 <- section_d %>% 
+    filter(age < 15) %>% 
+    filter_at(vars(matches('^d\\d{2}.*'), -matches('fct$')), any_vars(!is.na(.))) %>% 
+    select_cv(matches('^d\\d{2}.*'))
+)[[1]]
+
+
+### D01 - Voter registration status is blank or invalid
+
+## Voter registration status should not be blank and should be in the value set.
+(
+  cv_d01_2_nitvs <- section_d %>% 
+    filter(age >= 15, !(d01_regvoter %in% c(1, 2))) %>% 
+    select_cv(age, d01_regvoter, h = 'd01_regvoter')
+)[[1]]
+
+
+### D02 - Vote in the last election is blank or invalid
+
+## Vote in the last election should not be blank and should be in the value set.
+(
+  cv_d02_1_haveentry <- section_d %>% 
+    filter(age >= 15, d01_regvoter == 2, !is.na(d02_votele)) %>% 
+    select_cv(age, d01_regvoter, d02_votele, h = 'd02_votele')
+)[[1]]
+
+
+### D02 - Vote in the last election is blank or invalid
+
+## Vote in the last election should not be blank and should be in the value set.
+(
+  cv_d02_2_nitvs <- section_d %>% 
+    filter(age >= 15, d01_regvoter == 1, !(d02_votele %in% c(1, 2))) %>% 
+    select_cv(age, d01_regvoter, d02_votele, h = 'd02_votele')
+)[[1]]
+
+
+### D03 - Answer in B06 is OF but have entry in volunteerism 
+
+## Must skip volunteerism questions if the answer in b06 is overseas Filipinos.
+(
+  cv_d_OFW <- section_d %>%
+  filter(age < 15 | b06_ofi %in% c(1:3, 6), !is.na(d03_sptime)) %>% 
+  select_cv(age, b06_ofi, d03_sptime, h = c('b06_ofi','d03_sptime'))
+)[[1]]
+
+
+
+### D03 - Volunteering in the past month is blank/invalid
+
+## Volunteering in the past month should not be blank and should be in the value set.
+(
+  cv_d03_1_nitvs <- section_d %>% 
+    filter(age >= 15, b06_ofi %in% c(4, 5, 7), !(d03_sptime %in% c(1, 2))) %>% 
+    select_cv(age, d03_sptime, h = 'd03_sptime')
+)[[1]]
+
+
+### D04 - Answer in D03 (Volunteering in the past month) is No, but have entry
+
+## If the answer in answer in D03 (Volunteering in the past month) is No, (D04) Beneficiary of help provided in the past month must be blank
+(
+  cv_d04_1_haveentry <- section_d %>% 
+    filter(age >= 15, b06_ofi %in% c(4, 5, 7), d03_sptime == 2, !is.na(d04_provln)) %>% 
+    select_cv(age, b06_ofi, d03_sptime, d04_provln, h = c('d03_sptime','d04_provln'))
+)[[1]]
+
+
+### D04 - Beneficiary of help provided in the past month is blank or invalid
+
+## Beneficiary of help provided in the past month should not be blank and should be in the value set.
+(
+  cv_d04_2_nitvs <- section_d %>% 
+    filter(age >= 15, b06_ofi %in% c(4, 5, 7), d03_sptime == 1, is.na(d04_provln)) %>% 
+    select_cv(age, b06_ofi, d03_sptime, d04_provln, h = 'd04_provln')
+)[[1]]
+
+
+### D05 - Buying, collecting and distributing donated goods in the past month is blank or invalid
+
+## Buying, collecting and distributing donated goods in the past month should not be blank and should be in the value set.
+(
+  cv_d05_nitvs <- section_d %>% 
+    filter(age >= 15, b06_ofi %in% c(4, 5, 7), !(d05_collecting %in% c(1, 2))) %>% 
+    select_cv(age, b06_ofi, d05_collecting, h = 'd05_collecting')
+)[[1]]
+
+
+### D06 - Preparing goods to be donated in the past month is blank or invalid 
+
+## Preparing goods to be donated in the past month should not be blank and should be in the value set.
+(
+  cv_d06_nitvs <- section_d %>% 
+    filter(age >= 15, b06_ofi %in% c(4, 5, 7), !(d06_predonated %in% c(1, 2))) %>% 
+    select_cv(age, b06_ofi, d06_predonated, h = 'd06_predonated')
+)[[1]]
+
+
+### D07 - All 'NO' in D05 and D06 but have entry
+
+## If the answer in D05 (Buying, collecting and distributing donated goods in the past month)and D06 (Preparing goods to be donated in the past month) is NO, must skip this data item
+(
+  cv_d07_haveentry <- section_d %>% 
+    filter(age >= 15, b06_ofi %in% c(4, 5, 7), d05_collecting == 2, d06_predonated == 2, !is.na(d07_provide)) %>% 
+    select_cv(
+      age, 
+      b06_ofi, 
+      d05_collecting, 
+      d06_predonated, 
+      d07_provide, 
+      h = c(
+        'd05_collecting',
+        'd06_predonated',
+        'd07_provide'
+        )
+      )
+)[[1]]
+
+
+### D07 - Help provide is blank or invalid
+
+## Help provide should not be blank and should be in the value set.
+(
+  cv_d07_haveentry <- section_d %>% 
+    filter(
+      age >= 15, 
+      b06_ofi %in% c(4, 5, 7), 
+      d05_collecting == 1 | d06_predonated == 1, 
+      is.na(d07_provide) | str_trim(d07_provide) == ''
+    ) %>% 
+    select_cv(age, b06_ofi, d05_collecting, d06_predonated, d07_provide, h = 'd07_provide')
+)[[1]]
+
+
+### D08 - Classification of volunteer work is blank or invalid
+
+## Classification of volunteer work should not be blank and should be in the value set.
+(
+  cv_d08_nitvs <- section_d %>%
+    filter(age >= 15, b06_ofi %in% c(4, 5, 7), d05_collecting == 1 | d06_predonated == 1) %>% 
+    filter_at(vars(matches('^d08_psoc\\d{1}$')), all_vars(is.na(.))) %>%
+    select_cv(
+      age, 
+      b06_ofi, 
+      d05_collecting, 
+      d06_predonated, 
+      d11_provide, 
+      matches('^d08_psoc\\d{1}$'), 
+      h = c(
+        'd08_psoc1',
+        'd08_psoc2',
+        'd08_psoc3',
+        'd08_psoc4',
+        'd08_psoc5'
+        )
+      ) 
+)[[1]]
+
+
+### D08 - All NO in D05 and D06 but have entry
+
+## If the answer in D05 (Buying, collecting and distributing donated goods in the past month) and D06 (Preparing goods to be donated in the past month) is NO, must skip this data item
+(
+  cv_d08_nitvs <- section_d %>%
+    filter(age >= 15, b06_ofi %in% c(4, 5, 7), d05_collecting == 2, d06_predonated == 2) %>% 
+    filter_at(vars(matches('^d08_psoc\\d{1}$')), any_vars(!is.na(.) | str_trim(d07_provide) != '' | !is.na(d07_provide))) %>%
+    select_cv(
+      age, 
+      b06_ofi, 
+      d05_collecting, 
+      d06_predonated, 
+      d07_provide, 
+      matches('^d08_psoc\\d{1}$'), 
+      h = c(
+        'd05_collecting',
+        'd06_predonated',
+        'd08_psoc1',
+        'd08_psoc2',
+        'd08_psoc3',
+        'd08_psoc4',
+        'd08_psoc5'
+        )
+      )
+)[[1]]
+
+
+### D09 - Volunteering of at least one hour in the past month is blank or invalid
+
+## Volunteering of at least one hour in the past month should not be blank and should be in the value set.
+(
+  cv_d09_nitvs <- section_d %>% 
+    filter(age >= 15, b06_ofi %in% c(4, 5, 7), d05_collecting == 1 | d06_predonated == 1, !(d09_spone %in% c(1, 2))) %>% 
+    select_cv(age, b06_ofi, d05_collecting, d06_predonated, d09_spone, h = 'd09_spone')
+)[[1]]
+
+
+### D09 - All NO in D05 and D06 but have entry
+
+## If the answer in D05 (Buying, collecting and distributing donated goods in the past month) and D06 (Preparing goods to be donated in the past month) is NO, must skip this data item
+(
+  cv_d09_haveentry <- section_d %>% 
+    filter(age >= 15, b06_ofi %in% c(4, 5, 7), d05_collecting == 2, d06_predonated == 2, !is.na(d09_spone)) %>% 
+    select_cv(age, b06_ofi, d05_collecting, d06_predonated, d09_spone, h = c('d05_collecting','d06_predonated','d09_spone'))
+)[[1]]
+
+
+### D10 - Volunteering in the past 12 months is blank or invalid
+
+## Volunteering in the past 12 months should not be blank and should be in the value set.
+(
+  cv_d10_nitvs <- section_d %>% 
+    filter(age >= 15, b06_ofi %in% c(4, 5, 7), !(d10_sptime %in% c(1, 2))) %>% 
+    select_cv(age, b06_ofi, d10_sptime, h = 'd10_sptime')
+)[[1]]
+
+
+### D11 - No in D10 (Volunteering in the past 12 months) is NO but have entry
+
+## If the answer in D10 (Volunteering in the past 12 months), must skip this item
+(
+  cv_d11_1_haveentry <- section_d %>% 
+    filter(age >= 15, b06_ofi %in% c(4, 5, 7), d10_sptime == 2, !is.na(d11_provide) | str_trim(d11_provide) != '') %>% 
+    select_cv(age, b06_ofi, d10_sptime, d11_provide, h = c('d10_sptime','d11_provide'))
+)[[1]]
+
+
+### D11 - Help provide is blank or not in the value set
+
+## Help provide should not be blank and should be in the value set.
+(
+  cv_d11_1_haveentry <- section_d %>% 
+    filter(
+      age >= 15, 
+      b06_ofi %in% c(4, 5, 7),
+      d10_sptime == 1,
+      is.na(d11_provide) | str_trim(d11_provide) == ''
+    ) %>% 
+    select_cv(age, b06_ofi, d10_sptime, d11_provide, h = 'd11_provide')
+)[[1]]
+
+
+### D12 - Classification of volunteer work is blank or invalid
+
+## Classification of volunteer work should not be blank or not in the value set if have answer in D11 (Help provide) 
+(
+  cv_d12_1_haveentry <- section_d %>% 
+    filter(age >= 15, b06_ofi %in% c(4, 5, 7), d10_sptime == 1) %>% 
+    filter_at(vars(matches('^d12_psoc\\d{1}$')), all_vars(is.na(.))) %>%
+    select_cv(
+      age, 
+      b06_ofi, 
+      d10_sptime, 
+      d11_provide, 
+      matches('^d12_psoc\\d{1}$'), 
+      h = c(
+        'd11_provide',
+        'd12_psoc1',
+        'd12_psoc2',
+        'd12_psoc3',
+        'd12_psoc4',
+        'd12_psoc5'
+        )
+      )
+)[[1]]
+
+
+### D12 - D10 is 'NO' but D11 or D12 has entry
+
+## Classification of Work should not be blank and should be in the value set.
+(
+  cv_d12_2_haveentry <- section_d %>%
+    filter(age >= 15, b06_ofi %in% c(4, 5, 7), d10_sptime == 2) %>% 
+    filter_at(vars(matches('^d12_psoc\\d{1}$')), any_vars(!is.na(.) | str_trim(d11_provide) != '' | !is.na(d11_provide))) %>%
+    select_cv(
+      age, 
+      b06_ofi, 
+      d10_sptime, 
+      d11_provide, 
+      matches('^d12_psoc\\d{1}$'), 
+      h = c(
+        'd10_sptime',
+        'd11_provide',
+        'd12_psoc1',
+        'd12_psoc2',
+        'd12_psoc3',
+        'd12_psoc4',
+        'd12_psoc5'
+        )
+      )
+)[[1]]
+
+
+### D13 - Barangay/Local government unit volunteer is not in the value set or missing
+
+## Barangay/Local government unit volunteer should not blank and should be in the value set.
+(
+  cv_d13_nitvs <- section_d %>% 
+    filter(age >= 15, b06_ofi %in% c(4, 5, 7), d10_sptime == 1, is.na(d13_blvoluteer)) %>% 
+    select_cv(age, b06_ofi, d10_sptime, d13_blvoluteer, h = 'd13_blvoluteer')
+)[[1]]
