@@ -67,16 +67,18 @@ const df = computed(() => {
                     ? parseInt(a[key]) - parseInt(b[key])
                     : parseInt(b[key]) - parseInt(a[key])
             }
-        })
+        }) 
 
 })
 
 const dfExcludeTotal = computed(() => {
-    return df.value.filter((el : any) => el[sorted.variable] !== 'Total' && el[sorted.variable] !== undefined)
+    const key = sorted.variable ? sorted.variable : props.tableOptions.row
+    return df.value.filter((el : any) => el[key] !== 'Total' && el[key] !== undefined)
 })
 
 const dfTotalOnly = computed(() => {
-    return df.value.filter((el : any) => el[sorted.variable] === 'Total')
+    const key = sorted.variable ? sorted.variable : props.tableOptions.row
+    return df.value.filter((el : any) => el[key] === 'Total')
 })
 
 const tableExist = computed(() => {
@@ -145,7 +147,7 @@ ipcRenderer.on('saved-table', (event, data) => {
 </script>
 
 <template>
-    <div v-if="dfExcludeTotal.length" class="pb-16 bg-gradient-to-t from-white to-gray-100">
+    <div v-if="dataTable.length" class="pb-16 bg-gradient-to-t from-white to-gray-100">
         <!-- <input 
             type="text" v-model="tableTitle" 
             placeholder="Table Title"
@@ -175,10 +177,10 @@ ipcRenderer.on('saved-table', (event, data) => {
                
             </div>
         </div>
-        <button class="hover:text-teal-600">
+        <!-- <button class="hover:text-teal-600">
             <svg class="w-5 h-5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
         </button>
-        
+         -->
         <div class="overflow-auto w-full px-6 pb-24">
             <div class="rounded-xl border overflow-auto w-full">
                 <table class="w-full table-auto overflow-hidden">
@@ -210,23 +212,22 @@ ipcRenderer.on('saved-table', (event, data) => {
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.city_mun">{{ item.city_mun }}</td>
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.brgy">{{ item.brgy }}</td>
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.ean">{{ item.ean }}</td>
-                            <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap">{{ item[tableOptions.row] }}</td>
-                            <!-- <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap">{{ item[tableOptions.row] ? item[tableOptions.row] : 'Missing / NA' }}</td> -->
+                            <!-- <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap">{{ item[tableOptions.row] }}</td> -->
+                            <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap">{{ item[tableOptions.row] || item[tableOptions.row] == 0 ? item[tableOptions.row] : 'Missing / NA' }}</td>
                             <td class="text-sm tracking-wide border-t border-l px-3.5 py-1.5 text-right whitespace-nowrap" v-for="j in heading" :key="j">
                                 <TableItem :table="item[j]" />
                             </td>
                         </tr>
-                        <!-- <tr v-for="(item, index) in dfTotalOnly" :key="index">
+                        <tr v-for="(item, index) in dfTotalOnly" :key="index">
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.province">{{ item.province }}</td>
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.city_mun">{{ item.city_mun }}</td>
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.brgy">{{ item.brgy }}</td>
-                            <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.ean">{{ item.ean }}</td> -->
-                            <!-- <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap">{{ item[tableOptions.row] ? item[tableOptions.row] : 'Missing / NA' }}</td> -->
-                            <!-- <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap">{{ item[tableOptions.row] }}</td>
+                            <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.ean">{{ item.ean }}</td>
+                            <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap">{{ item[tableOptions.row] }}</td>
                             <td class="text-sm tracking-wide border-t border-l px-3.5 py-1.5 text-right whitespace-nowrap" v-for="j in heading" :key="j">
                                 <TableItem :table="item[j]" />
                             </td>
-                        </tr> -->
+                        </tr>
                     </tbody>
                 </table>
             </div>

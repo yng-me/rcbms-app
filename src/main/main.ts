@@ -87,7 +87,7 @@ function createWindow () {
     minHeight: 535,
     icon: join(app.getAppPath(), 'static', 'assets/hero.ico'),
     // resizable: false,
-    maximizable: false,
+    // maximizable: false,
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
       nodeIntegration: true,
@@ -379,8 +379,6 @@ ipcMain.on('arrow', (event, request) => {
     sp.on('close', (code) => {
      if(code == 0) {
        const payload = JSON.parse(df)
-       console.log(payload);
-       
        event.reply('return-arrow', {
          data: payload,
          script

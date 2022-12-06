@@ -74,7 +74,6 @@ export const pilotDataLoader = () : void => {
                 const csdbeConcat = csdbe.filter(el => /\.csdb$/g.test(el) && pilotGeo.includes(el.substring(1, 6)))
                     .map(item => join(path, item));
 
-
                 const extractTextFile = (input: string) => {
                     const { csexport_path } = withCSProInstalled();
                     const pffPath = join(app.getAppPath(), 'static', 'pff', 'pilot');
@@ -110,7 +109,9 @@ export const pilotDataLoader = () : void => {
                 }
                 
 
-                if(csdbeConcat.length === 0) return
+                if(csdbeConcat.length === 0) {
+                    return dialog.showErrorBox('CSDBE File Error', 'Invalid csdbe filename. All files must begin with 6-digit geocode.')
+                }
 
                 if(csdbeConcat.length === 1) {
 
