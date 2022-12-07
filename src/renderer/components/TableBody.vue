@@ -47,38 +47,62 @@ const show = reactive({
 
 const emits = defineEmits(['saved-table', 'show-export'])
 
+const key = computed(() => {
+    const groupBy = Object.entries({...props.tableOptions.groupBy})
+    .filter(item => item[1] === true) 
+    .map(el => el[0])
+    
+    return groupBy.length ? groupBy[0] : props.tableOptions.row
+})
+
 const df = computed(() => {
 
-    const key = sorted.variable ? sorted.variable : props.tableOptions.row
+    const k = sorted.variable.length ? sorted.variable[0] : key.value
 
     return props.dataTable
-        // .filter((el : any) => el[key] !== 'Total' && el[key] !== undefined)
+        .filter((el : any) => el[key.value] !== 'Total' && el[k] !== undefined)
         .sort((a : any, b : any) => {
 
-            const n = parseInt(a[key])
+            const n = parseInt(a[k])
             const order = sorted.desc ? 1: -1
             
             if(!n) {
-                if (a[key] > b[key]) return 1 * order
-                if (a[key] < b[key]) return -1 * order
+                if (a[k] > b[k]) return 1 * order
+                if (a[k] < b[k]) return -1 * order
                 return 0
             } else {
                 return sorted.desc 
-                    ? parseInt(a[key]) - parseInt(b[key])
-                    : parseInt(b[key]) - parseInt(a[key])
+                    ? parseInt(a[k]) - parseInt(b[k])
+                    : parseInt(b[k]) - parseInt(a[k])
             }
         }) 
 
 })
 
-const dfExcludeTotal = computed(() => {
-    const key = sorted.variable ? sorted.variable : props.tableOptions.row
-    return df.value.filter((el : any) => el[key] !== 'Total' && el[key] !== undefined)
-})
+// const dfExcludeTotal = computed(() => {
+
+//     const groupBy = Object.entries({...props.tableOptions.groupBy})
+//     .filter(item => item[1] === true) 
+//     .map(el => el[0])
+
+//     const key.value = groupBy.length ? groupBy[0] : props.tableOptions.row
+//     return df.value.filter((el : any) => {
+
+//         return Object.key.values(el).find(val => {
+//             return el[key.value] !== 'Total' && el[key.value] !== undefined 
+//         })
+//     })
+// })
+
 
 const dfTotalOnly = computed(() => {
-    const key = sorted.variable ? sorted.variable : props.tableOptions.row
-    return df.value.filter((el : any) => el[key] === 'Total')
+    return props.dataTable.filter((el : any) => el[key.value] === 'Total')
+})
+
+const dfMissingOnly = computed(() => {
+    const k = sorted.variable.length ? sorted.variable[0] : key.value
+
+    return props.dataTable.filter((el : any) => el[k] === undefined)
 })
 
 const tableExist = computed(() => {
@@ -99,13 +123,20 @@ const heading = computed(() => {
 })
 
 const sorted = reactive({
-    variable: '',
+    variable: [] as string[],
     desc: true
 })
 
 const sortTable = (variable: string) => {
-    sorted.variable = variable
+
+    if (!Boolean(sorted.variable.find(el => el == variable))) {
+        
+        sorted.variable.push(variable)
+    } 
+
     sorted.desc = !sorted.desc
+    console.log(sorted.variable);
+    
 }
 
 const saveSelectedTable = () => {
@@ -207,13 +238,25 @@ ipcRenderer.on('saved-table', (event, data) => {
                         </th>
                     </thead>
                     <tbody class="bg-white">
-                        <tr v-for="(item, index) in dfExcludeTotal" :key="index">
+                        <tr v-for="(item, index) in df" :key="index">
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.province">{{ item.province }}</td>
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.city_mun">{{ item.city_mun }}</td>
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.brgy">{{ item.brgy }}</td>
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.ean">{{ item.ean }}</td>
                             <!-- <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap">{{ item[tableOptions.row] }}</td> -->
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap">{{ item[tableOptions.row] || item[tableOptions.row] == 0 ? item[tableOptions.row] : 'Missing / NA' }}</td>
+                            <td class="text-sm tracking-wide border-t border-l px-3.5 py-1.5 text-right whitespace-nowrap" v-for="j in heading" :key="j">
+                                <TableItem :table="item[j]" />
+                            </td>
+                        </tr>
+                        <tr v-for="(item, index) in dfMissingOnly" :key="index">
+                            <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.province">{{ item.province }}</td>
+                            <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.city_mun">{{ item.city_mun }}</td>
+                            <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.brgy">{{ item.brgy }}</td>
+                            <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.ean">{{ item.ean }}</td>
+                            <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap">
+                                {{ item[tableOptions.row] || item[tableOptions.row] == 0 ? item[tableOptions.row] : 'Missing / NA' }}
+                            </td>
                             <td class="text-sm tracking-wide border-t border-l px-3.5 py-1.5 text-right whitespace-nowrap" v-for="j in heading" :key="j">
                                 <TableItem :table="item[j]" />
                             </td>
