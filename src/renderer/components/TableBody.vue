@@ -47,43 +47,62 @@ const show = reactive({
 
 const emits = defineEmits(['saved-table', 'show-export'])
 
+const key = computed(() => {
+    const groupBy = Object.entries({...props.tableOptions.groupBy})
+    .filter(item => item[1] === true) 
+    .map(el => el[0])
+    
+    return groupBy.length ? groupBy[0] : props.tableOptions.row
+})
+
 const df = computed(() => {
 
-    if(sorted.variable !== '') {
-        
-        return props.dataTable.sort((a : any, b : any) => {
+    const k = sorted.variable.length ? sorted.variable[0] : key.value
 
-            const v = a[sorted.variable] as string | number
-            const w = b[sorted.variable] as string | number
+    return props.dataTable
+        .filter((el : any) => el[key.value] !== 'Total' && el[k] !== undefined)
+        .sort((a : any, b : any) => {
+
+            const n = parseInt(a[k])
+            const order = sorted.desc ? 1: -1
             
-            if(v !== undefined && w !== undefined) {
+            if(!n) {
+                if (a[k] > b[k]) return 1 * order
+                if (a[k] < b[k]) return -1 * order
+                return 0
+            } else {
+                return sorted.desc 
+                    ? parseInt(a[k]) - parseInt(b[k])
+                    : parseInt(b[k]) - parseInt(a[k])
+            }
+        }) 
 
-                if(sorted.desc) {
-                    if(typeof v === 'string' && typeof w === 'string') {
-                        return w.localeCompare(v)
-                    } else if (typeof v === 'number' && typeof w === 'number') {
-                        return w - v
-                    }
-                } else {
-                    if(typeof v === 'string' && typeof w === 'string') {
-                        return v.localeCompare(w)
-                    } else if (typeof v === 'number' && typeof w === 'number') {
-                        return v - w
-                    }
-                }
-            } 
-        })
-    } else {        
-        return props.dataTable
-    }
 })
 
-const dfNoTotal = computed(() => {
-    return df.value.filter((el : any) => el[sorted.variable] !== 'Total')
+// const dfExcludeTotal = computed(() => {
+
+//     const groupBy = Object.entries({...props.tableOptions.groupBy})
+//     .filter(item => item[1] === true) 
+//     .map(el => el[0])
+
+//     const key.value = groupBy.length ? groupBy[0] : props.tableOptions.row
+//     return df.value.filter((el : any) => {
+
+//         return Object.key.values(el).find(val => {
+//             return el[key.value] !== 'Total' && el[key.value] !== undefined 
+//         })
+//     })
+// })
+
+
+const dfTotalOnly = computed(() => {
+    return props.dataTable.filter((el : any) => el[key.value] === 'Total')
 })
 
-const dfTotal = computed(() => {
-    return df.value.filter((el : any) => el[sorted.variable] === 'Total')
+const dfMissingOnly = computed(() => {
+    const k = sorted.variable.length ? sorted.variable[0] : key.value
+
+    return props.dataTable.filter((el : any) => el[k] === undefined)
 })
 
 const tableExist = computed(() => {
@@ -104,13 +123,19 @@ const heading = computed(() => {
 })
 
 const sorted = reactive({
-    variable: '',
+    variable: [] as string[],
     desc: true
 })
 
 const sortTable = (variable: string) => {
-    sorted.variable = variable
+
+    if (!Boolean(sorted.variable.find(el => el == variable))) {
+        
+        sorted.variable.push(variable)
+    } 
+
     sorted.desc = !sorted.desc
+    
 }
 
 const saveSelectedTable = () => {
@@ -152,12 +177,12 @@ ipcRenderer.on('saved-table', (event, data) => {
 </script>
 
 <template>
-    <div v-if="dfNoTotal.length" class="pb-16 bg-gradient-to-t from-white to-gray-100">
+    <div v-if="dataTable.length" class="pb-16 bg-gradient-to-t from-white to-gray-100">
         <!-- <input 
             type="text" v-model="tableTitle" 
             placeholder="Table Title"
             class="border-transparent tracking-wide bg-transparent sm:w-3/5 w-full font-semibold px-0 py-1 text-sm focus:border-b focus:border-t-transparent focus:border-l-transparent focus:border-r-transparent focus:border-teal-500 focus:border-opacity-50 focus:ring-0" > -->
-        <!-- <div class="px-6 pt-4 pb-3 sm:flex items-end justify-end w-full space-y-3">
+        <div class="px-6 pt-4 pb-3 sm:flex items-end justify-end w-full space-y-3">
             <div class="flex items-center space-x-3 justify-end">
                 <button 
                     @click="$emit('show-export')"
@@ -172,38 +197,39 @@ ipcRenderer.on('saved-table', (event, data) => {
                     @click="show.saveTable = true" 
                     :class="tableExist ? 'text-white bg-teal-600 ' : 'border text-gray-600 bg-white hover:text-teal-600 hover:bg-gray-50 '"
                     class="pl-3 pr-3.5 py-1.5 flex items-center space-x-1 text-xs tracking-widest rounded-xl uppercase font-semibold">
-                    <svg class="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                    <svg v-if="tableExist" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"></path></svg>    
+                    <svg v-else class="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
                     <span>Save{{ tableExist ? 'D' : '' }}</span>
                     <span v-if="tableExist" class="pl-1">
-                        <svg class="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     </span>
                 </button>
                
             </div>
-        </div> -->
+        </div>
         <!-- <button class="hover:text-teal-600">
             <svg class="w-5 h-5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
-        </button> -->
-        
+        </button>
+         -->
         <div class="overflow-auto w-full px-6 pb-24">
             <div class="rounded-xl border overflow-auto w-full">
                 <table class="w-full table-auto overflow-hidden">
                     <thead class="text-xs bg-gray-50 text-teal-700 border-b border-teal-700 uppercase tracking-widest">
                     <!-- <thead class="text-xs bg-teal-700 text-white border-b border-teal-700 uppercase tracking-widest"> -->
                         <th class="px-3.5 pt-2.5 pb-2 border-r font-semibold text-left items-start" v-if="tableOptions.groupBy.province">
-                            <!-- <TableSort @sort-table="sortTable('province')" label="Province" /> -->Province
+                            <TableSort @sort-table="sortTable('province')" label="Province" />
                         </th>
                         <th class="px-3.5 pt-2.5 pb-2 border-r font-semibold text-left items-start" v-if="tableOptions.groupBy.city_mun">
-                            <!-- <TableSort @sort-table="sortTable('city_mun')" label="City/Municipality" /> -->City/Municipality
+                            <TableSort @sort-table="sortTable('city_mun')" label="City/Municipality" />
                         </th>
                         <th class="px-3.5 pt-2.5 pb-2 border-r font-semibold text-left items-start" v-if="tableOptions.groupBy.brgy">
-                            <!-- <TableSort @sort-table="sortTable('brgy')" label="Barangay" /> -->Barangay
+                            <TableSort @sort-table="sortTable('brgy')" label="Barangay" />
                         </th>
                         <th class="px-3.5 pt-2.5 pb-2 border-r font-semibold text-left items-start" v-if="tableOptions.groupBy.ean">
-                            <!-- <TableSort @sort-table="sortTable('ean')" label="EA" /> -->EA
+                            <TableSort @sort-table="sortTable('ean')" label="EA" />
                         </th>
                         <th class="px-3.5 pt-2.5 pb-2 border-r font-semibold text-left items-start whitespace-nowrap">
-                            <!-- <TableSort @sort-table="sortTable(tableOptions.row)" :label="rowName !== '' ? rowName : tableOptions.row" /> -->{{ rowName !== '' ? rowName : tableOptions.row }}
+                            <TableSort @sort-table="sortTable(tableOptions.row)" :label="rowName !== '' ? rowName : tableOptions.row" />
                         </th>
                         <th class="px-3.5 pt-2.5 pb-2 border-l font-semibold !w-32 whitespace-nowrap" v-for="i in heading" :key="i">
                             <!-- <TableSort @sort-table="sortTable(i)" :label="i" /> -->
@@ -211,25 +237,36 @@ ipcRenderer.on('saved-table', (event, data) => {
                         </th>
                     </thead>
                     <tbody class="bg-white">
-                        <tr v-for="(item, index) in dfNoTotal" :key="index">
+                        <tr v-for="(item, index) in df" :key="index">
+                            <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.province">{{ item.province }}</td>
+                            <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.city_mun">{{ item.city_mun }}</td>
+                            <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.brgy">{{ item.brgy }}</td>
+                            <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.ean">{{ item.ean }}</td>
+                            <!-- <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap">{{ item[tableOptions.row] }}</td> -->
+                            <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap">{{ item[tableOptions.row] || item[tableOptions.row] == 0 ? item[tableOptions.row] : 'Missing / NA' }}</td>
+                            <td class="text-sm tracking-wide border-t border-l px-3.5 py-1.5 text-right whitespace-nowrap" v-for="j in heading" :key="j">
+                                <TableItem :table="item[j]" />
+                            </td>
+                        </tr>
+                        <tr v-for="(item, index) in dfMissingOnly" :key="index">
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.province">{{ item.province }}</td>
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.city_mun">{{ item.city_mun }}</td>
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.brgy">{{ item.brgy }}</td>
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.ean">{{ item.ean }}</td>
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap">
-                                {{ item[tableOptions.row] }}
+                                {{ item[tableOptions.row] || item[tableOptions.row] == 0 ? item[tableOptions.row] : 'Missing / NA' }}
                             </td>
                             <td class="text-sm tracking-wide border-t border-l px-3.5 py-1.5 text-right whitespace-nowrap" v-for="j in heading" :key="j">
                                 <TableItem :table="item[j]" />
                             </td>
                         </tr>
-                        <tr v-for="(item, index) in dfTotal" :key="index">
+                        <tr v-for="(item, index) in dfTotalOnly" :key="index">
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.province">{{ item.province }}</td>
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.city_mun">{{ item.city_mun }}</td>
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.brgy">{{ item.brgy }}</td>
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap" v-if="tableOptions.groupBy.ean">{{ item.ean }}</td>
                             <td class="text-sm tracking-wide border-t border-r px-3.5 py-1.5 text-left whitespace-nowrap">
-                                {{ item[tableOptions.row] }}
+                                {{ item[tableOptions.row] || item[tableOptions.row] == 0 ? item[tableOptions.row] : 'Missing / NA' }}
                             </td>
                             <td class="text-sm tracking-wide border-t border-l px-3.5 py-1.5 text-right whitespace-nowrap" v-for="j in heading" :key="j">
                                 <TableItem :table="item[j]" />

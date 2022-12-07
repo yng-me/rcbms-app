@@ -7,6 +7,8 @@ import Footer from './components/Footer.vue';
 import Home from './components/Home.vue';
 // @ts-ignore
 import TableMain from './components/TableMain.vue';
+// @ts-ignore
+import TableIndex from './components/tabulation/Index.vue'
 // import Arrow from './components/Arrow.vue';
 import { ipcRenderer } from './electron';
 
@@ -76,6 +78,7 @@ ipcRenderer.on('define-mode', (event, data) => {
   <transition name="arrow">
     <div v-if="showTable" class="w-full h-full">
         <TableMain @back="showTable = false" :isPilotMode="isPilotMode" />
+        <!-- <TableIndex /> -->
     </div>
   </transition>
   <Footer></Footer>

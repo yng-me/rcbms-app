@@ -87,7 +87,7 @@ function createWindow () {
     minHeight: 535,
     icon: join(app.getAppPath(), 'static', 'assets/hero.ico'),
     // resizable: false,
-    maximizable: false,
+    // maximizable: false,
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
       nodeIntegration: true,
@@ -216,18 +216,13 @@ ipcMain.on('update-r-config', (event, data) => {
   })
 })
 
-ipcMain.on('check-text-data', (event, data) => {
-  console.log(data);
-  
+ipcMain.on('check-text-data', (event, data) => {  
   event.reply('check-text-data', textDataCheck(data.source, data.mode))
 })
 
 ipcMain.on('configure-path', (event, payload) => {
   dialog.showOpenDialog({properties: [payload.property] }).then((response : any) => {
     if (!response.canceled) {
-      // console.log(payload);
-      console.log(response.filePaths[0]);
-
       const newPath = response.filePaths[0];
       const updatedConfig = { 
         ...rConfig(), 
