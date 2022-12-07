@@ -135,7 +135,6 @@ const sortTable = (variable: string) => {
     } 
 
     sorted.desc = !sorted.desc
-    console.log(sorted.variable);
     
 }
 
