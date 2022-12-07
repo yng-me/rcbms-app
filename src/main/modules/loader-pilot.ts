@@ -110,7 +110,9 @@ export const pilotDataLoader = () : void => {
                 }
                 
 
-                if(csdbeConcat.length === 0) return
+                if(csdbeConcat.length === 0) {
+                    return dialog.showErrorBox('Load CSDB File', 'Error in loading CSDB file. Make sure to rename your file/s with a 6-digit geo code as prefix.')
+                }
 
                 if(csdbeConcat.length === 1) {
 

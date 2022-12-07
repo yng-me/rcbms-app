@@ -113,5 +113,12 @@ export const updateRCBMS = () => {
         ])
     }
 
+    // if(version == '1.0.8') {
+    //     seen = false
+    //     applyUpdate([
+    //         join('utils', 'save-record.R')
+    //     ])
+    // }
+
     fs.writeJSONSync(path, { version: v, seen })
 }
