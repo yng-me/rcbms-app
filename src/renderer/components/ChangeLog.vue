@@ -23,7 +23,7 @@ const changeLogs = [
                 feature: 'Dynamic Ouput Folder location',
                 type: 'enhancement',
                 info: [
-                    'All output files generated (either Export Logs or List of Cases with Inconsistencies) will now be based on the Output Folder configuration.',
+                    'All output files generated (either Export Logs or List of Cases with Inconsistencies) is now be based on the Output Folder configuration.',
                 ]
             },
             {
@@ -32,13 +32,6 @@ const changeLogs = [
                 info: [
                     'When generating inconsistencies, you can now minimize the pop-up window so you can access other features of RCBMS while waiting for the execution to finish.',
                     'You can now also maximize the entire window of RCBMS for maximum productivity.'
-                ]
-            },
-            {
-                feature: 'Dynamic Ouput Folder location',
-                type: 'enhancement',
-                info: [
-                    'All output files generated (either Export Logs or List of Cases with Inconsistencies) will now be based on the Output Folder configuration.',
                 ]
             },
             { 
