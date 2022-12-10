@@ -20,6 +20,8 @@ import Hero from './Hero.vue';
 import Generate from './Generate.vue';
 // @ts-ignore
 import AboutUs from './AboutUs.vue'
+// @ts-ignore
+import Notification from './Notification.vue';
 
 const g = 'b13c4cbb792ef13d5a60a916'
 
@@ -164,6 +166,7 @@ const show = reactive({
   runScript: false,
   loadDataConfirm: false,
   loadData: false,
+  minimizeWindow: false,
 })
 
 const myhalf = g + '800393e28d621d9471609fd2'
@@ -221,7 +224,7 @@ const runScript = () => {
   endTimer.value = false
   loadingOutput.value = true
   show.runScript = true
-  loading.value = true
+  // loading.value = true
 
   rConfig.use_pilot_data 
     ? ipcRenderer.send('run-script-pilot') 
@@ -233,7 +236,7 @@ const runScript = () => {
 }
 
 watch(_sec, (newValue) => {
-  if(loading.value && !endTimer.value) {
+  if(loadingOutput.value && !endTimer.value) {
     setTimeout(() => {
       if(newValue < 59) {
         _sec.value++
@@ -269,8 +272,8 @@ const stopProcessing = () => {
   _min.value = 0
   _hr.value = 0
   endTimer.value = true
-  loading.value = false
   loadingOutput.value = false
+  show.minimizeWindow = false
   show.runScript = false
 }
 
@@ -293,14 +296,44 @@ const canLoadData = computed(() => {
 })
 
 const endTimer = ref(true)
-const doneProcessing = () => {
-  loading.value = false
-  endTimer.value = true
-}
 
 ipcRenderer.on('load-export-logs', (event, data) => {
   data.exportLog = data
 })
+
+interface Notification {
+    progress: string
+    showProgress: boolean
+    progressWidth: number
+    isOpen?: boolean
+}
+
+const notif : Notification = reactive({
+  progress: '',
+  progressWidth: 0,
+  showProgress: false,
+  isOpen: false
+})
+
+const minimizeWindow = (event: Notification) => {
+  if(!event.isOpen) {
+    setTimeout(() => {
+      show.minimizeWindow = true
+    }, 300);
+    show.runScript = false
+  }
+
+  notif.progress = event.progress
+  notif.progressWidth = event.progressWidth
+  notif.showProgress = event.showProgress
+
+  if(event.progress == 'Done processing') {
+    show.minimizeWindow = false
+    show.runScript = true
+    endTimer.value = true
+    loadingOutput.value = false
+  }
+}
 
 //  Output preview =====================================================
 const openOutputFile = () => ipcRenderer.send('open-output-folder', rConfig.use_pilot_data)
@@ -309,6 +342,15 @@ const refreshing = ref(false)
 const refreshApp = () => {
   data.errors = []
   refreshing.value = true
+  loading.value = false
+  loadingOutput.value = false
+
+  if(loadingOutput.value) {
+    ipcRenderer.send('kill-rspawn')
+    setTimeout(() => {
+    }, 300);
+  }
+
   setTimeout(() => {
     refreshing.value = false
     ipcRenderer.send('mounted')
@@ -327,7 +369,6 @@ const loadDataDialog = () => {
     }
   }
 }
-
 
 const showLoadData = () => {
   show.loadDataConfirm = false
@@ -361,17 +402,19 @@ watch(selectedCSDBE, (newValue) => {
     <div class="y-scroll-bar relative">
         <NavMenu @updateConfig="updateConfig($event)" :checks="checks">
         <button 
+            :disabled="loadingOutput"
             title="Refresh the app"
             @click.prevent="refreshApp"
-            class="hover:text-teal-600 transform hover:rotate-12 ">
-            <svg :class="refreshing ? 'animate-spin text-teal-600' : ''" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            :class="loadingOutput ? 'text-gray-300' : 'hover:text-teal-600 hover:rotate-12'"
+            class=" transform">
+            <svg :class="refreshing? 'animate-spin text-teal-600' : ''" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
         </button>
         <template #tabulation>
             <button 
             title="Tabulation" 
-            :disabled="!withParquetData"
+            :disabled="(!withParquetData || loadingOutput || loading)"
             @click.prevent="$emit('tableShown')" 
-            :class="!withParquetData ? 'text-gray-300' : 'hover:text-teal-600 transform hover:rotate-12'">
+            :class="!withParquetData || loadingOutput || loading? 'text-gray-300' : 'hover:text-teal-600 transform hover:rotate-12'">
             <svg class="w-5 h-5 text-current" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
             </button>
         </template>
@@ -384,7 +427,7 @@ watch(selectedCSDBE, (newValue) => {
           <div class="mx-auto max-w-4xl px-10 sm:flex items-center sm:space-y-0 space-y-3 gap-3 justify-center mt-3">
               <button 
                 @click.prevent="loadDataDialog"
-                :disabled="loading || !canLoadData"
+                :disabled="(loading || !canLoadData || loadingOutput)"
                 :class="!canLoadData? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'"
                 class="sm:w-auto w-full flex items-center justify-center text-xs space-x-2 rounded-xl px-4 py-2 bg-gradient-to-tr tracking-wider"
               >
@@ -398,9 +441,12 @@ watch(selectedCSDBE, (newValue) => {
                 <svg v-if="(checks.textDataCheck.isAvailable && !loading && !data.errors.length)" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               </button>
               <button 
-                :disabled="cannotRunScript"
+                :disabled="(cannotRunScript || loadingOutput)"
                 @click.prevent="runScript"
-                :class="cannotRunScript? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'"
+                :class="[
+                  cannotRunScript? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700',
+                  loadingOutput ? 'hover:from-teal-600 hover:to-cyan-600' : ''
+                ]"
                 title="Generate list of HPQ cases with inconsistencies using R"
                 class="sm:w-auto w-full flex items-center justify-center text-xs space-x-2 rounded-xl px-4 py-2 bg-gradient-to-tr tracking-wider"
               >
@@ -495,20 +541,31 @@ watch(selectedCSDBE, (newValue) => {
           </DialogBox>
         </BaseModal>
 
-        <BaseModal @close="stopProcessing" :closeable="false" :show="show.runScript" usage="dialog" max-width="xl">
+        <BaseModal @close="[show.runScript = false, show.minimizeWindow = true]" :show="show.runScript" usage="dialog" max-width="xl">
           <Generate 
               @close="stopProcessing" 
-              :loading="loading" 
+              @minimize="minimizeWindow($event)"
+              :loading="loadingOutput" 
               :is-pilot-mode="rConfig.use_pilot_data"
-              @done-processing="doneProcessing"
+              @done-processing="endTimer = true"
               @stop-processing="stopProcessing"
               :time-elapsed="`${hr}:${min}:${sec}`"
           >
-              <span v-if="loading" class="flex items-center space-x-1">
+              <span v-if="loadingOutput" class="flex items-center space-x-1">
               <span class="text-xs text-gray-400 font-mono">{{ hr }}:{{ min }}:{{ sec }}</span>
               <span class="flex shrink-0 h-1.5 w-1.5 animate-pulse rounded-full bg-red-600"></span>
               </span>
           </Generate>
         </BaseModal>
   </div>
+  <Notification 
+    v-if="(notif.progress && loadingOutput && show.minimizeWindow)"
+    :progress="notif.progress"
+    :progress-width="notif.progressWidth"
+    :show-progress="notif.showProgress"
+    notif-type="maximize"
+    @toggle="(show.runScript = true, show.minimizeWindow = false)"
+    class="left-4 top-4 w-56 z-50"
+  />
+
 </template>

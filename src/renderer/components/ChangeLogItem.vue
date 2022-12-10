@@ -22,7 +22,7 @@ const show = ref(false)
             <span class="text-gray-400">&bull;</span>
             <span class="text-sm text-gray-500">{{ item.releaseDate }}</span>
         </h2>
-        <button v-if="order > 0" @click.prevent="show = !show" class="hover:text-teal-600">
+        <button v-if="order > 0" @click.prevent="show = !show" class="hover:text-teal-600 mt-1">
             <svg :class="show ? 'tranform rotate-180' : ''" class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
         </button>
     </div>

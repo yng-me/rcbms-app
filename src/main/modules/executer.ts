@@ -167,35 +167,34 @@ export const executer = () => {
               })
             
               qSpawn.on('close', (d) => {
-                console.log(d);
-                // console.log('done');
-                // if(d == 0) {
+            
+                if(d === null) {
+                  event.reply('stop-spawn')
+                } else {
                   event.reply('done-processing')
-  
-                  if(rConfig().clear) {
-                    clearData(join(base, 'data\\csdb'))
-                    clearData(join(base, 'data\\text'))
-                  }
-                // }
+                }
+                if(rConfig().clear) {
+                  clearData(join(base, 'data\\csdb'))
+                  clearData(join(base, 'data\\text'))
+                }
               })
   
               ipcMain.on('kill-rspawn', () => {
                 qSpawn.kill('SIGKILL')
-                // qSpawn.kill()
+                qSpawn.kill()
                 qSpawn.stderr.destroy()
                 qSpawn.stdout.destroy()
-                // console.log('kill');
-                event.reply('stop-processing')
+                event.reply('stop-spawn')
               })
             }
         })
   
         ipcMain.on('kill-rspawn', () => {
           rSpawn.kill('SIGKILL')
-          // rSpawn.kill()
+          rSpawn.kill()
           rSpawn.stderr.destroy()
           rSpawn.stdout.destroy()
-          event.reply('stop-processing')
+          event.reply('stop-spawn')
         })      
       } catch {
         dialog.showErrorBox('Generating Cases with Inconsistencies', 'There was an error in generating cases with inconsistencies. Please try again.')

@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { ref, PropType } from "vue";
+import { ref, PropType, reactive } from "vue";
 import { SavedTables } from "../utils/types";
 
-const viewStatus = ref(true)
+const viewStatus = ref(false)
 
 const props = defineProps({
     savedTables: {
@@ -10,6 +10,11 @@ const props = defineProps({
         required: true
     }
 })
+
+const tableSettings = reactive({
+    use_tidy: false
+})
+
 const emits = defineEmits(['selected-table'])
 
 const selectedTable = (title: string) => {
@@ -27,11 +32,11 @@ const selectedTable = (title: string) => {
                     <div class="flex items-center space-x-4">
                         <!-- @click.prevent="viewStatus = false" -->
                         <!-- :class="viewStatus ? 'text-gray-400' : 'text-teal-600'"  -->
-                        <!-- <button 
+                        <button 
                             @click.prevent="viewStatus = false"
                             :class="!viewStatus ? 'text-teal-600' : 'text-gray-300'" class="hover:text-teal-700 font-semibold tracking-widest uppercase hover:font-medium">
                             <span class="">Options</span>
-                        </button>  -->
+                        </button> 
                         <!-- <span class="opacitiy-40 text-gray-200">|</span> -->
                         <button 
                         @click.prevent="viewStatus = true"
@@ -62,6 +67,23 @@ const selectedTable = (title: string) => {
                     <div class="border-t px-5 py-2.5 flex justify-end space-x-2 bg-gray-50 w-full">
                         <slot></slot>
                     </div>
+                </template>
+                <template v-else>
+                    <label :class="false? 'text-gray-300' : 'hover:bg-gray-50'" class="px-4 py-2.5 border-t w-full flex items-center justify-between">
+                        <span class="flex items-center space-x-2">
+                        <svg class="w-4 h-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                        <span>Use tidy data</span>
+                        </span>
+                        <span class="switch">
+                        <input 
+                            v-model="tableSettings.use_tidy"
+                            :disabled="false" 
+                            name="use-rdata" 
+                            type="checkbox" 
+                        />
+                        <span class="slider round"></span>
+                        </span>
+                    </label>
                 </template>
             </div>
         </div>

@@ -105,11 +105,19 @@ export const updateRCBMS = () => {
     }
 
     if(version == '1.0.7') {
-        seen = false
         applyUpdate([
             'utils',
             join('scripts', '2021-pilot-cbms'),
             join('qmd', 'section-r.qmd'),
+        ])
+    }
+
+    if(version == '1.0.8') {
+        seen = false
+        applyUpdate([
+            join('utils', 'save-record.R'),
+            join('utils', 'exports', 'export-config.R'),
+            join('scripts', '2021-pilot-cbms', 'sections')
         ])
     }
 

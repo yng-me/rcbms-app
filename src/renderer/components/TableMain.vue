@@ -117,9 +117,12 @@ const applyFilter = (evt : any, type : 'groupBy' | 'geoFilter') => {
 }
 
 ipcRenderer.on('return-arrow', (event, payload) => {
-    loading.value = false
-    state.script = payload.script
-    state.data = payload.data
+    show.advancedOption = false
+    setTimeout(() => {        
+        loading.value = false
+        state.script = payload.script
+        state.data = payload.data
+    }, 500);
 })
 
 const rowName = computed(() => {
@@ -139,13 +142,9 @@ const matchedVariables = computed(() => {
 })
 
 
-const updateSavedTables = (evt : SavedTables[]) => {
-    state.savedTables = evt
-}
+const updateSavedTables = (evt : SavedTables[]) => state.savedTables = evt
 
 const selectTableFromSaved = (t: TableOptions) => {
-
-    show.advancedOption = false
 
     tableOptions.col = t.col
     tableOptions.rowRecord = t.rowRecord

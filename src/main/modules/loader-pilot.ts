@@ -74,7 +74,6 @@ export const pilotDataLoader = () : void => {
                 const csdbeConcat = csdbe.filter(el => /\.csdb$/g.test(el) && pilotGeo.includes(el.substring(1, 6)))
                     .map(item => join(path, item));
 
-
                 const extractTextFile = (input: string) => {
                     const { csexport_path } = withCSProInstalled();
                     const pffPath = join(app.getAppPath(), 'static', 'pff', 'pilot');
@@ -110,7 +109,9 @@ export const pilotDataLoader = () : void => {
                 }
                 
 
-                if(csdbeConcat.length === 0) return
+                if(csdbeConcat.length === 0) {
+                    return dialog.showErrorBox('Load CSDB File', 'Error in loading CSDB file. Make sure to rename your file/s with a 6-digit geo code as prefix.')
+                }
 
                 if(csdbeConcat.length === 1) {
 

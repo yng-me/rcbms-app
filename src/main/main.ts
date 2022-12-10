@@ -80,14 +80,14 @@ let mainWindow : BrowserWindow
 function createWindow () {
 
   mainWindow = new BrowserWindow({
-    width: dev ? 1200: 985,
-    height: 775,
+    width: dev ? 1400: 1200,
+    height: 850,
     autoHideMenuBar: true,  
     minWidth: 550,
     minHeight: 535,
     icon: join(app.getAppPath(), 'static', 'assets/hero.ico'),
     // resizable: false,
-    maximizable: false,
+    // maximizable: false,
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
       nodeIntegration: true,
@@ -216,18 +216,13 @@ ipcMain.on('update-r-config', (event, data) => {
   })
 })
 
-ipcMain.on('check-text-data', (event, data) => {
-  console.log(data);
-  
+ipcMain.on('check-text-data', (event, data) => {  
   event.reply('check-text-data', textDataCheck(data.source, data.mode))
 })
 
 ipcMain.on('configure-path', (event, payload) => {
   dialog.showOpenDialog({properties: [payload.property] }).then((response : any) => {
     if (!response.canceled) {
-      // console.log(payload);
-      console.log(response.filePaths[0]);
-
       const newPath = response.filePaths[0];
       const updatedConfig = { 
         ...rConfig(), 
@@ -295,7 +290,7 @@ ipcMain.on('load-dictionary', (event, req) => {
         }
       })
   } catch {
-    dialog.showErrorBox('Data Dictionary', 'There was an error loading the data dictionary for tabulation. Please restart the RCBMS app.')
+    dialog.showErrorBox('Data Dictionary Error', 'There was an error loading the data dictionary for tabulation. Please restart the RCBMS app.')
   }
 })
 

@@ -18,6 +18,8 @@ const grouping = reactive<TableOptionsGrouping>({
     ean: false
 })
 
+const showAdvancedFilter = ref(false)
+
 const emit = defineEmits(['closeGroup', 'groupingApplied'])
 
 const pulse = ref(false)
@@ -96,10 +98,11 @@ watch(
                 type="checkbox" name="gEA" id="gEA" class="rounded text-teal-600">
                 <span>Enumeration Area (EA)</span>
             </label>
-            <div class="border-t px-5 py-2.5 flex justify-end space-x-2 bg-gray-50">
-                <!-- <button class="text-xs uppercase tracking-widest font-medium hover:text-teal-600">
-                    Advanced 
-                </button> -->
+            <div class="border-t px-5 py-2.5 flex justify-between space-x-2 bg-gray-50">
+                <button @click.prevent="showAdvancedFilter = true" class="text-xs uppercase flex items-center space-x-0.5 tracking-widest font-medium text-gray-500 hover:text-teal-600">
+                    <span>Advanced</span>
+                    <svg class="w-3.5 h-3.5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
                 <div class="flex space-x-2 items-center">
                     <button 
                         @click.prevent="$emit('closeGroup')" 
