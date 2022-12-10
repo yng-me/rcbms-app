@@ -127,58 +127,81 @@ j_files <- as_tibble(paste0(justification_path, '\\', list.files(justification_p
 
 if(config$include_justifiction & dir.exists(justification_path) & length(j_files) > 0) {
   
-  j_df <- lapply(j_files, function(x) {
-    read.xlsx(x, 'Cases with Inconsistencies', startRow = 4)
+  j_df_valid <- list()
+
+  for(k in 1:length(j_files)) {
+    
+    wb_j <- loadWorkbook(j_files[k])
+    
+    if('Cases with Inconsistencies' %in% names(wb_j)) {
+      j_df_valid[[k]] <- j_files[k]
+    }
+  }
+  
+  
+  j_df <- lapply(j_df_valid, function(x) {
+    if(!is.null(x)) {
+      read.xlsx(x, 'Cases with Inconsistencies', startRow = 4)
+    }
   })
   
   justifications <- do.call('rbind', j_df)
 
-  
-  if('tab' %in% names(justifications)) {
-    justification <- justifications %>% 
-      select(
-        'Case ID' = Case.ID,
-        'Line Number' = Line.Number,
-        Section,
-        tab,
-        Status,
-        'Remarks / Justification' = `Remarks./.Justification`
-      ) %>% 
-      filter(!is.na(Status) | !is.na(`Remarks / Justification`)) %>% 
-      mutate('Line Number' = if_else(is.na(`Line Number`), '', sprintf('%02d', as.integer(`Line Number`)))) %>% 
-      na_if('')
+  if(!is.null(justifications)) {
     
-      exp_case_wise <- exp_case_wise %>% 
-        left_join(
-          justification, 
-          by = c('Case ID', 'Line Number', 'Section', 'tab') 
+    if('tab' %in% names(justifications)) {
+      justification <- justifications %>% 
+        select(
+          'Case ID' = Case.ID,
+          'Line Number' = Line.Number,
+          Section,
+          tab,
+          Status,
+          'Remarks / Justification' = `Remarks./.Justification`
         ) %>% 
-        distinct()
-        # filter(!grepl('JUSTIFIED', Status, ignore.case = T))  %>% 
+        filter(!is.na(Status) | !is.na(`Remarks / Justification`)) %>% 
+        mutate('Line Number' = if_else(is.na(`Line Number`), '', sprintf('%02d', as.integer(`Line Number`)))) %>% 
+        na_if('')
       
-  } else {
-    
-    justification <- justifications %>%
-      select(
-        'Case ID' = Case.ID,
-        'Line Number' = Line.Number,
-        Section,
-        Title,
-        Description,
-        Status,
-        'Remarks / Justification' = `Remarks./.Justification`
-      ) %>% 
-      filter(!is.na(Status) | !is.na(`Remarks / Justification`)) %>% 
-      mutate('Line Number' = if_else(is.na(`Line Number`), '', sprintf('%02d', as.integer(`Line Number`)))) %>% 
-      na_if('')
-    
-      exp_case_wise <- exp_case_wise %>% 
-        left_join(
-          justification, 
-          by = c('Case ID', 'Line Number', 'Section', 'Title', 'Description')
+        exp_case_wise <- exp_case_wise %>% 
+          left_join(
+            justification, 
+            by = c('Case ID', 'Line Number', 'Section', 'tab') 
+          ) %>% 
+          distinct()
+          # filter(!grepl('JUSTIFIED', Status, ignore.case = T))  %>% 
+        
+    } else {
+      
+      justification <- justifications %>%
+        select(
+          'Case ID' = Case.ID,
+          'Line Number' = Line.Number,
+          Section,
+          Title,
+          Description,
+          Status,
+          'Remarks / Justification' = `Remarks./.Justification`
         ) %>% 
-        distinct()
-        # filter(!grepl('JUSTIFIED', Status, ignore.case = T)) %>% 
+        filter(!is.na(Status) | !is.na(`Remarks / Justification`)) %>% 
+        mutate('Line Number' = if_else(is.na(`Line Number`), '', sprintf('%02d', as.integer(`Line Number`)))) %>% 
+        na_if('')
+      
+        exp_case_wise <- exp_case_wise %>% 
+          left_join(
+            justification, 
+            by = c('Case ID', 'Line Number', 'Section', 'Title', 'Description')
+          ) %>% 
+          distinct()
+          # filter(!grepl('JUSTIFIED', Status, ignore.case = T)) %>% 
+    }
+  } else {
+    exp_case_wise <- exp_case_wise %>% 
+      distinct() %>%
+      mutate(
+        Status = NA,
+        'Remarks / Justification' = NA
+      ) 
   }
   
 } else {

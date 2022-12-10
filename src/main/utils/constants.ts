@@ -4,7 +4,7 @@ import { app } from 'electron'
 // import os from 'os'
 
 const isMac = process.platform === 'darwin'
-// export const base = isMac ? join(os.homedir(), 'Desktop', 'Apps', 'rcbms-app', 'src', 'main', 'static', 'rcbms') : join('C:', 'rcbms')
+// export const base = isMac ? join(os.homedir(), 'Desktop', 'Apps', 'rcbms-app', 'build', 'main', 'static', 'rcbms') : join('C:', 'rcbms')
 export const base = isMac ? join(app.getAppPath(), 'static', 'rcbms') : join('C:', 'rcbms')
 export const pilotDirectory =  isMac ? join(app.getAppPath(), 'scripts', '2021-pilot-cbms') : join(base, 'scripts', '2021-pilot-cbms')
 

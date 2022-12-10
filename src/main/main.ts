@@ -80,8 +80,8 @@ let mainWindow : BrowserWindow
 function createWindow () {
 
   mainWindow = new BrowserWindow({
-    width: dev ? 1200: 985,
-    height: 775,
+    width: dev ? 1400: 1200,
+    height: 850,
     autoHideMenuBar: true,  
     minWidth: 550,
     minHeight: 535,
@@ -290,7 +290,7 @@ ipcMain.on('load-dictionary', (event, req) => {
         }
       })
   } catch {
-    dialog.showErrorBox('Data Dictionary', 'There was an error loading the data dictionary for tabulation. Please restart the RCBMS app.')
+    dialog.showErrorBox('Data Dictionary Error', 'There was an error loading the data dictionary for tabulation. Please restart the RCBMS app.')
   }
 })
 

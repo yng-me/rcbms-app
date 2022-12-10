@@ -5,7 +5,7 @@ import Dialog from './Dialog.vue';
 import quotes from '../assets/quotes.json'
 
 import { ipcRenderer } from '../electron'
-import { reactive, ref, computed } from 'vue';
+import { reactive, ref, computed, watch } from 'vue';
 
 const shuffleArray = (arr : any) => {
     const newArr = arr.slice()
@@ -21,7 +21,7 @@ const q = shuffleArray(quotes)
 const showOutputFolder = ref(false)
 const showLogs = ref(false)
 
-const emits = defineEmits(['close', 'stop-processing', 'done-processing'])
+const emits = defineEmits(['close', 'stop-processing', 'done-processing', 'minimize'])
 const props = defineProps(['loading', 'timeElapsed', 'isPilotMode'])
 
 const data : any = reactive({
@@ -42,7 +42,7 @@ ipcRenderer.on('rstatus', (event, payload) => {
     rStatus.message = payload.message
     progress.value = progress.value + payload.count
     if(payload.error) {
-        emits('done-processing')
+        emits('stop-processing')
         showOutputFolder.value = false
     }
 })
@@ -51,11 +51,12 @@ ipcRenderer.on('done-processing', (event, data) => {
     ipcRenderer.send('mounted')
     progress.value++
     showOutputFolder.value = true
+    minimizable.value = false
     rStatus.message = 'Done processing'
     emits('done-processing')
 })
 
-ipcRenderer.on('stop-processing', (event, data) => emits('stop-processing'))
+ipcRenderer.on('stop-spawn', () => emits('stop-processing'))
 
 const progress = ref(0)
 const n = 18 + 6
@@ -68,23 +69,37 @@ const quote = computed(() => {
 const killProcess = () => {
     progress.value = 0
     showOutputFolder.value = false
+    minimizable.value = true
     showLogs.value = false
     ipcRenderer.send('kill-rspawn')
     data.logs = []
     emits('close')
 }
-
+const minimizable = ref(true)
 const openOutputFile = () => ipcRenderer.send('open-output-folder', props.isPilotMode)
 
+const minimizeWindow = (isOpen = false) => {
+    emits('minimize', {
+        progress: rStatus.message,
+        progressWidth: progressIndicator.value,
+        progressCounter: progress.value,
+        isOpen,
+    })
+}
 
+watch(progress, () => {
+    minimizeWindow(true)
+})
 
 </script>
 
 <template>
     <Dialog 
         @close="killProcess"
+        @minimize="minimizeWindow"
         title="Generating List of Cases with Inconsistencies"
         :message="quote"
+        :minimizable="minimizable"
         height="h-32"
     >
         <template #progress>

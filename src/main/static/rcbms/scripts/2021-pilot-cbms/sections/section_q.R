@@ -445,9 +445,9 @@ cv_q04_other <-  hpq_data$SECTION_Q %>%
   collect() 
 
 cv_q13_other <- hpq_data$SECTION_Q %>% 
+  collect() %>% 
   filter(grepl('B', Q13), HSN < 7777, pilot_area == eval_area) %>% 
-  select(case_id, Q13) %>% 
-  collect() 
+  select(case_id, Q13) 
 
 cv_q14_other <-  hpq_data$SECTION_Q %>% 
   filter(Q14 == 99, !is.na(Q14_SPECIFY), HSN < 7777, pilot_area == eval_area) %>% 

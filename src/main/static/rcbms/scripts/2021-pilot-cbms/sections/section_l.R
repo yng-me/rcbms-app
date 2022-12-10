@@ -150,11 +150,11 @@ get_occ <- function(data, var, set, c_var = NULL, c_set = NULL, d = L25) {
 
 section_l <- suppressWarnings(
   hpq_data$SECTION_L %>% 
+    collect() %>% 
     mutate(L2TLNO = str_trim(L2TLNO)) %>% 
     left_join(rov, by = 'case_id') %>% 
     filter(HSN < 7777, RESULT_OF_VISIT == 1, pilot_area == eval_area) %>% 
     select(case_id, pilot_area, starts_with('L'), -contains(c('SPECIFY', 'LAST'))) %>% 
-    collect() %>% 
     mutate_at(vars(matches('L[246]_\\d{2}')), as.integer) %>% 
     rename_at(vars(matches('^L(20|45|56)_RENTFREE_\\d+$')), ~ str_replace(., 'RENTFREE', 'RENT_FREE'))
 )

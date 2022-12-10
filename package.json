@@ -1,7 +1,7 @@
 {
   "name": "rcbms",
   "productName": "RCBMS",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Validation Generator for the Community-Based Monitoring System using R",
   "main": "build/main/main.js",
   "scripts": {

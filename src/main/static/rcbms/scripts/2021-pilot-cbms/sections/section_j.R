@@ -145,28 +145,31 @@ cv_j05_not_in_the_vs <- section_j_hh %>%
 # ===============================================================================
 d_j6 <- section_j_hh %>% 
   filter(J5 == 1) %>% 
-  select(J06_LNO_01:J06_LNO_30) %>% 
+  select(matches('^J06_LNO_\\d{2}')) %>% 
   select(where(notAllBlank))
 
 j6_list <- list()
-# j6_list_na <- list()
-for(i in 1:length(d_j6)) {
-  j6_list[[i]] <- section_j_hh %>% 
-    select(
-      case_id, pilot_area, J5,
-      contains(c(paste0('J06_LNO_', sprintf('%02d', i))))
-    ) %>% 
-    filter(J5 == 2, !is.na(!!as.name(paste0('J06_LNO_', sprintf('%02d', i))))) %>% 
-    rename(J06 = 4)
 
-  #j6_list_na[[i]] <- section_j_hh %>% 
-   # select(
-    #  case_id, pilot_area, J5,
-    #  contains(c(paste0('J06_LNO_', sprintf('%02d', i))))
-    #) %>% 
-    #filter(J5 == 1, is.na(!!as.name(paste0('J06_LNO_', sprintf('%02d', i))))) %>% 
-    #rename(J06 = 4)
+if(nrow(d_j6) > 0) {
+  # j6_list_na <- list()
+  for(i in 1:length(d_j6)) {
+    j6_list[[i]] <- section_j_hh %>% 
+      select(
+        case_id, pilot_area, J5,
+        contains(c(paste0('J06_LNO_', sprintf('%02d', i))))
+      ) %>% 
+      filter(J5 == 2, !is.na(!!as.name(paste0('J06_LNO_', sprintf('%02d', i))))) %>% 
+      rename(J06 = 4)
   
+    #j6_list_na[[i]] <- section_j_hh %>% 
+     # select(
+      #  case_id, pilot_area, J5,
+      #  contains(c(paste0('J06_LNO_', sprintf('%02d', i))))
+      #) %>% 
+      #filter(J5 == 1, is.na(!!as.name(paste0('J06_LNO_', sprintf('%02d', i))))) %>% 
+      #rename(J06 = 4)
+    
+  }
 }
 cv_j06_with_ans <- do.call('rbind', j6_list) %>% tibble()
 #cv_j6_na <- do.call('rbind', j6_list_na) %>% tibble()
@@ -449,13 +452,15 @@ d_j30 <- section_j_hh %>%
   select(where(notAllBlank))
 
 j31_list <- list()
-for(i in 1:length(d_j30)) {
-  j30_var <- paste0('J30_', sprintf('%02d', i))
-  j31_var <- paste0('J31_', sprintf('%02d', i))
-  j31_list[[i]] <- section_j_hh %>% 
-    select(case_id, pilot_area, contains(c(j30_var, j31_var))) %>% 
-    filter(!!as.name(j30_var) == 1, is.na(!!as.name(j31_var))) %>% 
-    rename(J30 = 3, J31 = 4)
+if(nrow(d_j30) > 0) {
+  for(i in 1:length(d_j30)) {
+    j30_var <- paste0('J30_', sprintf('%02d', i))
+    j31_var <- paste0('J31_', sprintf('%02d', i))
+    j31_list[[i]] <- section_j_hh %>% 
+      select(case_id, pilot_area, contains(c(j30_var, j31_var))) %>% 
+      filter(!!as.name(j30_var) == 1, is.na(!!as.name(j31_var))) %>% 
+      rename(J30 = 3, J31 = 4)
+  }
 }
 
 cv_j31_na <- do.call('rbind', j31_list) %>% tibble()
@@ -527,57 +532,61 @@ j36_list <- list()
 j39_list <- list()
 j40_list <- list()
 j41_list <- list()
-for(i in 1:length(d_j32)) {
-  
-  # J35 == 1 
-  j36_list[[paste0('cd_j36_', i, '_na')]] <- section_j_hh %>% 
-    select(
-      case_id, pilot_area, 
-      contains(c(paste0('J35_', sprintf('%02d', i)), paste0('J36_', sprintf('%02d', i))))
-    ) %>% 
-    filter(
-      !!as.name(paste0('J35_', sprintf('%02d', i))) == 1, 
-      is.na(!!as.name(paste0('J36_', sprintf('%02d', i)))) | !!as.name(paste0('J36_', sprintf('%02d', i))) < 1
-    ) %>% 
-    rename(J35 = 3, J36 = 4)
-  
-  # J38 == 1 and J39 is NA
-  j39_list[[paste0('cd_j39_', i, '_na')]] <- section_j_hh %>% 
-    select(
-      case_id, pilot_area, 
-      contains(c(paste0('J38_', sprintf('%02d', i)), paste0('J39_', sprintf('%02d', i))))
-    ) %>% 
-    filter(
-      !!as.name(paste0('J38_', sprintf('%02d', i))) == 1, 
-      str_trim(!!as.name(paste0('J39_', sprintf('%02d', i)))) != '',
-      !grepl('[A-TZ]+', str_trim(!!as.name(paste0('J39_', sprintf('%02d', i)))))
-    ) %>% 
-    rename(J38 = 3, J39 = 4)
 
-  # J38 == 1 and J40 is NA
-  j40_list[[paste0('cd_j40_', i, '_na')]] <- section_j_hh %>% 
-    select(
-      case_id, pilot_area, 
-      contains(c(paste0('J38_', sprintf('%02d', i)), paste0('J40_', sprintf('%02d', i))))
-    ) %>% 
-    filter(
-      !!as.name(paste0('J38_', sprintf('%02d', i))) == 1, 
-      str_trim(!!as.name(paste0('J40_', sprintf('%02d', i)))) != '',
-      !grepl('[A-HZ]+', str_trim(!!as.name(paste0('J40_', sprintf('%02d', i)))))
-    ) %>% 
-    rename(J38 = 3, J40 = 4)
+if(nrow(d_j32) > 0) {
+  
+  for(i in 1:length(d_j32)) {
     
-  # J38 == 2
-  j41_list[[paste0('cd_j41_', i, '_na')]] <- section_j_hh %>% 
-    select(
-      case_id, pilot_area, 
-      contains(c(paste0('J38_', sprintf('%02d', i)), paste0('J41_', sprintf('%02d', i))))
-    ) %>% 
-    filter(
-      !!as.name(paste0('J38_', sprintf('%02d', i))) == 2, 
-      !(!!as.name(paste0('J41_', sprintf('%02d', i))) %in% c(1:6, 9, NA))
-    ) %>% 
-    rename(J38 = 3, J41 = 4)
+    # J35 == 1 
+    j36_list[[paste0('cd_j36_', i, '_na')]] <- section_j_hh %>% 
+      select(
+        case_id, pilot_area, 
+        contains(c(paste0('J35_', sprintf('%02d', i)), paste0('J36_', sprintf('%02d', i))))
+      ) %>% 
+      filter(
+        !!as.name(paste0('J35_', sprintf('%02d', i))) == 1, 
+        is.na(!!as.name(paste0('J36_', sprintf('%02d', i)))) | !!as.name(paste0('J36_', sprintf('%02d', i))) < 1
+      ) %>% 
+      rename(J35 = 3, J36 = 4)
+    
+    # J38 == 1 and J39 is NA
+    j39_list[[paste0('cd_j39_', i, '_na')]] <- section_j_hh %>% 
+      select(
+        case_id, pilot_area, 
+        contains(c(paste0('J38_', sprintf('%02d', i)), paste0('J39_', sprintf('%02d', i))))
+      ) %>% 
+      filter(
+        !!as.name(paste0('J38_', sprintf('%02d', i))) == 1, 
+        str_trim(!!as.name(paste0('J39_', sprintf('%02d', i)))) != '',
+        !grepl('[A-TZ]+', str_trim(!!as.name(paste0('J39_', sprintf('%02d', i)))))
+      ) %>% 
+      rename(J38 = 3, J39 = 4)
+  
+    # J38 == 1 and J40 is NA
+    j40_list[[paste0('cd_j40_', i, '_na')]] <- section_j_hh %>% 
+      select(
+        case_id, pilot_area, 
+        contains(c(paste0('J38_', sprintf('%02d', i)), paste0('J40_', sprintf('%02d', i))))
+      ) %>% 
+      filter(
+        !!as.name(paste0('J38_', sprintf('%02d', i))) == 1, 
+        str_trim(!!as.name(paste0('J40_', sprintf('%02d', i)))) != '',
+        !grepl('[A-HZ]+', str_trim(!!as.name(paste0('J40_', sprintf('%02d', i)))))
+      ) %>% 
+      rename(J38 = 3, J40 = 4)
+      
+    # J38 == 2
+    j41_list[[paste0('cd_j41_', i, '_na')]] <- section_j_hh %>% 
+      select(
+        case_id, pilot_area, 
+        contains(c(paste0('J38_', sprintf('%02d', i)), paste0('J41_', sprintf('%02d', i))))
+      ) %>% 
+      filter(
+        !!as.name(paste0('J38_', sprintf('%02d', i))) == 2, 
+        !(!!as.name(paste0('J41_', sprintf('%02d', i))) %in% c(1:6, 9, NA))
+      ) %>% 
+      rename(J38 = 3, J41 = 4)
+  }
 }
 
 cv_j36_na <- do.call('rbind', j36_list) %>% tibble()
