@@ -6,7 +6,7 @@ defineEmits(['toggle'])
 </script>
 
 <template>
-    <div class="absolute">
+    <div class="fixed">
         <div class="px-4 py-2.5 shadow-xl rounded-xl bg-gradient-to-bl from-teal-600 to-cyan-700 text-white border-gray-50 border-2 opacity-80">
             <div class="items-start flex space-x-2 justify-between">
                 <div class="">

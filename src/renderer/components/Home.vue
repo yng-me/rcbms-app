@@ -399,7 +399,7 @@ watch(selectedCSDBE, (newValue) => {
 
 
 <template>
-    <div class="y-scroll-bar relative">
+    <div class="y-scroll-bar">
         <NavMenu @updateConfig="updateConfig($event)" :checks="checks">
         <button 
             :disabled="loadingOutput"
@@ -428,7 +428,10 @@ watch(selectedCSDBE, (newValue) => {
               <button 
                 @click.prevent="loadDataDialog"
                 :disabled="(loading || !canLoadData || loadingOutput)"
-                :class="!canLoadData? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700'"
+                :class="[
+                  !canLoadData? 'text-gray-300 from-gray-400 to-gray-400' : 'from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700',
+                  loadingOutput ? 'hover:from-teal-600 hover:to-cyan-600' : ''
+                ]"
                 class="sm:w-auto w-full flex items-center justify-center text-xs space-x-2 rounded-xl px-4 py-2 bg-gradient-to-tr tracking-wider"
               >
                 <span class=" whitespace-nowrap truncate">
