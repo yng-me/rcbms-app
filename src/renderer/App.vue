@@ -1,5 +1,6 @@
 <script setup lang="ts">
 
+import { ipcRenderer } from './electron';
 import { reactive, ref } from 'vue';
 // @ts-ignore
 import Footer from './components/Footer.vue';
@@ -9,10 +10,6 @@ import Home from './components/Home.vue';
 import Notification from './components/Notification.vue';
 // @ts-ignore
 import TableMain from './components/TableMain.vue';
-// @ts-ignore
-import TableIndex from './components/tabulation/Index.vue'
-// import Arrow from './components/Arrow.vue';
-import { ipcRenderer } from './electron';
 
 const showTable = ref(false)
 const show = ref(true)
@@ -52,24 +49,23 @@ ipcRenderer.on('define-mode', (event, data) => {
 <template>
   <transition>
     <Notification 
-    v-if="progress && show" 
-    @toggle="show = false"
-    :progress="progress"
-    :show-progress="d.percent > 0 && d.percent < 100"
-    :progress-width="Math.round(d.percent)"
-    notif-type="close"
-    class="left-3 top-3 xl:w-1/4 sm:w-1/3 w-2/3 z-50"
+      v-if="progress && show" 
+      @toggle="show = false"
+      :progress="progress"
+      :show-progress="d.percent > 0 && d.percent < 100"
+      :progress-width="Math.round(d.percent)"
+      notif-type="close"
+      class="left-3 top-3 xl:w-1/4 sm:w-1/3 w-2/3 z-50"
     />
   </transition>
   <transition>
-    <div v-if="!showTable">
+    <div v-show="!showTable">
       <Home @table-shown="showTable = !showTable" />
     </div>
   </transition>
   <transition name="arrow">
-    <div v-if="showTable" class="w-full h-full">
+    <div v-show="showTable" class="w-full h-full">
         <TableMain @back="showTable = false" :isPilotMode="isPilotMode" />
-        <!-- <TableIndex /> -->
     </div>
   </transition>
   <Footer></Footer>
