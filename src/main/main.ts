@@ -69,18 +69,18 @@ import { dataLoader } from './modules/loader'
 import { updateRCBMS } from './modules/updater';
 import { base, pilotDirectory } from './utils/constants';
 import { pilotDataLoader } from './modules/loader-pilot';
-import { piloExecuter } from './modules/executer-pilot';
+import { pilotExecuter } from './modules/executer-pilot';
 import { justificationCheck } from './modules/checker/with-justification';
 
 const isMac = process.platform === 'darwin'
-const dev = process.env.NODE_ENV === 'development'
+const inDev = process.env.NODE_ENV === 'development'
 
 let mainWindow : BrowserWindow
 
 function createWindow () {
 
   mainWindow = new BrowserWindow({
-    width: dev ? 1400: 1200,
+    width: inDev ? 1400: 1200,
     height: 850,
     autoHideMenuBar: true,  
     minWidth: 550,
@@ -92,7 +92,7 @@ function createWindow () {
       preload: join(__dirname, 'preload.js'),
       nodeIntegration: true,
       contextIsolation: true,
-      devTools: dev ? true : false,
+      devTools: inDev ? true : false,
     }
   });
   
@@ -115,7 +115,7 @@ function createWindow () {
 
   })  
   
-  if (dev) {
+  if (inDev) {
 
     const rendererPort = process.argv[2];
     mainWindow.webContents.openDevTools();
@@ -196,7 +196,7 @@ ipcMain.on('mounted', (event, data) => {
 
 executer()
 pilotDataLoader()
-piloExecuter()
+pilotExecuter()
 dataLoader()
 
 ipcMain.on('open-output-folder', (event, data) => {

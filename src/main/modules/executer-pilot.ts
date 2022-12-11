@@ -11,7 +11,7 @@ const replacer = (str : string) => {
   return str != undefined ? str.replace(/(\r\n|\n|\r|\r\n)*/gm, '') : ''
 }
 
-export const piloExecuter = () => {
+export const pilotExecuter = () => {
   
   ipcMain.on('run-script-pilot', (event, data) => {
       let rComm = os || !withRInstalled().isAvailable ? 'Rscript' : withRInstalled().path;

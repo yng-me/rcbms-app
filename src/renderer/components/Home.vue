@@ -5,23 +5,20 @@ import { onMounted, reactive, ref, onBeforeMount, computed, watch } from 'vue';
 import { RConfig, UpdateConfig, CSDBEList } from '../utils/types'
 
 // @ts-ignore
+import Footer from './Footer.vue';
 import Dashboard from './Dashboard.vue';
-// @ts-ignore
-import BaseModal from './BaseModal.vue'
 // @ts-ignore
 import NavMenu from './Menu.vue'
 // @ts-ignore
-import DialogBox from './Dialog.vue'
-// @ts-ignore
-import Footer from './Footer.vue';
-// @ts-ignore
 import Hero from './Hero.vue';
 // @ts-ignore
+import Toast from './Notification.vue'
+// @ts-ignore
+import DialogBox from './Dialog.vue'
+// // @ts-ignore
+import BaseModal from './BaseModal.vue';
+// @ts-ignore
 import Generate from './Generate.vue';
-// @ts-ignore
-import AboutUs from './AboutUs.vue'
-// @ts-ignore
-import Notification from './Notification.vue';
 
 const g = 'b13c4cbb792ef13d5a60a916'
 
@@ -561,7 +558,7 @@ watch(selectedCSDBE, (newValue) => {
           </Generate>
         </BaseModal>
   </div>
-  <Notification 
+  <Toast 
     v-if="(notif.progress && loadingOutput && show.minimizeWindow)"
     :progress="notif.progress"
     :progress-width="notif.progressWidth"
