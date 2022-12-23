@@ -3,10 +3,11 @@
 print('Processing Section R...')
 
 section_r <- hpq_data$SECTION_R %>%
+  collect() %>% 
   left_join(rov, by = 'case_id') %>% 
   filter(HSN < 7777, RESULT_OF_VISIT == 1, pilot_area == eval_area) %>% 
-  select(case_id, pilot_area, starts_with('R'), -contains(c('REF', 'SPECIFY'))) %>% 
-  collect()
+  select(case_id, pilot_area, starts_with('R'), -contains(c('REF', 'SPECIFY')))
+  
 
 #Not in the value set R01====
 cv_r01  <- section_r %>% 
@@ -309,9 +310,10 @@ cv_r01vsr03vsr04  <- section_r %>%
 
 # ====
 cv_r01_other <- hpq_data$SECTION_R %>% 
+  collect() %>% 
   filter(R1 == 9, !is.na(R1_SPECIFY), HSN < 7777, pilot_area == eval_area) %>%
-  select(case_id, R1, R1_SPECIFY) %>% 
-  collect()
+  select(case_id, R1, R1_SPECIFY) 
+  
 # 
 # cv_r02_more_than_5 <- hpq_data$SECTION_R %>% 
 #   filter(R2 >= 5, HSN < 7777, pilot_area == eval_area) %>% 
@@ -319,39 +321,41 @@ cv_r01_other <- hpq_data$SECTION_R %>%
 #   collect()
 
 cv_r03_other <- hpq_data$SECTION_R %>% 
+  collect() %>% 
   filter(R3 == 9, !is.na(R3_SPECIFY), HSN < 7777, pilot_area == eval_area) %>%
-  select(case_id, R3, R3_SPECIFY) %>% 
-  collect()
+  select(case_id, R3, R3_SPECIFY) 
+  
 
 cv_r03_1_other <- hpq_data$SECTION_R %>% 
+  collect() %>%
   filter(R3_1 == 9, !is.na(R3_1_SPECIFY), HSN < 7777, pilot_area == eval_area) %>%
-  select(case_id, R3_1, R3_1_SPECIFY) %>% 
-  collect()
+  select(case_id, R3_1, R3_1_SPECIFY) 
+  
 
 cv_r04_other <- hpq_data$SECTION_R %>% 
+  collect() %>% 
   filter(R4 == 99, !is.na(R4_SPECIFY), HSN < 7777, pilot_area == eval_area) %>%
-  select(case_id, R4, R4_SPECIFY) %>% 
-  collect()
+  select(case_id, R4, R4_SPECIFY)
 
 cv_r05_other <- hpq_data$SECTION_R %>% 
+  collect() %>% 
   filter(R5 == 9, !is.na(R5_SPECIFY), HSN < 7777, pilot_area == eval_area) %>%
-  select(case_id, R5, R5_SPECIFY) %>% 
-  collect()
+  select(case_id, R5, R5_SPECIFY)
 
 cv_r06_other <- hpq_data$SECTION_R %>% 
+  collect() %>% 
   filter(R6 == 9, !is.na(R6_SPECIFY), HSN < 7777, pilot_area == eval_area) %>%
-  select(case_id, R6, R6_SPECIFY) %>% 
-  collect()
+  select(case_id, R6, R6_SPECIFY)
 
 cv_r08_other <- hpq_data$SECTION_R %>% 
+  collect()  %>% 
   filter(R8 == 99, !is.na(R8_SPECIFY), HSN < 7777, pilot_area == eval_area) %>%
-  select(case_id, R8, R8_SPECIFY) %>% 
-  collect()
+  select(case_id, R8, R8_SPECIFY)
 
 cv_r15_other <- hpq_data$SECTION_R %>% 
+  collect() %>% 
   filter(R15 == 9, !is.na(R15_SPECIFY), HSN < 7777, pilot_area == eval_area) %>%
-  select(case_id, R15, R15_SPECIFY) %>% 
-  collect()
+  select(case_id, R15, R15_SPECIFY) 
 
 #R02 - < 1 or >= 4 number of floors
 cv_r02_number_of_floors  <- section_r %>% 

@@ -624,9 +624,10 @@ cv_a17_pwd_functional <- section_a_reg %>%
   select(case_id, pwd_line_number, matches('^A17[A-F]*')) 
 
 cv_rare_disease <- hpq_data$SECTION_J23 %>% 
+  collect()  %>% 
   filter(J25 == 99, HSN < 7777, !is.na(J25_SPECIFY), pilot_area == eval_area) %>% 
-  select(case_id, J25, J25_SPECIFY) %>% 
-  collect() 
+  select(case_id, J25, J25_SPECIFY) 
+  
 
 # ---------------------------------------------------------
 

@@ -2,10 +2,11 @@
 print('Processing Section O...')
 
 section_o <- hpq_data$SECTION_O %>%
+  collect()  %>% 
   left_join(rov, by = 'case_id') %>% 
   filter(HSN < 7777, RESULT_OF_VISIT == 1, pilot_area == eval_area) %>% 
-  select(case_id, pilot_area, starts_with('O'), -contains('SPECIFY')) %>% 
-  collect()
+  select(case_id, pilot_area, starts_with('O'), -contains('SPECIFY'))
+  
 
 d_o <- section_o %>% 
   filter(O1 == 1, O2 == 1) %>% 

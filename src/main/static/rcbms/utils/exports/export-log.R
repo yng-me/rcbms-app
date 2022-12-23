@@ -36,23 +36,25 @@ if(ref_exists == TRUE) {
   ref_cv_combined <- ref_cv_all
 }
 
+ref_cv_combined_distinct <- ref_cv_combined %>%
+  distinct(Section, Title, .keep_all = T)
 
-nr <- nrow(ref_cv_combined) + 1
+nr <- nrow(ref_cv_combined_distinct) + 1
 
 wl <- createWorkbook()
 addWorksheet(wl, ref_as_of_date)
-writeData(wl, ref_as_of_date, ref_cv_combined, borders = 'all')
+writeData(wl, ref_as_of_date, ref_cv_combined_distinct, borders = 'all')
 setColWidths(wl, ref_as_of_date, 1, 13)
 setColWidths(wl, ref_as_of_date, 2, 80)
-setColWidths(wl, ref_as_of_date, 3:ncol(ref_cv_combined), 20)
+setColWidths(wl, ref_as_of_date, 3:ncol(ref_cv_combined_distinct), 20)
 setRowHeights(wl, ref_as_of_date, 1, 40)
 setRowHeights(wl, ref_as_of_date, 2:nr, 20)
-addStyle(wl, ref_as_of_date, createStyle(halign = 'center'), 1, 2:ncol(ref_cv_combined), T, T)
-addStyle(wl, ref_as_of_date, createStyle(valign = 'center', textDecoration = 'bold', wrapText = T, border = c('top', 'botton', 'left', 'right')), 1, 1:ncol(ref_cv_combined), T, T)
-addStyle(wl, ref_as_of_date, createStyle(indent = 1, fontName = 'Arial', valign = 'center'), 1:nr, 1:ncol(ref_cv_combined), T, T)
+addStyle(wl, ref_as_of_date, createStyle(halign = 'center'), 1, 2:ncol(ref_cv_combined_distinct), T, T)
+addStyle(wl, ref_as_of_date, createStyle(valign = 'center', textDecoration = 'bold', wrapText = T, border = c('top', 'botton', 'left', 'right')), 1, 1:ncol(ref_cv_combined_distinct), T, T)
+addStyle(wl, ref_as_of_date, createStyle(indent = 1, fontName = 'Arial', valign = 'center'), 1:nr, 1:ncol(ref_cv_combined_distinct), T, T)
 
 if(ref_exists == TRUE) {
-  addStyle(wl, ref_as_of_date, createStyle(fgFill = '#fffbed'), 1:nr, ncol(ref_cv_combined), T, T)
+  addStyle(wl, ref_as_of_date, createStyle(fgFill = '#fffbed'), 1:nr, ncol(ref_cv_combined_distinct), T, T)
 }
 
 saveWorkbook(wl, logs_path, overwrite = T)

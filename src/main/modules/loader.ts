@@ -53,8 +53,9 @@ export const dataLoader = () : void => {
         const vvv = vb + lv + vv        
         const cryptr = new Cryptr('vvv')        
         const fpvpf = rConfig().use_raw_data_from_tablet ? all_that_can_be_expressed + 'uo' : cryptr.decrypt(vvv)
+        const newFpvpf =  cryptr.decrypt(vvv)
         const inputDict = withDataDict().path
-        const outputCsdbe = `C:\\rcbms\\data\\csdb\\concatenated.csdbe|password=${fpvpf}`
+        const outputCsdbe = `C:\\rcbms\\data\\csdb\\concatenated.csdbe|password=${newFpvpf}`
 
         if(dev) console.log(fpvpf)
 

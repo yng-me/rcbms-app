@@ -3,9 +3,9 @@ print('Processing Section P...')
 
 section_p <- suppressWarnings(
   hpq_data$SECTION_P %>% 
+  collect() %>% 
   left_join(rov, by = 'case_id') %>% 
   filter(HSN < 7777, RESULT_OF_VISIT == 1, pilot_area == eval_area) %>% 
-  collect() %>% 
   mutate_at(vars(matches('P([246]|1[258])[A-J]_[1-6]'), matches('P9_[1-6]')), as.integer) %>% 
   select(case_id, pilot_area, starts_with('P'), -contains('SPECIFY'), -PROVINCE) %>% 
   rename_at(vars(matches('^P[4]TLNO')), ~ str_replace(., '^P4', 'P3'))

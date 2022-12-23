@@ -38,7 +38,6 @@ export const updateRCBMS = () => {
     if(version == '1.0.0') {
 
         const filesToUpdate = [
-
             join('qmd', 'section-g.qmd'),
             join('qmd', 'section-m.qmd'),
             join('qmd', 'section-l.qmd'),
@@ -113,11 +112,21 @@ export const updateRCBMS = () => {
     }
 
     if(version == '1.0.8') {
-        seen = false
         applyUpdate([
             join('utils', 'save-record.R'),
             join('utils', 'exports', 'export-config.R'),
             join('scripts', '2021-pilot-cbms', 'sections')
+        ])
+    }
+
+    if(version == '1.0.9') {
+        seen = false
+        applyUpdate([
+            join('qmd', 'section-g.qmd'),
+            join('qmd', 'section-p.qmd'),
+            join('qmd', 'section-m.qmd'),
+            join('scripts', '2021-pilot-cbms', 'sections'),
+            join('utils', 'exports', 'export-log.R')
         ])
     }
 

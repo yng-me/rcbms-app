@@ -430,19 +430,19 @@ cv_hwa_c2_b <- section_q %>%
   filter(Q29 == 1, is.na(Q30) | Q30 == "")
 
 cv_q01_other <- hpq_data$SECTION_Q %>% 
+  collect() %>% 
   filter(Q1 == 99, !is.na(Q1_SPECIFY), HSN < 7777, pilot_area == eval_area) %>% 
-  select(case_id, Q1, Q1_SPECIFY) %>% 
-  collect() 
+  select(case_id, Q1, Q1_SPECIFY) 
 
 cv_q03_other <- hpq_data$SECTION_Q %>% 
+  collect() %>%
   filter(Q3 == 99, !is.na(Q3_SPECIFY), HSN < 7777, pilot_area == eval_area) %>% 
-  select(case_id, Q3, Q3_SPECIFY) %>% 
-  collect() 
+  select(case_id, Q3, Q3_SPECIFY)  
 
 cv_q04_other <-  hpq_data$SECTION_Q %>% 
+  collect()  %>% 
   filter(Q4 == 99, !is.na(Q4_SPECIFY), HSN < 7777, pilot_area == eval_area) %>% 
-  select(case_id, Q4, Q4_SPECIFY) %>% 
-  collect() 
+  select(case_id, Q4, Q4_SPECIFY)
 
 cv_q13_other <- hpq_data$SECTION_Q %>% 
   collect() %>% 
@@ -450,9 +450,9 @@ cv_q13_other <- hpq_data$SECTION_Q %>%
   select(case_id, Q13) 
 
 cv_q14_other <-  hpq_data$SECTION_Q %>% 
+  collect() %>% 
   filter(Q14 == 99, !is.na(Q14_SPECIFY), HSN < 7777, pilot_area == eval_area) %>% 
-  select(case_id, Q14, Q14_SPECIFY) %>% 
-  collect() 
+  select(case_id, Q14, Q14_SPECIFY) 
 
 #=================================================================  
 #End code for HPQ section Q

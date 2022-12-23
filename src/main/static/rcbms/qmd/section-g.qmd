@@ -417,11 +417,17 @@ If G12Z = 2 then specify field should be blank. HH does nit have any other agric
 If household has sustenance activity in farming, gardening (F02D = 1) and/or engaged in entrepreneurial activity in crop farming gardening (F03A = 2), then G12A should be 'Yes'.
 
 ```{r, echo=F, warning=F, error=F}
-#Any YES in F02D and F03A, G12A should be YES
+g12_a_check <- section_g11_19 %>% 
+  filter(f02_dfarming == 1 | f03_crop == 1) %>%
+  mutate(g12a_agrimain_grwcrps = if_else(g12a_agrimain_grwcrps == 2, 0L, g12a_agrimain_grwcrps)) %>% 
+  select(1:9, f02_dfarming_fct, f03_crop_fct, g12a_agrimain_grwcrps, g12a_agrimain_grwcrps_fct) %>% 
+  group_by(case_id) %>% 
+  summarise(s = sum(g12a_agrimain_grwcrps, na.rm = T)) %>% 
+  filter(s == 0)
+
 (
   cv_g12a_agrimain_noanswer1 <- section_g11_19 %>% 
-    filter(f02_dfarming == 1 | f03_crop == 1, g12a_agrimain_grwcrps == 2) %>% 
-    distinct(line_number_id, .keep_all = T) %>% 
+    inner_join(g12_a_check, by = 'case_id') %>%
     mutate_at(vars(matches('^f0[2-3].*_fct$')), toupper) %>% 
     select_cv(
       g11_lno, 
@@ -439,10 +445,17 @@ If household has sustenance activity in farming, gardening (F02D = 1) and/or eng
 If household has household sustenance activity in raising livestock and poultry (F02E = 1) and/or engaged in entrepreneurial activity in livestock and poultry raising (F03B = 2), then G12B should be YES (= 1).
 
 ```{r, echo=F, warning=F, error=F}
-#Any YES in F02E and F03B, G12B should be YES
+g12_b_check <- section_g11_19 %>% 
+  filter(f02_eraising == 1 | f03_livestock == 1) %>% 
+  mutate(g12b_agrimain_lvstckpltry = if_else(g12b_agrimain_lvstckpltry == 2, 0L, g12b_agrimain_lvstckpltry)) %>% 
+  select(1:9, f02_dfarming_fct, f03_crop_fct, g12b_agrimain_lvstckpltry, g12b_agrimain_lvstckpltry_fct) %>% 
+  group_by(case_id) %>% 
+  summarise(s = sum(g12b_agrimain_lvstckpltry, na.rm = T)) %>% 
+  filter(s == 0)
+
 (
   cv_g12b_agrimain_noanswer1 <- section_g11_19 %>% 
-    filter(f02_eraising == 1 | f03_livestock == 1, g12b_agrimain_lvstckpltry == 2) %>% 
+    inner_join(g12_b_check, by = 'case_id') %>%
     mutate_at(vars(matches('^f0[2-3].*_fct$')), toupper) %>% 
     select_cv(
       f02_eraising_fct, 
@@ -459,12 +472,19 @@ If household has household sustenance activity in raising livestock and poultry 
 If HH has sustenance activity in fishing, gathering shells, snails, seaweeds, corals, etc (F02A = 1) and/or engaged in entrepreneurial activity in fishing (F03C = 2), then G12D, G12D, or G12E should be YES (= 1).
 
 ```{r, echo=F, warning=F, error=F}
-#Any YES in F02A and F03C, G12C should be YES
+g12_c_check <- section_g11_19 %>% 
+  filter(f02_afishing == 1 | f03_fish == 1) %>%
+  mutate_at(vars(matches('g12[c-e].*'), -matches('_fct$')), ~ if_else(. == 2, 0L, .)) %>% 
+  select(1:9, f02_afishing, f03_fish, matches('g12[c-e].*')) %>% 
+  group_by(case_id) %>% 
+  summarise_at(vars(matches('g12[c-e].*'), -matches('_fct$')), ~ sum(., na.rm = T)) %>% 
+  adorn_totals('col') %>% 
+   filter(Total == 0) %>% 
+   tibble()
+
 (
   cv_g12c_agrimain_noanswer1 <- section_g11_19 %>% 
-    filter(f02_afishing == 1 | f03_fish == 1) %>%
-    filter_at(vars(matches('g12[c-e].*'), -matches('_fct$')), any_vars(. == 2)) %>% 
-    mutate_at(vars(matches('^f0[2-3].*_fct$')), toupper) %>%
+    inner_join(g12_c_check, by = 'case_id') %>%
     select_cv(
       f02_afishing_fct, 
       f03_fish_fct, 
@@ -499,18 +519,19 @@ If the household is engaged in either growing of crops (G12A = 1) or livestock a
 )[[1]]
 ```
 
-### G13 - Not applicable since G12C-Z are all 'No'
 
-G13 should be blank since answers in G13C to G13Z are all 'No'.
+### G13 - Not applicable since G12A-B are all 'No'
+
+G13 should be blank since answers in G13A to G13B are all 'No'.
 
 ```{r, echo=F, warning=F, error=F}
 (
   cv_g14_prodact_na <- section_g11_19 %>% 
-    filter_at(vars(matches('^g12[c-fz]_.*'), -matches('_fct$')), all_vars(. == 2)) %>% 
+    filter_at(vars(matches('^g12[a-b]_.*'), -matches('_fct$')), all_vars(. == 2)) %>% 
     filter(!is.na(g13_typengage_grownlvstck)) %>% 
     distinct() %>%
     select_cv(
-      matches('^g12[c-fz]_.*_fct$'),
+      matches('^g12[a-b]_.*_fct$'),
       g13_typengage_grownlvstck_fct
     )
 )[[1]]
@@ -546,18 +567,18 @@ If household is engaged in growing of crops (G12A = 1) and/or engaged in livesto
 )[[1]]
 ```
 
-### G14A-Z - Not applicable since G12C-Z are all 'No'
+### G14A-B - Not applicable since G12A-B are all 'No'
 
-If answered all 'No' in G12C-Z, G14A-Z must be blank.
+If answered all 'No' in G12A-B, G14A-B must be blank.
 
 ```{r, echo=F, warning=F, error=F}
 (
   cv_g14_prodact_na <- section_g11_19 %>% 
-    filter_at(vars(matches('^g12[c-fz]_.*'), -matches('_fct$')), all_vars(. == 2)) %>% 
-    filter_at(vars(matches('^g14[a-z]_.*'), -matches('_fct$')), any_vars(!is.na(.))) %>% 
+    filter_at(vars(matches('^g12[a-b]_.*'), -matches('_fct$')), all_vars(. == 2)) %>% 
+    filter_at(vars(matches('^g14[a-b]_.*'), -matches('_fct$')), any_vars(!is.na(.))) %>% 
     select_cv(
-      matches('^g12[c-fz]_.*_fct$'),
-      matches('^g14[a-z]_.*_fct$')
+      matches('^g12[a-b]_.*_fct$'),
+      matches('^g14[a-b]_.*_fct$')
     )
 )[[1]]
 ```
