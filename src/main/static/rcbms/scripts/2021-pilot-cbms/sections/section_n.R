@@ -2,10 +2,11 @@
 print('Processing Section N...')
 
 section_n <- hpq_data$SECTION_N %>%
+  collect() %>% 
   left_join(rov, by = 'case_id') %>% 
   filter(HSN < 7777, RESULT_OF_VISIT == 1, pilot_area == eval_area) %>% 
-  select(case_id, pilot_area, HSN, starts_with('N')) %>% 
-  collect() 
+  select(case_id, pilot_area, HSN, starts_with('N')) 
+  
 
 # Not in the value set N1
 cv_n01 <- section_n %>%

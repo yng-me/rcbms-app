@@ -9,6 +9,26 @@ type Mode = 'changelog' | 'upcoming'
 
 const changeLogs = [
     {
+        version: 'RCBMS v1.0.10',
+        releaseDate: '23 December 2022',
+        logs: [
+            { 
+                feature: 'R script',
+                type: 'bug fix',
+                info: [
+                    'Fixed R script of Sections G and P.'
+                ]
+            },
+            {
+                feature: 'Merging of csdbe files from tablet and DPS',
+                type: 'enhancement',
+                info: [
+                    'Concatenated csdbe files taken from tablet (after loading from RCBMS) can now be merged/concatenated with csdbe files downloaded from DPS.',
+                ]
+            },
+        ]  
+    },
+    {
         version: 'RCBMS v1.0.9',
         releaseDate: '10 December 2022',
         logs: [

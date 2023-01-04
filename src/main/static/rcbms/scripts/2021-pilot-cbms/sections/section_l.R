@@ -188,8 +188,8 @@ cv_l03_not_in_vs_and_missing <- section_l %>%
 
 # ===============================================
 section_l4_d <- hpq_data$SECTION_L4 %>% 
-  filter(HSN < 7777, pilot_area == eval_area, !is.na(L4)) %>% 
   collect() %>% 
+  filter(HSN < 7777, pilot_area == eval_area, !is.na(L4)) %>% 
   mutate(case_id_m = paste0(case_id, sprintf('%02d', as.integer(L4)))) %>% 
   left_join(hpq_individual_age, by = 'case_id_m') 
 

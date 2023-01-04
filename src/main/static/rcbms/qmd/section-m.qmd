@@ -226,7 +226,7 @@ The household temporarily evacuated in the past three years, main reason for tem
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m09_reason_nitv <-section_m %>% 
+  cv_m09_reason_nitv <- section_m %>% 
     filter(m08_tytempevarea == 1, !(m09_tymreason %in% c(1:9, 99))) %>% 
     select_cv(m08_tytempevarea, m09_tymreason, h = 'm09_tymreason')
 )[[1]]
@@ -238,7 +238,7 @@ The household did not temporarily evacuated in the past three years, main reason
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m09_reason_wval <-section_m %>% 
+  cv_m09_reason_wval <- section_m %>% 
     filter(m08_tytempevarea %in% c(2, 8), !is.na(m09_tymreason)) %>% 
     select_cv(m08_tytempevarea, m09_tymreason, h = 'm09_tymreason')
 )[[1]]
@@ -280,7 +280,7 @@ The household temporarily evacuated in the past three years, last temporary evac
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m10_reason12_nitv <-section_m %>% 
+  cv_m10_reason12_nitv <- section_m %>% 
     filter(m08_tytempevarea == 1, !(m10_tmltemeva %in% c(1, 2))) %>% 
     select_cv(m08_tytempevarea, m10_tmltemeva, h = 'm10_tmltemeva')
 )[[1]]
@@ -292,7 +292,7 @@ The household did not temporarily evacuated in the past three years, last tempor
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m09_reason12_wval <-section_m %>% 
+  cv_m09_reason12_wval <- section_m %>% 
     filter(m08_tytempevarea == 2, !is.na(m10_tmltemeva)) %>% 
     select_cv(m08_tytempevarea, m10_tmltemeva, h = 'm10_tmltemeva')
 )[[1]]
@@ -304,7 +304,7 @@ The household temporarily evacuated in the past three years, place of last tempo
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m11_stayevarea_nitv <-section_m %>% 
+  cv_m11_stayevarea_nitv <- section_m %>% 
     filter(m08_tytempevarea == 1, m10_tmltemeva == 1, !m11_stayevarea %in% c(1:7, 9)) %>% 
     select_cv(m08_tytempevarea, m10_tmltemeva, m11_stayevarea, h = 'm11_stayevarea')
 )[[1]]
@@ -316,7 +316,7 @@ The household did not temporarily evacuated in the past three years, place of la
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m11_stayevarea_wval <-section_m %>% 
+  cv_m11_stayevarea_wval <- section_m %>% 
     filter(m08_tytempevarea == 2, m10_tmltemeva == 2, !is.na(m11_stayevarea)) %>% 
     select_cv(m08_tytempevarea, m10_tmltemeva, m11_stayevarea, h = 'm11_stayevarea')
 )[[1]]
@@ -359,7 +359,7 @@ The household temporarily evacuated in the past three years, length of stay in t
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m12_hlongevarea_nitv <-section_m %>% 
+  cv_m12_hlongevarea_nitv <- section_m %>% 
     filter(m08_tytempevarea == 1, m10_tmltemeva == 1, is.na(m12_hlongevarea)) %>% 
     select_cv(m08_tytempevarea, m10_tmltemeva, m11_stayevarea, m12_hlongevarea, h = 'm12_hlongevarea')
 )[[1]]
@@ -440,7 +440,7 @@ The household is negatively affected by typhoon in the past 12 months, negative 
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m14ta_typhoon_nitv <-section_m %>%
+  cv_m14ta_typhoon_nitv <- section_m %>%
     filter(m13a_negaff == 1) %>% 
     filter_at(vars(matches('^m14t[a-iz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
     select_cv(
@@ -468,7 +468,7 @@ The household is not negatively affected by typhoon in the past 12 months, negat
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m14ta_typhoon_wval <-section_m %>%
+  cv_m14ta_typhoon_wval <- section_m %>%
     filter(m13a_negaff == 2) %>% 
     filter_at(vars(matches('^m14t[a-iz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
     select_cv(
@@ -552,7 +552,7 @@ The household is negatively affected by drought in the past 12 months, negative 
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m14c_drought_nitv <-section_m %>%
+  cv_m14c_drought_nitv <- section_m %>%
     filter(m13c_negaff == 1) %>% 
     filter_at(vars(matches('^m14d[a-iz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
     select_cv(
@@ -580,7 +580,7 @@ The household is not negatively affected by drought in the past 12 months, negat
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m14c_drought_wval <-section_m %>%
+  cv_m14c_drought_wval <- section_m %>%
     filter(m13c_negaff == 2) %>% 
     filter_at(vars(matches('^m14d[a-iz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
     select_cv(
@@ -608,7 +608,7 @@ The household is negatively affected by earthquake in the past 12 months, negati
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m14d_eartquake_nitv <-section_m %>%
+  cv_m14d_eartquake_nitv <- section_m %>%
     filter(m13d_negaff == 1) %>% 
     filter_at(vars(matches('^m14e[a-iz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
     select_cv(
@@ -636,7 +636,7 @@ The household is not negatively affected by earthquake in the past 12 months, ne
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m14d_earthquake_wval <-section_m %>%
+  cv_m14d_earthquake_wval <- section_m %>%
     filter(m13d_negaff == 2) %>% 
     filter_at(vars(matches('^m14e[a-iz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
     select_cv(
@@ -664,7 +664,7 @@ The household is negatively affected by earthquake in the past 12 months, negati
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m14e_volcanic_nitv <-section_m %>%
+  cv_m14e_volcanic_nitv <- section_m %>%
     filter(m13e_negaff == 1) %>% 
     filter_at(vars(matches('^m14v[a-iz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
     select_cv(
@@ -692,7 +692,7 @@ The household is not negatively affected by earthquake in the past 12 months, ne
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m14e_volcanic_wval <-section_m %>%
+  cv_m14e_volcanic_wval <- section_m %>%
     filter(m13e_negaff == 2) %>% 
     filter_at(vars(matches('^m14v[a-iz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
     select_cv(
@@ -720,7 +720,7 @@ The household is negatively affected by landslide in the past 12 months, negativ
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m14f_landslide_nitv <-section_m %>%
+  cv_m14f_landslide_nitv <- section_m %>%
     filter(m13f_negaff == 1) %>% 
     filter_at(vars(matches('^m14l[a-iz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
     select_cv(
@@ -748,7 +748,7 @@ The household is not negatively affected by landslide in the past 12 months, neg
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m14f_landslide_wval <-section_m %>%
+  cv_m14f_landslide_wval <- section_m %>%
     filter(m13f_negaff == 2) %>% 
     filter_at(vars(matches('^m14l[a-iz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
     select_cv(
@@ -776,7 +776,7 @@ The household is negatively affected by fire in the past 12 months, negative imp
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m14g_fire_nitv <-section_m %>%
+  cv_m14g_fire_nitv <- section_m %>%
     filter(m13g_negaff == 1) %>% 
     filter_at(vars(matches('^m14fi[a-iz]_fire$'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
     select_cv(
@@ -804,7 +804,7 @@ The household is not negatively affected by fire in the past 12 months, negative
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m14g_fire_wval <-section_m %>%
+  cv_m14g_fire_wval <- section_m %>%
     filter(m13g_negaff == 2) %>% 
     filter_at(vars(matches('^m14fi[a-iz]_fire$'), -matches("fct$")), any_vars(!is.na(.))) %>% 
     select_cv(
@@ -832,7 +832,7 @@ The household is negatively affected by pandemic in the past 12 months, negative
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m14h_pandemic_nitv <-section_m %>%
+  cv_m14h_pandemic_nitv <- section_m %>%
     filter(m13h_negaff == 1) %>% 
     filter_at(vars(matches('^m14p[a-iz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
     select_cv(
@@ -860,7 +860,7 @@ The household is not negatively affected by pandemic in the past 12 months, nega
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m14h_pandemic_wval <-section_m %>%
+  cv_m14h_pandemic_wval <- section_m %>%
     filter(m13h_negaff == 2) %>% 
     filter_at(vars(matches('^m14p[a-iz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
     select_cv(
@@ -888,7 +888,7 @@ The household is negatively affected by armed conflict in the past 12 months, ne
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m14i_armedconflict_nitv <-section_m %>%
+  cv_m14i_armedconflict_nitv <- section_m %>%
     filter(m13i_negaff == 1) %>% 
     filter_at(vars(matches('^m14a[a-iz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
     select_cv(
@@ -944,7 +944,7 @@ The household is negatively affected by other calamity in the past 12 months, ne
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m14i_armedconflict_nitv <-section_m %>%
+  cv_m14i_armedconflict_nitv <- section_m %>%
     filter(m13z_negaff == 1) %>% 
     filter_at(vars(matches('^m14o[a-iz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
     select_cv(
@@ -972,7 +972,7 @@ The household is not negatively affected by other calamity in the past 12 months
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m14i_armedconflict_wval <-section_m %>%
+  cv_m14i_armedconflict_wval <- section_m %>%
     filter(m13z_negaff == 2) %>% 
     filter_at(vars(matches('^m14o[a-iz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
     select_cv(
@@ -1000,7 +1000,7 @@ If in M14 the respondent answered that at least one (1) of the calamities caused
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m15az_damage_nitv <-section_m %>%
+  cv_m15az_damage_nitv <- section_m %>%
     filter_at(vars(matches('^m14[a-z]c_.*|^m14fic_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
     filter(is.na(m15a_esttotdamage) | m15a_esttotdamage <= 0) %>% 
     select_cv(matches('^m14[a-z]c_.*|^m14fic_.*'), m15a_esttotdamage , h = 'm15a_esttotdamage')
@@ -1013,7 +1013,7 @@ If in M14 the respondent answered that at least one (1) of the calamities caused
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m15b_damage_nitv <-section_m %>%
+  cv_m15b_damage_nitv <- section_m %>%
     filter_at(vars(matches('^m14[a-z]d_.*|^m14fid_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
     filter(is.na(m15b_esttotdamage) | m15b_esttotdamage <= 0) %>% 
     select_cv(matches('^m14[a-z]d_.*|^m14fid_.*'), m15b_esttotdamage, h = 'm15b_esttotdamage')
@@ -1027,7 +1027,7 @@ If in M14 the respondent answered that at least one (1) of the calamities caused
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m16_expenditure_nitv <-section_m %>%
+  cv_m16_expenditure_nitv <- section_m %>%
     filter_at(vars(matches('^m14[a-z]c_.*|^m14fic_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
     filter(is.na(m16_reconrepair)) %>% 
     select_cv(matches('^m14[a-z]c_.*|^m14fic_.*'), m16_reconrepair, h = 'm16_reconrepair')
@@ -1132,7 +1132,7 @@ The household is negatively affected by drought in the past 12 months, assistanc
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m17c_drought_nitv <-section_m %>%
+  cv_m17c_drought_nitv <- section_m %>%
     filter(m13c_negaff == 1) %>% 
     filter_at(vars(matches('^m17d[a-dz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
     select_cv(
@@ -1155,7 +1155,7 @@ The household is not negatively affected by drought in the past 12 months, assis
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m17c_drought_wval <-section_m %>%
+  cv_m17c_drought_wval <- section_m %>%
     filter(m13c_negaff == 2) %>% 
     filter_at(vars(matches('^m17d[a-dz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
     select_cv(
@@ -1247,7 +1247,7 @@ The household is  not negatively affected by volcanic eruption in the past 12 mo
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m17e_volcanic_wval <-section_m %>%
+  cv_m17e_volcanic_wval <- section_m %>%
     filter(m13e_negaff == 2) %>% 
     filter_at(vars(matches('^m17v[a-dz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
     select_cv(
@@ -1339,7 +1339,7 @@ The household is not negatively affected by fire in the past 12 months, assistan
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m17g_fire_wval <-section_m %>%
+  cv_m17g_fire_wval <- section_m %>%
     filter(m13g_negaff == 2) %>% 
     filter_at(vars(matches('^m17f[a-dz]_fire$'), -matches("fct$")), any_vars(!is.na(.))) %>% 
     select_cv(
@@ -1362,7 +1362,7 @@ The household is negatively affected by pandemic in the past 12 months, assistan
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m17h_pandemic_nitv <-section_m %>%
+  cv_m17h_pandemic_nitv <- section_m %>%
     filter(m13h_negaff == 1) %>% 
     filter_at(vars(matches('^m17p[a-dz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
     select_cv(
@@ -1385,7 +1385,7 @@ The household is not negatively affected by pandemic in the past 12 months, assi
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m17h_pandemic_wval <-section_m %>%
+  cv_m17h_pandemic_wval <- section_m %>%
     filter(m13h_negaff == 2) %>% 
     filter_at(vars(matches('^m17p[a-dz]_.*'), -matches("fct$")), any_vars(!is.na(.))) %>% 
     select_cv(
@@ -1500,7 +1500,7 @@ If answered at least one (1) ‘1’ for Yes in any of the types of assistance l
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m18ta_typhoon_nitv <-section_m %>%
+  cv_m18ta_typhoon_nitv <- section_m %>%
     filter(m13a_negaff == 1) %>% 
     filter_at(vars(matches('^m17t[a-dz]_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
     filter_at(vars(matches('^m18t[a-hz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
@@ -1587,7 +1587,7 @@ If answered at least one (1) ‘1’ for Yes in any of the types of assistance l
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m18d_eartquake_nitv <-section_m %>%
+  cv_m18d_eartquake_nitv <- section_m %>%
     filter(m13d_negaff == 1) %>% 
     filter_at(vars(matches('^m17e[a-dz]_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
     filter_at(vars(matches('^m18e[a-hz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
@@ -1616,7 +1616,7 @@ If answered at least one (1) ‘1’ for Yes in any of the types of assistance l
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m18e_volcanic_nitv <-section_m %>%
+  cv_m18e_volcanic_nitv <- section_m %>%
     filter(m13e_negaff == 1) %>% 
     filter_at(vars(matches('^m17v[a-dz]_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
     filter_at(vars(matches('^m18v[a-hz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
@@ -1703,7 +1703,7 @@ If answered at least one (1) ‘1’ for Yes in any of the types of assistance l
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m18h_pandemic_nitv <-section_m %>%
+  cv_m18h_pandemic_nitv <- section_m %>%
     filter(m13h_negaff == 1) %>% 
     filter_at(vars(matches('^m17p[a-dz]_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
     filter_at(vars(matches('^m18p[a-hz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
@@ -1732,7 +1732,7 @@ If answered at least one (1) ‘1’ for Yes in any of the types of assistance l
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m18i_armedconflict_nitv <-section_m %>%
+  cv_m18i_armedconflict_nitv <- section_m %>%
     filter(m13i_negaff == 1) %>% 
     filter_at(vars(matches('^m17a[a-dz]_.*'), -matches("fct$")), any_vars(. == 1)) %>% 
     filter_at(vars(matches('^m18a[a-hz]_.*'), -matches("fct$")), any_vars(!(. %in% c(1, 2)))) %>% 
@@ -1862,7 +1862,7 @@ Answer in M20 is 2 - No, contents of the disaster preparedness kit should be bla
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m21_az_wval <-section_m %>% 
+  cv_m21_az_wval <- section_m %>% 
     filter(m20_diskit == 2) %>% 
     filter_at(vars(matches("^m21_[a-qz].*"), -matches("fct$")), any_vars(!is.na(.))) %>% 
     select_cv(
@@ -1977,7 +1977,7 @@ Answer in M20 is 2 - No, actual value of the contents of the disaster kit should
 
 ```{r, echo=F, warning=F, error=F}
 (
-  cv_m22_totalcost_wval <-section_m %>% 
+  cv_m22_totalcost_wval <- section_m %>% 
     filter(m20_diskit == 2, !is.na(m22_totalcost))%>% 
     select_cv(m20_diskit, m22_totalcost, h = 'm22_totalcost')
 )[[1]]

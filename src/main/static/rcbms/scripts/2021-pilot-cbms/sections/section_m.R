@@ -3,10 +3,11 @@
 print('Processing Section M...')
 
 section_m <- hpq_data$SECTION_M %>%  
+  collect() %>%
   left_join(rov, by = 'case_id') %>% 
   filter(HSN < 7777, RESULT_OF_VISIT == 1, pilot_area == eval_area) %>% 
-  select(case_id, pilot_area, starts_with('M')) %>% 
-  collect()
+  select(case_id, pilot_area, starts_with('M')) 
+  
 
 #  ===========================================================
 #  Regular HH with no response in M1

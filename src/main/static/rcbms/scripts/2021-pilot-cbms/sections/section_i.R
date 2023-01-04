@@ -5,10 +5,11 @@ print('Processing Section I...')
 
 
 section_i <- hpq_data$SECTION_I %>% 
+  collect() %>% 
   left_join(rov, by = 'case_id') %>% 
   filter(HSN < 7777, RESULT_OF_VISIT == 1, pilot_area == eval_area) %>% 
-  select(case_id, pilot_area, starts_with('I')) %>% 
-  collect()
+  select(case_id, pilot_area, starts_with('I')) 
+  
 
 #============================================================
 # Reason for not having financial account/s vs No active formal financial account/s

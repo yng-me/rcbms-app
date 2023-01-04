@@ -2,10 +2,11 @@
 print('Processing Section K...')
 
 section_k <- hpq_data$SECTION_K %>%
+  collect() %>%
   left_join(rov, by = 'case_id') %>% 
   filter(HSN < 7777, RESULT_OF_VISIT == 1, pilot_area == eval_area) %>%
-  select(case_id, pilot_area, matches('K[1-8]')) %>% 
-  collect()
+  select(case_id, pilot_area, matches('K[1-8]')) 
+  
 
 k_na <- list()
 k_not_in_vs <- list()
