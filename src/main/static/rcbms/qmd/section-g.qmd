@@ -419,7 +419,7 @@ If household has sustenance activity in farming, gardening (F02D = 1) and/or eng
 ```{r, echo=F, warning=F, error=F}
 g12_a_check <- section_g11_19 %>% 
   filter(f02_dfarming == 1 | f03_crop == 1) %>%
-  mutate(g12a_agrimain_grwcrps = if_else(g12a_agrimain_grwcrps == 2, 0L, g12a_agrimain_grwcrps)) %>% 
+  mutate(g12a_agrimain_grwcrps = if_else(g12a_agrimain_grwcrps == 2, 0L, as.integer(g12a_agrimain_grwcrps))) %>% 
   select(1:9, f02_dfarming_fct, f03_crop_fct, g12a_agrimain_grwcrps, g12a_agrimain_grwcrps_fct) %>% 
   group_by(case_id) %>% 
   summarise(s = sum(g12a_agrimain_grwcrps, na.rm = T)) %>% 
@@ -447,7 +447,7 @@ If household has household sustenance activity in raising livestock and poultry 
 ```{r, echo=F, warning=F, error=F}
 g12_b_check <- section_g11_19 %>% 
   filter(f02_eraising == 1 | f03_livestock == 1) %>% 
-  mutate(g12b_agrimain_lvstckpltry = if_else(g12b_agrimain_lvstckpltry == 2, 0L, g12b_agrimain_lvstckpltry)) %>% 
+  mutate(g12b_agrimain_lvstckpltry = if_else(g12b_agrimain_lvstckpltry == 2, 0L, as.integer(g12b_agrimain_lvstckpltry))) %>% 
   select(1:9, f02_dfarming_fct, f03_crop_fct, g12b_agrimain_lvstckpltry, g12b_agrimain_lvstckpltry_fct) %>% 
   group_by(case_id) %>% 
   summarise(s = sum(g12b_agrimain_lvstckpltry, na.rm = T)) %>% 
@@ -474,7 +474,7 @@ If HH has sustenance activity in fishing, gathering shells, snails, seaweeds, co
 ```{r, echo=F, warning=F, error=F}
 g12_c_check <- section_g11_19 %>% 
   filter(f02_afishing == 1 | f03_fish == 1) %>%
-  mutate_at(vars(matches('g12[c-e].*'), -matches('_fct$')), ~ if_else(. == 2, 0L, .)) %>% 
+  mutate_at(vars(matches('g12[c-e].*'), -matches('_fct$')), ~ if_else(. == 2, 0L, as.integer(.))) %>% 
   select(1:9, f02_afishing, f03_fish, matches('g12[c-e].*')) %>% 
   group_by(case_id) %>% 
   summarise_at(vars(matches('g12[c-e].*'), -matches('_fct$')), ~ sum(., na.rm = T)) %>% 

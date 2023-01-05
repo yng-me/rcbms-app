@@ -29,7 +29,6 @@ gather_section_l <- function(data, var, length, ...) {
   do.call('rbind', df_list)
 }
 
-
 gather_l <- function(data, filter, var, letters = NULL, ln = NULL) {
   l <- list()
   for(i in 1:15) {
@@ -137,14 +136,13 @@ get_occ <- function(data, var, set, c_var = NULL, c_set = NULL, d = L25) {
     
     data %>% 
       filter(
-        {{d}} == 1 & !(!!as.name(a) %in% set) & !!as.name(f_a) == c_set |
-          {{d}} == 2 & !(!!as.name(a) %in% set) & !(!!as.name(b) %in% set) & !!as.name(f_a) == c_set & !!as.name(f_b) == c_set |
-          {{d}} > 2 & !(!!as.name(a) %in% set) & !(!!as.name(b) %in% set) & !(!!as.name(c) %in% set) & !!as.name(f_a) == c_set & !!as.name(f_b) == c_set & !!as.name(f_c) == c_set
+        {{d}} == 1 & !(!!as.name(a) %in% set) & !!as.name(f_a) == set |
+          {{d}} == 2 & !(!!as.name(a) %in% set) & !(!!as.name(b) %in% set) & !!as.name(f_a) == set & !!as.name(f_b) == set |
+          {{d}} > 2 & !(!!as.name(a) %in% set) & !(!!as.name(b) %in% set) & !(!!as.name(c) %in% set) & !!as.name(f_a) == set & !!as.name(f_b) == set & !!as.name(f_c) == set
       ) %>% 
       select(case_id, {{d}}, !!as.name(a), !!as.name(b), !!as.name(c))
   }
 }
-
 
 # ---------------------------------------------------------------
 
@@ -438,15 +436,15 @@ cv_l35_invalid <- section_l %>%
 cv_l36_invalid <- section_l %>% 
   gather_parcel %>% 
   filter(
-    L25 == 1 & L33A == 1 & (L36A == 0 | is.na(L36A)) |
-      L25 == 2 & L33A == 1 & L33B == 1 & (L36A == 0 | is.na(L36A)) & (L36B == 0 | is.na(L36B)) |
-      L25 > 2 & L33A == 1 & L33B == 1 & L33C == 1 & (L36A == 0 | is.na(L36A)) & (L36B == 0 | is.na(L36B)) &  (L36C == 0 | is.na(L36C))
+    L25 == 1 & L33A == 1 & is.na(L36A) |
+      L25 == 2 & L33A == 1 & L33B == 1 & is.na(L36A) & is.na(L36B) |
+      L25 > 2 & L33A == 1 & L33B == 1 & L33C == 1 & is.na(L36A) & is.na(L36B) & is.na(L36C)
   ) %>% 
   select(case_id, L25, matches('^L3[36]'))
 
 cv_l37_invalid <- section_l %>% 
   gather_parcel %>% 
-  filter(L25 == 1, is.na(L37) | L37 == 0) %>% 
+  filter(L25 == 1, is.na(L37)) %>% 
   select(case_id, L25, L37)
 
 # ----------------------------------------------------------------------------------
