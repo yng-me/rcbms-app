@@ -298,19 +298,19 @@ cv_C03ATTEND1 <- hpq_individual %>%
   select(case_id, LINENO, age_computed, C03ATTEND, C05CURGRADE)
 
 cv_C03ATTEND2 <- hpq_individual %>%
-  filter(age_computed %in% c(5:11), C03ATTEND == 1, C05CURGRADE >= 2) %>%
+  filter(age_computed %in% c(5:10), C03ATTEND == 1, C05CURGRADE >= 2) %>%
   select(case_id, LINENO, age_computed, C03ATTEND, C05CURGRADE)
 
 cv_C03ATTEND3 <- hpq_individual %>%
-  filter(age_computed %in% c(12:15), C03ATTEND == 1, C05CURGRADE >= 5) %>%
+  filter(age_computed %in% c(11:14), C03ATTEND == 1, C05CURGRADE >= 3) %>%
   select(case_id, LINENO, age_computed, C03ATTEND, C05CURGRADE)
 
 cv_C03ATTEND4 <- hpq_individual %>%
-  filter(age_computed %in% c(16:17), C03ATTEND == 1, C05CURGRADE >= 6) %>%
+  filter(age_computed %in% c(15:16), C03ATTEND == 1, C05CURGRADE >= 6) %>%
   select(case_id, LINENO, age_computed, C03ATTEND, C05CURGRADE)
 
 cv_C03ATTEND5 <- hpq_individual %>%
-  filter(age_computed %in% c(18:24), C03ATTEND == 1, C05CURGRADE >= 8) %>%
+  filter(age_computed %in% c(17:22), C03ATTEND == 1, C05CURGRADE >= 8) %>%
   select(case_id, LINENO, age_computed, C03ATTEND, C05CURGRADE)
 
 cv_c06_reason_not_in_school_male_pregnant <- hpq_individual %>%
