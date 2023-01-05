@@ -9,6 +9,20 @@ type Mode = 'changelog' | 'upcoming'
 
 const changeLogs = [
     {
+        version: 'RCBMS v1.0.11',
+        releaseDate: '05 January 2023',
+        logs: [
+            { 
+                feature: 'R script',
+                type: 'bug fix',
+                info: [
+                    '[2022 CBMS] fixed R script of Section G.',
+                    '[2021 Pilot CBMS] fixed R script of Sections C and L.',
+                ]
+            }
+        ]  
+    },
+    {
         version: 'RCBMS v1.0.10',
         releaseDate: '23 December 2022',
         logs: [
